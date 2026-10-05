@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAZARO - এক বাজারে সবকিছু</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 pb-20">
+
+    <!-- Header / Navbar -->
+    <header class="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md">
+        <div class="flex justify-between items-center max-w-xl mx-auto">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wider text-amber-400">BAZARO</h1>
+                <p class="text-[10px] text-gray-300">এক বাজারে সবকিছু</p>
+            </div>
+            <div class="relative">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-500 text-slate-900 font-bold text-xs w-5 h-5 rounded-full flex items-center justify-center">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Banner -->
+    <section class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 p-6 text-center shadow-inner">
+        <h2 class="text-xl font-bold mb-1">সেরা মানের প্রিমিয়াম কালেকশন</h2>
+        <p class="text-xs">অনলাইনে অর্ডার করুন, পেমেন্ট করুন ডেলিভারির সময়!</p>
+    </section>
+
+    <!-- Product Grid -->
+    <main class="max-w-xl mx-auto p-4">
+        <h3 class="text-lg font-bold mb-4 text-gray-800 border-l-4 border-amber-500 pl-2">আমাদের পণ্যসমূহ</h3>
+        
+        <div class="grid grid-cols-2 gap-4">
+            
+            <!-- Sample Product 1 (JS Leather Wallet) -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <img src="https://via.placeholder.com/150" alt="JS Leather Wallet" class="w-full h-32 object-cover rounded-md mb-2">
+                <h4 class="font-bold text-sm text-gray-800">JS Leather Wallet</h4>
+                <p class="text-xs text-gray-500">১০০% খাঁটি চামড়ার মানিব্যাগ</p>
+                <div class="mt-2 flex justify-between items-center">
+                    <span class="text-amber-600 font-bold text-sm">৳ ৮৫০</span>
+                    <button onclick="addToCart('JS Leather Wallet', 850)" class="bg-slate-900 text-white text-xs px-2 py-1 rounded shadow hover:bg-amber-500 hover:text-slate-900 transition">কার্টে রাখুন</button>
+                </div>
+            </div>
+
+            <!-- Sample Product 2 -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                <img src="https://via.placeholder.com/150" alt="Casual Shirt" class="w-full h-32 object-cover rounded-md mb-2">
+                <h4 class="font-bold text-sm text-gray-800">প্রিমিয়াম কটন শার্ট</h4>
+                <p class="text-xs text-gray-500">কমফোর্ট ফেব্রিক</p>
+                <div class="mt-2 flex justify-between items-center">
+                    <span class="text-amber-600 font-bold text-sm">৳ ১২৫০</span>
+                    <button onclick="addToCart('প্রিমিয়াম কটন শার্ট', 1250)" class="bg-slate-900 text-white text-xs px-2 py-1 rounded shadow hover:bg-amber-500 hover:text-slate-900 transition">কার্টে রাখুন</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Checkout Button Area -->
+        <div class="mt-6 text-center">
+            <button onclick="sendOrderToWhatsApp()" class="w-full bg-emerald-600 text-white font-bold py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 text-sm">
+                <i class="fab fa-whatsapp text-lg"></i> হোয়াটসঅ্যাপে সরাসরি অর্ডার করুন
+            </button>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-900 text-white border-t border-slate-800 flex justify-around items-center h-14 z-50">
+        <a href="#" class="flex flex-col items-center text-amber-400 text-xs">
+            <i class="fas fa-home text-base mb-1"></i>
+            <span>হোম</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-gray-400 text-xs">
+            <i class="fas fa-th-large text-base mb-1"></i>
+            <span>ক্যাটাগরি</span>
+        </a>
+        <a href="#" class="flex flex-col items-center text-gray-400 text-xs">
+            <i class="fas fa-shopping-bag text-base mb-1"></i>
+            <span>অর্ডার</span>
+        </a>
+    </nav>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let cart = [];
+        const whatsappNumber = "8801603146149"; // আপনার নম্বর
+
+        function addToCart(title, price) {
+            cart.push({ title, price });
+            document.getElementById('cart-count').innerText = cart.length;
+            alert(title + " কার্টে যুক্ত করা হয়েছে!");
+        }
+
+        function sendOrderToWhatsApp() {
+            if (cart.length === 0) {
+                alert("আপনার কার্ট খালি! আগে কোনো পণ্য কার্টে যুক্ত করুন।");
+                return;
+            }
+
+            let message = "আসসালামু আলাইকুম, আমি BAZARO থেকে নিচের পণ্যগুলো অর্ডার করতে চাই:\n\n";
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                message += `${index + 1}. ${item.title} - ৳ ${item.price}\n`;
+                total += item.price;
+            });
+
+            message += `\nমোট মূল্য: ৳ ${total}\n\nদয়া করে অর্ডারটি কনফার্ম করুন।`;
+
+            const encodedUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+            window.open(encodedUrl, '_blank');
+        }
+    </script>
+</body>
+</html>
