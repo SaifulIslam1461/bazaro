@@ -4,8 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BAZARO - এক বাজারে সবকিছু</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff9800">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BAZARO">
+  <link rel="apple-touch-icon" href="https://via.placeholder.com/192/ff9800/ffffff?text=BAZARO">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
     body { background: #f8f9fa; color: #333; padding-bottom: 70px; }
@@ -14,6 +24,30 @@
     .logo-title { font-size: 22px; font-weight: bold; color: #f77f00; }
     .cart-btn-icon { position: relative; font-size: 20px; cursor: pointer; }
     .cart-count { position: absolute; top: -8px; right: -10px; background: #d62828; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; }
+
+    /* Custom Install PWA Banner */
+    #pwa-install-banner {
+      display: none;
+      background: #ff9800;
+      color: white;
+      padding: 10px 15px;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 55px;
+      z-index: 99;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #pwa-install-banner button {
+      background: #0b132b;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 12px;
+    }
 
     .hero-banner { background: linear-gradient(135deg, #f77f00, #fcbf49); color: #003049; text-align: center; padding: 18px 15px; }
 
@@ -37,7 +71,6 @@
     .modal-content { background: white; width: 95%; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 8px; position: relative; }
     .close-btn { position: absolute; right: 15px; top: 15px; font-size: 22px; cursor: pointer; font-weight: bold; }
 
-    /* Product Details UI */
     .gallery-main { width: 100%; height: 260px; object-fit: cover; border-radius: 6px; }
     .gallery-thumbs { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; }
     .gallery-thumbs img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd; cursor: pointer; }
@@ -73,6 +106,12 @@
     </div>
   </header>
 
+  <!-- PWA Install App Banner -->
+  <div id="pwa-install-banner">
+    <div style="font-size: 13px; font-weight: bold;"><i class="fas fa-mobile-alt"></i> BAZARO অ্যাপ ইনস্টল করুন</div>
+    <button id="btn-install-app">ইনস্টল করুন</button>
+  </div>
+
   <div class="hero-banner">
     <h2>প্রিমিয়াম কোয়ালিটির অফিশিয়াল কালেকশন</h2>
     <p>ক্যাশ অন ডেলিভারিতে সারাদেশে ডেলিভারি!</p>
@@ -100,7 +139,7 @@
       <h3>আপনার শপিং কার্ট</h3>
       <div id="cart-items" style="margin-top: 15px;"></div>
       <hr style="margin: 15px 0;">
-      <div style="display:flex; justify-style:space-between; font-weight:bold;">
+      <div style="display:flex; justify-content:space-between; font-weight:bold;">
         <span>মোট মূল্য:</span>
         <span id="cart-total">৳ 0</span>
       </div>
@@ -146,21 +185,51 @@
   let selectedSize = '';
   let selectedColor = '';
 
+  // PWA Service Worker Registration
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('PWA Service Worker Registered!'))
+        .catch(err => console.log('Service Worker Failed:', err));
+    });
+  }
+
+  // PWA Add to Home Screen / Install Banner Prompt
+  let deferredPrompt;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('btn-install-app');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBanner.style.display = 'flex';
+  });
+
+  installBtn.addEventListener('click', () => {
+    installBanner.style.display = 'none';
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the PWA install prompt');
+        }
+        deferredPrompt = null;
+      });
+    }
+  });
+
   function updateCartUI() {
     document.getElementById('cart-count').innerText = cart.reduce((sum, item) => sum + item.qty, 0);
     localStorage.setItem('bazaro_cart', JSON.stringify(cart));
   }
 
   async function loadData() {
-    // Categories
     const { data: categories } = await supabaseClient.from('categories').select('*');
     if (categories) {
       document.getElementById('category-list').innerHTML = `<div class="cat-chip" onclick="filterCat('all')">সবগুলো</div>` + categories.map(c => 
         `<div class="cat-chip" onclick="filterCat('${c.name}')">${c.name}</div>`
       ).join('');
     }
-
-    // Products
     loadProducts('all');
   }
 
@@ -188,9 +257,7 @@
     }
   }
 
-  function filterCat(catName) {
-    loadProducts(catName);
-  }
+  function filterCat(catName) { loadProducts(catName); }
 
   async function openDetails(id) {
     const { data: p } = await supabaseClient.from('products').select('*').eq('id', id).single();
@@ -259,7 +326,6 @@
         <p style="font-size:13px; color:#444; margin-top:5px; line-height:1.5;">${p.description || p.short_description || 'কোনো বিবরণ দেওয়া নেই।'}</p>
       </div>
 
-      <!-- REVIEWS SECTION -->
       <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
         <h4>গ্রাহকদের রিভিউ (${reviews ? reviews.length : 0})</h4>
         <div style="margin-top:10px;">
