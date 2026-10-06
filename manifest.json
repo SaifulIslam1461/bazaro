@@ -1,0 +1,24 @@
+{
+  "name": "BAZARO",
+  "short_name": "BAZARO",
+  "description": "এক বাজারে সবকিছু",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ff9800",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/ff9800/ffffff?text=BAZARO",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512/ff9800/ffffff?text=BAZARO",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
