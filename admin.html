@@ -1,403 +1,608 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAZARO - Admin Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>BAZARO - Admin & Seller Center</title>
+
+  <!-- PWA Manifest & Meta -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#f77f00">
+
+  <!-- Tailwind CSS & FontAwesome & Chart.js & Supabase -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#f77f00', dark: '#d66d00', light: '#ff9825' },
+            darkbg: '#0b132b',
+            carddark: '#161f38',
+            navdark: '#1c2541'
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { background: #f4f6f9; color: #333; }
-    
-    header { background: #0b132b; color: white; padding: 15px 20px; text-align: center; }
-    .nav-tabs { display: flex; background: #1c2541; overflow-x: auto; white-space: nowrap; }
-    .nav-tabs button { background: none; border: none; color: white; padding: 12px 20px; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; }
-    .nav-tabs button.active { border-bottom: 3px solid #ff9800; color: #ff9800; background: rgba(255,255,255,0.05); }
-
-    .container { padding: 20px; max-width: 1000px; margin: auto; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .card { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
-    h3 { margin-bottom: 15px; color: #0b132b; border-left: 4px solid #ff9800; padding-left: 10px; }
-
-    input, select, textarea { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-    .btn { background: #ff9800; color: white; border: none; padding: 10px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; }
-    .btn-danger { background: #d62828; }
-    .btn-edit { background: #007bff; }
-    .btn-success { background: #28a745; }
-
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    table th, table td { padding: 10px; border: 1px solid #ddd; text-align: left; font-size: 13px; }
-    table th { background: #f1f1f1; }
-
-    .action-btns { display: flex; gap: 5px; }
-    .action-btns button { padding: 5px 8px; font-size: 11px; }
-
-    /* Modal for Editing */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; }
-    .modal-content { background: white; width: 90%; max-width: 500px; margin: 30px auto; padding: 20px; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; }
-    .close-modal { position: absolute; right: 15px; top: 15px; font-size: 20px; cursor: pointer; }
+    * { font-family: 'Hind Siliguri', sans-serif; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b132b; }
+    ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f77f00; }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 dark:bg-darkbg text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
 
-  <header>
-    <h2>BAZARO Admin Dashboard</h2>
-  </header>
+  <!-- MAIN WRAPPER -->
+  <div class="flex h-screen overflow-hidden">
 
-  <div class="nav-tabs">
-    <button class="active" onclick="switchTab('tab-products', this)"><i class="fas fa-box"></i> প্রোডাক্টস</button>
-    <button onclick="switchTab('tab-categories', this)"><i class="fas fa-list"></i> ক্যাটাগরি</button>
-    <button onclick="switchTab('tab-orders', this)"><i class="fas fa-shopping-cart"></i> অর্ডারসমূহ</button>
-    <button onclick="switchTab('tab-resellers', this)"><i class="fas fa-users"></i> রিসেলার ও সেলার</button>
-    <button onclick="switchTab('tab-settings', this)"><i class="fas fa-cog"></i> অ্যাপ সেটিংস</button>
-  </div>
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="w-64 bg-white dark:bg-navdark border-r border-slate-200 dark:border-slate-800 flex flex-col transition-all duration-300 z-30 fixed md:relative h-full -translate-x-full md:translate-x-0">
+      
+      <!-- Brand Logo -->
+      <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 bg-brand rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand/30">B</div>
+          <span class="font-bold text-xl text-slate-900 dark:text-white tracking-wide">BAZARO <span class="text-xs text-brand font-semibold block -mt-1">Seller Center</span></span>
+        </div>
+        <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+      </div>
 
-  <div class="container">
+      <!-- Navigation Menu -->
+      <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        
+        <div class="text-xs font-semibold text-slate-400 px-3 uppercase tracking-wider mb-2">Main Menu</div>
+        
+        <button onclick="switchTab('dashboard')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition bg-brand text-white" id="btn-dashboard">
+          <i class="fas fa-chart-pie w-5 text-center"></i> Dashboard
+        </button>
 
-    <!-- 1. PRODUCTS TAB -->
-    <div id="tab-products" class="tab-content active">
-      <div class="card">
-        <h3>নতুন প্রোডাক্ট যোগ করুন</h3>
-        <form id="add-product-form" onsubmit="saveProduct(event)">
-          <input type="text" id="p_name" placeholder="প্রোডাক্টের নাম" required>
-          <div style="display:flex; gap:10px;">
-            <input type="number" id="p_price" placeholder="রেগুলার প্রাইস (৳)" required>
-            <input type="number" id="p_discount" placeholder="ডিসকাউন্ট প্রাইস (৳)">
+        <button onclick="switchTab('products')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" id="btn-products">
+          <i class="fas fa-box w-5 text-center"></i> Products
+        </button>
+
+        <button onclick="switchTab('add-product')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" id="btn-add-product">
+          <i class="fas fa-plus-circle w-5 text-center"></i> Add Product
+        </button>
+
+        <button onclick="switchTab('categories')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" id="btn-categories">
+          <i class="fas fa-list-alt w-5 text-center"></i> Categories
+        </button>
+
+        <button onclick="switchTab('orders')" class="nav-item w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" id="btn-orders">
+          <div class="flex items-center gap-3"><i class="fas fa-shopping-cart w-5 text-center"></i> Orders</div>
+          <span class="bg-brand/20 text-brand text-xs font-bold px-2 py-0.5 rounded-full" id="sidebar-pending-count">0</span>
+        </button>
+
+        <button onclick="switchTab('customers')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" id="btn-customers">
+          <i class="fas fa-users w-5 text-center"></i> Customers
+        </button>
+
+        <div class="text-xs font-semibold text-slate-400 px-3 uppercase tracking-wider mt-6 mb-2">Management</div>
+
+        <button onclick="switchTab('settings')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" id="btn-settings">
+          <i class="fas fa-cog w-5 text-center"></i> Settings
+        </button>
+
+      </div>
+
+      <!-- User Info Footer -->
+      <div class="p-3 border-t border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-carddark rounded-xl">
+          <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">SA</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold truncate">Super Admin</p>
+            <p class="text-[10px] text-emerald-500 font-semibold">● Online</p>
           </div>
-          <select id="p_category" required>
-            <option value="">ক্যাটাগরি সিলেক্ট করুন</option>
-          </select>
-          <input type="text" id="p_image" placeholder="মূল ছবির URL (Image URL)" required>
-          <textarea id="p_desc" placeholder="প্রোডাক্টের বিবরণ" rows="3"></textarea>
-          <button type="submit" class="btn btn-success">সেভ করুন</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>সমস্ত প্রোডাক্ট তালিকা</h3>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>ছবি</th>
-                <th>নাম</th>
-                <th>মূল্য</th>
-                <th>ক্যাটাগরি</th>
-                <th>অ্যাকশন</th>
-              </tr>
-            </thead>
-            <tbody id="product-list-body">
-              <tr><td colspan="5">লোড হচ্ছে...</td></tr>
-            </tbody>
-          </table>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- 2. CATEGORIES TAB -->
-    <div id="tab-categories" class="tab-content">
-      <div class="card">
-        <h3>নতুন ক্যাটাগরি তৈরি করুন</h3>
-        <form onsubmit="saveCategory(event)">
-          <input type="text" id="c_name" placeholder="ক্যাটাগরির নাম (যেমন: Leather)" required>
-          <input type="text" id="c_icon" placeholder="ছবি / আইকন URL" required>
-          <button type="submit" class="btn btn-success">ক্যাটাগরি সেভ করুন</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>বিদ্যমান ক্যাটাগরি</h3>
-        <ul id="category-list-body" style="list-style:none; padding:0;"></ul>
-      </div>
-    </div>
+    <!-- CONTENT WRAPPER -->
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-    <!-- 3. ORDERS TAB -->
-    <div id="tab-orders" class="tab-content">
-      <div class="card">
-        <h3>অর্ডার তালিকা</h3>
-        <div style="overflow-x:auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>আইডি</th>
-                <th>গ্রাহক</th>
-                <th>ফোন</th>
-                <th>ঠিকানা</th>
-                <th>মোট (৳)</th>
-                <th>স্ট্যাটাস</th>
-              </tr>
-            </thead>
-            <tbody id="order-list-body">
-              <tr><td colspan="6">লোড হচ্ছে...</td></tr>
-            </tbody>
-          </table>
+      <!-- TOP NAVBAR -->
+      <header class="h-16 bg-white dark:bg-navdark border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 md:px-8 z-20">
+        <div class="flex items-center gap-4">
+          <button onclick="toggleSidebar()" class="md:hidden text-slate-500 dark:text-slate-300 hover:text-brand"><i class="fas fa-bars text-xl"></i></button>
+          <div class="relative hidden sm:block w-64">
+            <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+            <input type="text" id="globalSearch" oninput="globalFilter()" placeholder="Search orders, products..." class="w-full bg-slate-100 dark:bg-darkbg text-xs py-2 pl-9 pr-4 rounded-xl border border-transparent focus:border-brand outline-none transition">
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- 4. RESELLER & SELLER MANAGEMENT TAB -->
-    <div id="tab-resellers" class="tab-content">
-      <div class="card">
-        <h3>নতুন রিসেলার / সেলার যোগ করুন</h3>
-        <form onsubmit="addReseller(event)">
-          <input type="text" id="r_name" placeholder="রিসেলার / সেলারের নাম" required>
-          <input type="tel" id="r_phone" placeholder="মোবাইল নম্বর" required>
-          <select id="r_role">
-            <option value="Reseller">রিসেলার (Reseller)</option>
-            <option value="Seller">সেলার / ভেন্ডার (Vendor/Seller)</option>
-          </select>
-          <input type="number" id="r_commission" placeholder="কমিশন / মার্জিন (%)">
-          <button type="submit" class="btn btn-success">অ্যাকাউন্ট যোগ করুন</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>অনুমোদিত রিসেলার ও সেলার তালিকা</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>নাম</th>
-              <th>ফোন</th>
-              <th>টাইপ</th>
-              <th>কমিশন</th>
-              <th>অ্যাকশন</th>
-            </tr>
-          </thead>
-          <tbody id="reseller-list-body">
-            <tr><td colspan="5">কোনো সদস্য নেই।</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+        <div class="flex items-center gap-3">
+          <!-- Dark/Light Toggle -->
+          <button onclick="toggleTheme()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-carddark flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-brand transition">
+            <i class="fas fa-moon dark:hidden"></i>
+            <i class="fas fa-sun hidden dark:block text-amber-400"></i>
+          </button>
 
-    <!-- 5. APP SETTINGS TAB -->
-    <div id="tab-settings" class="tab-content">
-      <div class="card">
-        <h3>অ্যাপ ও পেজ সেটিংস</h3>
-        <form onsubmit="saveSettings(event)">
-          <label><b>অ্যাপ লোগো URL:</b></label>
-          <input type="text" id="set_logo" placeholder="https://...">
+          <!-- Notification Bell -->
+          <div class="relative">
+            <button class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-carddark flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-brand transition">
+              <i class="fas fa-bell"></i>
+              <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500"></span>
+            </button>
+          </div>
+
+          <!-- Refresh Button -->
+          <button onclick="fetchDashboardData()" class="px-3 py-1.5 bg-brand/10 text-brand rounded-xl font-semibold text-xs hover:bg-brand hover:text-white transition flex items-center gap-2">
+            <i class="fas fa-sync-alt"></i> Sync Data
+          </button>
+        </div>
+      </header>
+
+      <!-- DYNAMIC CONTENT BODY -->
+      <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
+
+        <!-- 1. DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-page space-y-6">
           
-          <label><b>ফেসবুক পেজ লিংক:</b></label>
-          <input type="text" id="set_fb" placeholder="https://facebook.com/...">
-          
-          <label><b>হোয়াটসঅ্যাপ নম্বর (WhatsApp Support):</b></label>
-          <input type="text" id="set_wa" placeholder="8801600000000">
+          <!-- Stat Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Revenue Card -->
+            <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase">Total Revenue</p>
+                <h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white" id="stat-revenue">৳ 0</h3>
+                <p class="text-[11px] text-emerald-500 mt-1 font-semibold"><i class="fas fa-arrow-up"></i> +12.5% from last month</p>
+              </div>
+              <div class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center text-xl font-bold"><i class="fas fa-wallet"></i></div>
+            </div>
 
-          <label><b>হেল্পলাইন / মোবাইল নম্বর:</b></label>
-          <input type="text" id="set_phone" placeholder="01700000000">
+            <!-- Orders Card -->
+            <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase">Total Orders</p>
+                <h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white" id="stat-orders">0</h3>
+                <p class="text-[11px] text-brand mt-1 font-semibold" id="stat-pending-label">0 Pending Orders</p>
+              </div>
+              <div class="w-12 h-12 bg-brand/10 text-brand rounded-2xl flex items-center justify-center text-xl font-bold"><i class="fas fa-shopping-bag"></i></div>
+            </div>
 
-          <button type="submit" class="btn btn-success">সেটিংস আপডেট করুন</button>
-        </form>
-      </div>
+            <!-- Products Card -->
+            <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase">Active Products</p>
+                <h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white" id="stat-products">0</h3>
+                <p class="text-[11px] text-amber-500 mt-1 font-semibold" id="stat-lowstock">0 Low Stock Items</p>
+              </div>
+              <div class="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-2xl flex items-center justify-center text-xl font-bold"><i class="fas fa-boxes"></i></div>
+            </div>
+
+            <!-- Customers Card -->
+            <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400 uppercase">Total Customers</p>
+                <h3 class="text-2xl font-bold mt-1 text-slate-900 dark:text-white" id="stat-customers">0</h3>
+                <p class="text-[11px] text-sky-500 mt-1 font-semibold">Active Buyers</p>
+              </div>
+              <div class="w-12 h-12 bg-sky-500/10 text-sky-500 rounded-2xl flex items-center justify-center text-xl font-bold"><i class="fas fa-users"></i></div>
+            </div>
+          </div>
+
+          <!-- Charts Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="font-bold text-slate-900 dark:text-white text-base">Revenue Overview</h4>
+                <span class="text-xs text-slate-400">Monthly Performance</span>
+              </div>
+              <div class="h-64"><canvas id="revenueChart"></canvas></div>
+            </div>
+
+            <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <div class="flex justify-between items-center mb-4">
+                <h4 class="font-bold text-slate-900 dark:text-white text-base">Top Categories</h4>
+                <span class="text-xs text-slate-400">Share</span>
+              </div>
+              <div class="h-64 flex items-center justify-center"><canvas id="categoryChart"></canvas></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 2. PRODUCTS TAB -->
+        <div id="tab-products" class="tab-page hidden space-y-4">
+          <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
+              <h3 class="font-bold text-lg">Product Inventory</h3>
+              <button onclick="switchTab('add-product')" class="px-4 py-2 bg-brand text-white text-xs font-bold rounded-xl hover:bg-brand-dark transition"><i class="fas fa-plus"></i> Add New Product</button>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-400 uppercase">
+                    <th class="py-3 px-4">Product</th>
+                    <th class="py-3 px-4">SKU</th>
+                    <th class="py-3 px-4">Category</th>
+                    <th class="py-3 px-4">Price</th>
+                    <th class="py-3 px-4">Stock</th>
+                    <th class="py-3 px-4">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="product-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                  <!-- Loaded Dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. ADD PRODUCT TAB -->
+        <div id="tab-add-product" class="tab-page hidden space-y-6">
+          <form id="productForm" onsubmit="saveProduct(event)" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <h3 class="font-bold text-lg text-brand border-b border-slate-200 dark:border-slate-800 pb-3"><i class="fas fa-box-open"></i> Add New Product</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Product Name *</label>
+                <input type="text" id="p_name" required placeholder="e.g. Premium Leather Wallet" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Category *</label>
+                <select id="p_category" required class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+                  <!-- Categories Option Loaded Dynamically -->
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Regular Price (৳) *</label>
+                <input type="number" id="p_price" required placeholder="1200" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Discount Price (৳)</label>
+                <input type="number" id="p_discount_price" placeholder="990" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Stock Quantity *</label>
+                <input type="number" id="p_stock" value="10" required class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold mb-1">Main Image URL *</label>
+              <input type="url" id="p_image" required placeholder="https://i.ibb.co/example.jpg" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold mb-1">Description</label>
+              <textarea id="p_description" rows="3" placeholder="Enter product specifications..." class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-brand text-white font-bold text-xs rounded-xl hover:bg-brand-dark transition shadow-lg shadow-brand/20">Save Product</button>
+          </form>
+        </div>
+
+        <!-- 4. ORDERS TAB -->
+        <div id="tab-orders" class="tab-page hidden space-y-4">
+          <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="font-bold text-lg mb-4">Customer Orders</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-400 uppercase">
+                    <th class="py-3 px-4">Order ID</th>
+                    <th class="py-3 px-4">Customer</th>
+                    <th class="py-3 px-4">Phone</th>
+                    <th class="py-3 px-4">Address</th>
+                    <th class="py-3 px-4">Amount</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4">Update Status</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                  <!-- Loaded Dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. CATEGORIES TAB -->
+        <div id="tab-categories" class="tab-page hidden space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <form onsubmit="saveCategory(event)" class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+              <h4 class="font-bold text-base text-brand">Add New Category</h4>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Category Name</label>
+                <input type="text" id="cat_name" required placeholder="e.g. Fashion" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+              <button type="submit" class="w-full py-2.5 bg-brand text-white font-bold text-xs rounded-xl hover:bg-brand-dark transition">Save Category</button>
+            </form>
+
+            <div class="md:col-span-2 bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+              <h4 class="font-bold text-base mb-3">All Categories</h4>
+              <div id="category-list-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <!-- Loaded Dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. CUSTOMERS TAB -->
+        <div id="tab-customers" class="tab-page hidden space-y-4">
+          <div class="bg-white dark:bg-carddark p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <h3 class="font-bold text-lg mb-4">Customer Insights</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-400 uppercase">
+                    <th class="py-3 px-4">Name</th>
+                    <th class="py-3 px-4">Phone</th>
+                    <th class="py-3 px-4">Orders Count</th>
+                    <th class="py-3 px-4">Total Spent</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-body" class="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                  <!-- Loaded Dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. SETTINGS TAB -->
+        <div id="tab-settings" class="tab-page hidden space-y-6">
+          <form onsubmit="saveSettings(event)" class="bg-white dark:bg-carddark p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+            <h3 class="font-bold text-lg text-brand border-b border-slate-200 dark:border-slate-800 pb-3"><i class="fas fa-sliders-h"></i> Platform Settings</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Website Name</label>
+                <input type="text" id="set_site_name" value="BAZARO" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">WhatsApp Order Number</label>
+                <input type="text" id="set_whatsapp" value="8801700000000" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold mb-1">Inside City Delivery Charge (৳)</label>
+                <input type="number" id="set_del_in" value="60" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold mb-1">Outside City Delivery Charge (৳)</label>
+                <input type="number" id="set_del_out" value="120" class="w-full bg-slate-50 dark:bg-darkbg border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 text-xs outline-none focus:border-brand">
+              </div>
+            </div>
+
+            <button type="submit" class="px-6 py-2.5 bg-brand text-white font-bold text-xs rounded-xl hover:bg-brand-dark transition">Update Settings</button>
+          </form>
+        </div>
+
+      </main>
     </div>
-
   </div>
 
-  <!-- EDIT PRODUCT MODAL -->
-  <div class="modal" id="edit-modal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeEditModal()">&times;</span>
-      <h3>প্রোডাক্ট এডিট করুন</h3>
-      <input type="hidden" id="edit_p_id">
-      <input type="text" id="edit_p_name" placeholder="প্রোডাক্ট নাম">
-      <input type="number" id="edit_p_price" placeholder="রেগুলার প্রাইস">
-      <input type="number" id="edit_p_discount" placeholder="ডিসকাউন্ট প্রাইস">
-      <input type="text" id="edit_p_image" placeholder="ছবির URL">
-      <button class="btn btn-success" onclick="updateProduct()">আপডেট করুন</button>
-    </div>
-  </div>
+  <script>
+    // SUPABASE CONFIGURATION
+    const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-<script>
-  const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let globalOrders = [];
+    let globalProducts = [];
+    let revenueChartInstance, categoryChartInstance;
 
-  function switchTab(tabId, btn) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    btn.classList.add('active');
-  }
+    // UI CONTROLS
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+    }
 
-  // Load All Initial Data
-  async function loadAdminData() {
-    loadCategories();
-    loadProducts();
-    loadOrders();
-    loadResellers();
-  }
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+    }
 
-  // 1. Categories
-  async function loadCategories() {
-    const { data } = await supabaseClient.from('categories').select('*');
-    const select = document.getElementById('p_category');
-    const list = document.getElementById('category-list-body');
-    
-    select.innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>';
-    list.innerHTML = '';
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-page').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.remove('bg-brand', 'text-white');
+        el.classList.add('text-slate-600', 'dark:text-slate-300');
+      });
 
-    if(data) {
-      data.forEach(c => {
-        select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-        list.innerHTML += `<li style="padding:8px 0; border-bottom:1px solid #eee; display:flex; justify-size:space-between; align-items:center;">
-          <span><img src="${c.image_url}" width="20" style="vertical-align:middle;"> ${c.name}</span>
-          <button class="btn btn-danger" style="padding:2px 6px; font-size:10px;" onclick="deleteCategory(${c.id})">মুছুন</button>
-        </li>`;
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`btn-${tabId}`);
+      if(activeBtn) {
+        activeBtn.classList.add('bg-brand', 'text-white');
+        activeBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
+      }
+    }
+
+    // DATA FETCHING & SYNCRONIZATION
+    async function fetchDashboardData() {
+      const [{ data: products }, { data: orders }, { data: categories }] = await Promise.all([
+        db.from('products').select('*').order('id', { ascending: false }),
+        db.from('orders').select('*').order('id', { ascending: false }),
+        db.from('categories').select('*')
+      ]);
+
+      globalProducts = products || [];
+      globalOrders = orders || [];
+
+      renderStats(globalProducts, globalOrders);
+      renderProductsTable(globalProducts);
+      renderOrdersTable(globalOrders);
+      renderCategories(categories || []);
+      renderCustomers(globalOrders);
+      initCharts(globalOrders, categories || []);
+    }
+
+    // STATS CALCULATION
+    function renderStats(products, orders) {
+      const totalRev = orders.filter(o => o.status !== 'Cancelled').reduce((sum, o) => sum + (parseFloat(o.total_amount) || 0), 0);
+      const pendingOrders = orders.filter(o => o.status === 'Order Placed' || o.status === 'Pending').length;
+      const lowStock = products.filter(p => (p.stock || 0) <= 5).length;
+
+      document.getElementById('stat-revenue').innerText = '৳ ' + totalRev.toLocaleString();
+      document.getElementById('stat-orders').innerText = orders.length;
+      document.getElementById('stat-products').innerText = products.length;
+      document.getElementById('stat-pending-label').innerText = `${pendingOrders} Pending Orders`;
+      document.getElementById('sidebar-pending-count').innerText = pendingOrders;
+      document.getElementById('stat-lowstock').innerText = `${lowStock} Low Stock Items`;
+    }
+
+    // RENDER PRODUCTS
+    function renderProductsTable(products) {
+      const tbody = document.getElementById('product-table-body');
+      const catSelect = document.getElementById('p_category');
+      
+      tbody.innerHTML = products.map(p => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+          <td class="py-3 px-4 font-semibold flex items-center gap-3">
+            <img src="${p.image_url}" class="w-8 h-8 rounded-lg object-cover">
+            <span class="truncate max-w-[150px]">${p.name}</span>
+          </td>
+          <td class="py-3 px-4 text-slate-400">${p.sku || 'N/A'}</td>
+          <td class="py-3 px-4">${p.category || 'General'}</td>
+          <td class="py-3 px-4 font-bold text-brand">৳ ${p.discount_price || p.price}</td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full ${p.stock > 5 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'} font-bold">${p.stock}</span></td>
+          <td class="py-3 px-4"><button onclick="deleteProduct(${p.id})" class="text-rose-500 hover:text-rose-700"><i class="fas fa-trash"></i></button></td>
+        </tr>
+      `).join('');
+    }
+
+    // RENDER ORDERS
+    function renderOrdersTable(orders) {
+      const tbody = document.getElementById('orders-table-body');
+      tbody.innerHTML = orders.map(o => `
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+          <td class="py-3 px-4 font-bold">#${o.id}</td>
+          <td class="py-3 px-4 font-semibold">${o.customer_name || 'Anonymous'}</td>
+          <td class="py-3 px-4">${o.phone}</td>
+          <td class="py-3 px-4 truncate max-w-[180px]">${o.full_address || o.district || 'N/A'}</td>
+          <td class="py-3 px-4 font-bold text-emerald-500">৳ ${o.total_amount}</td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded-full bg-brand/10 text-brand font-bold">${o.status || 'Placed'}</span></td>
+          <td class="py-3 px-4">
+            <select onchange="updateOrderStatus(${o.id}, this.value)" class="bg-slate-100 dark:bg-darkbg text-xs border border-slate-300 dark:border-slate-700 rounded-lg p-1">
+              <option value="Order Placed" ${o.status==='Order Placed'?'selected':''}>Placed</option>
+              <option value="Confirmed" ${o.status==='Confirmed'?'selected':''}>Confirmed</option>
+              <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+              <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // RENDER CATEGORIES
+    function renderCategories(categories) {
+      const grid = document.getElementById('category-list-grid');
+      const select = document.getElementById('p_category');
+      
+      select.innerHTML = '<option value="">Select Category</option>' + categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+      grid.innerHTML = categories.map(c => `<div class="p-3 bg-slate-100 dark:bg-darkbg rounded-xl font-semibold text-xs text-center border border-slate-200 dark:border-slate-800">${c.name}</div>`).join('');
+    }
+
+    // RENDER CUSTOMERS
+    function renderCustomers(orders) {
+      const customersMap = {};
+      orders.forEach(o => {
+        if (!customersMap[o.phone]) {
+          customersMap[o.phone] = { name: o.customer_name || 'Customer', count: 0, total: 0 };
+        }
+        customersMap[o.phone].count += 1;
+        customersMap[o.phone].total += parseFloat(o.total_amount) || 0;
+      });
+
+      const tbody = document.getElementById('customers-table-body');
+      tbody.innerHTML = Object.entries(customersMap).map(([phone, data]) => `
+        <tr>
+          <td class="py-3 px-4 font-semibold">${data.name}</td>
+          <td class="py-3 px-4 text-slate-400">${phone}</td>
+          <td class="py-3 px-4">${data.count} Orders</td>
+          <td class="py-3 px-4 font-bold text-emerald-500">৳ ${data.total}</td>
+        </tr>
+      `).join('');
+
+      document.getElementById('stat-customers').innerText = Object.keys(customersMap).length;
+    }
+
+    // ACTIONS
+    async function saveProduct(e) {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById('p_name').value,
+        category: document.getElementById('p_category').value,
+        price: parseFloat(document.getElementById('p_price').value),
+        discount_price: parseFloat(document.getElementById('p_discount_price').value) || null,
+        stock: parseInt(document.getElementById('p_stock').value),
+        image_url: document.getElementById('p_image').value,
+        description: document.getElementById('p_description').value,
+        slug: document.getElementById('p_name').value.toLowerCase().replace(/ /g, '-')
+      };
+
+      const { error } = await db.from('products').insert([payload]);
+      if (!error) { alert('Product saved!'); fetchDashboardData(); switchTab('products'); }
+      else alert(error.message);
+    }
+
+    async function updateOrderStatus(id, status) {
+      await db.from('orders').update({ status }).eq('id', id);
+      fetchDashboardData();
+    }
+
+    async function deleteProduct(id) {
+      if(confirm('Are you sure?')) {
+        await db.from('products').delete().eq('id', id);
+        fetchDashboardData();
+      }
+    }
+
+    // CHARTS INITIALIZATION
+    function initCharts(orders, categories) {
+      const ctx1 = document.getElementById('revenueChart').getContext('2d');
+      if(revenueChartInstance) revenueChartInstance.destroy();
+      
+      revenueChartInstance = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Revenue (৳)',
+            data: [12000, 19000, 15000, 25000, 22000, 30000],
+            borderColor: '#f77f00',
+            backgroundColor: 'rgba(247, 127, 0, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+      });
+
+      const ctx2 = document.getElementById('categoryChart').getContext('2d');
+      if(categoryChartInstance) categoryChartInstance.destroy();
+
+      categoryChartInstance = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: categories.slice(0, 4).map(c => c.name),
+          datasets: [{
+            data: [40, 25, 20, 15],
+            backgroundColor: ['#f77f00', '#6366f1', '#10b981', '#3b82f6']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
       });
     }
-  }
 
-  async function saveCategory(e) {
-    e.preventDefault();
-    const name = document.getElementById('c_name').value;
-    const image_url = document.getElementById('c_icon').value;
-    await supabaseClient.from('categories').insert([{ name, image_url }]);
-    alert('ক্যাটাগরি সেভ হয়েছে!');
-    loadCategories();
-  }
-
-  async function deleteCategory(id) {
-    if(confirm('ক্যাটাগরিটি মুছে ফেলতে চান?')) {
-      await supabaseClient.from('categories').delete().eq('id', id);
-      loadCategories();
-    }
-  }
-
-  // 2. Products
-  async function loadProducts() {
-    const { data } = await supabaseClient.from('products').select('*').order('id', {ascending: false});
-    const body = document.getElementById('product-list-body');
-    if(!data || data.length === 0) {
-      body.innerHTML = '<tr><td colspan="5">কোনো প্রোডাক্ট পাওয়া যায়নি।</td></tr>';
-      return;
-    }
-    body.innerHTML = data.map(p => `
-      <tr>
-        <td><img src="${p.image_url}" width="40" height="40" style="object-fit:cover;"></td>
-        <td><b>${p.name}</b></td>
-        <td>৳${p.discount_price || p.price}</td>
-        <td>${p.category || '-'}</td>
-        <td class="action-btns">
-          <button class="btn btn-edit" onclick="openEditModal(${p.id}, '${p.name}', ${p.price}, ${p.discount_price || 0}, '${p.image_url}')">এডিট</button>
-          <button class="btn btn-danger" onclick="deleteProduct(${p.id})">ডিলিট</button>
-        </td>
-      </tr>
-    `).join('');
-  }
-
-  async function saveProduct(e) {
-    e.preventDefault();
-    const name = document.getElementById('p_name').value;
-    const price = document.getElementById('p_price').value;
-    const discount_price = document.getElementById('p_discount').value || null;
-    const category = document.getElementById('p_category').value;
-    const image_url = document.getElementById('p_image').value;
-    const description = document.getElementById('p_desc').value;
-
-    await supabaseClient.from('products').insert([{ name, price, discount_price, category, image_url, description }]);
-    alert('নতুন প্রোডাক্ট যোগ হয়েছে!');
-    document.getElementById('add-product-form').reset();
-    loadProducts();
-  }
-
-  function openEditModal(id, name, price, discount, image) {
-    document.getElementById('edit_p_id').value = id;
-    document.getElementById('edit_p_name').value = name;
-    document.getElementById('edit_p_price').value = price;
-    document.getElementById('edit_p_discount').value = discount;
-    document.getElementById('edit_p_image').value = image;
-    document.getElementById('edit-modal').style.display = 'block';
-  }
-
-  function closeEditModal() { document.getElementById('edit-modal').style.display = 'none'; }
-
-  async function updateProduct() {
-    const id = document.getElementById('edit_p_id').value;
-    const name = document.getElementById('edit_p_name').value;
-    const price = document.getElementById('edit_p_price').value;
-    const discount_price = document.getElementById('edit_p_discount').value;
-    const image_url = document.getElementById('edit_p_image').value;
-
-    await supabaseClient.from('products').update({ name, price, discount_price, image_url }).eq('id', id);
-    alert('প্রোডাক্ট আপডেট সম্পন্ন!');
-    closeEditModal();
-    loadProducts();
-  }
-
-  async function deleteProduct(id) {
-    if(confirm('আপনি কি নিশ্চিত যে প্রোডাক্টটি মুছে ফেলতে চান?')) {
-      await supabaseClient.from('products').delete().eq('id', id);
-      loadProducts();
-    }
-  }
-
-  // 3. Orders
-  async function loadOrders() {
-    const { data } = await supabaseClient.from('orders').select('*').order('id', {ascending: false});
-    const body = document.getElementById('order-list-body');
-    if(!data || data.length === 0) {
-      body.innerHTML = '<tr><td colspan="6">কোনো অর্ডার নেই।</td></tr>';
-      return;
-    }
-    body.innerHTML = data.map(o => `
-      <tr>
-        <td>#${o.id}</td>
-        <td>${o.customer_name}</td>
-        <td>${o.phone}</td>
-        <td>${o.address}, ${o.upazila}, ${o.district}</td>
-        <td>৳${o.total_amount}</td>
-        <td><b>${o.status || 'Pending'}</b></td>
-      </tr>
-    `).join('');
-  }
-
-  // 4. Resellers & Sellers
-  async function loadResellers() {
-    const { data } = await supabaseClient.from('resellers').select('*');
-    const body = document.getElementById('reseller-list-body');
-    if(!data || data.length === 0) {
-      body.innerHTML = '<tr><td colspan="5">কোনো সদস্য নেই।</td></tr>';
-      return;
-    }
-    body.innerHTML = data.map(r => `
-      <tr>
-        <td>${r.name}</td>
-        <td>${r.phone}</td>
-        <td><b>${r.role}</b></td>
-        <td>${r.commission || 0}%</td>
-        <td><button class="btn btn-danger" style="padding:2px 5px; font-size:10px;" onclick="deleteReseller(${r.id})">রিমুভ</button></td>
-      </tr>
-    `).join('');
-  }
-
-  async function addReseller(e) {
-    e.preventDefault();
-    const name = document.getElementById('r_name').value;
-    const phone = document.getElementById('r_phone').value;
-    const role = document.getElementById('r_role').value;
-    const commission = document.getElementById('r_commission').value || 0;
-
-    await supabaseClient.from('resellers').insert([{ name, phone, role, commission }]);
-    alert('নতুন সদস্য যুক্ত করা হয়েছে!');
-    loadResellers();
-  }
-
-  async function deleteReseller(id) {
-    if(confirm('সদস্যটিকে রিমুভ করতে চান?')) {
-      await supabaseClient.from('resellers').delete().eq('id', id);
-      loadResellers();
-    }
-  }
-
-  // 5. Settings
-  function saveSettings(e) {
-    e.preventDefault();
-    alert('সেটিংস সফলভাবে আপডেট হয়েছে!');
-  }
-
-  loadAdminData();
-</script>
+    // INIT
+    window.addEventListener('DOMContentLoaded', fetchDashboardData);
+  </script>
 </body>
 </html>
