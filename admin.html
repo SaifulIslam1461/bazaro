@@ -3,104 +3,239 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAZARO Admin Panel</title>
+  <title>BAZARO Admin Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
-    .container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #333; }
-    label { font-weight: bold; display: block; margin-top: 10px; }
-    input, textarea, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-    button { background: #28a745; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 15px; }
-    button:hover { background: #218838; }
-    #login-box { display: block; }
-    #admin-box { display: none; }
-    .status { margin-top: 10px; font-weight: bold; text-align: center; }
+    * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    body { background: #f0f2f5; color: #333; }
+    .header { background: #0b132b; color: white; padding: 15px; text-align: center; }
+    .container { max-width: 900px; margin: 20px auto; padding: 15px; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    h2 { margin-bottom: 15px; color: #1d3557; font-size: 18px; border-bottom: 2px solid #f77f00; padding-bottom: 5px; }
+    label { font-weight: bold; display: block; margin-top: 10px; font-size: 13px; }
+    input, select, textarea, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
+    button { background: #28a745; color: white; font-weight: bold; border: none; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; }
+    .tab-btn { background: #e9ecef; color: #333; padding: 10px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; flex: 1; }
+    .tab-btn.active { background: #f77f00; color: white; font-weight: bold; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f8f9fa; }
+    .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; color: white; font-weight: bold; }
+    .badge-pending { background: #ffc107; color: black; }
+    .badge-confirmed { background: #17a2b8; }
+    .badge-delivered { background: #28a745; }
+    .badge-cancelled { background: #dc3545; }
+    #login-box { max-width: 400px; margin: 80px auto; }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <!-- লগইন সেকশন -->
-  <div id="login-box">
-    <h2>Admin Login</h2>
-    <label>পাসওয়ার্ড দিন:</label>
+  <div class="header">
+    <h1>BAZARO Admin Dashboard</h1>
+  </div>
+
+  <div id="login-box" class="card">
+    <h2>এডমিন লগইন</h2>
+    <label>পাসওয়ার্ড:</label>
     <input type="password" id="adminPassword" placeholder="পাসওয়ার্ড লিখুন">
-    <button onclick="checkPassword()">লগইন করুন</button>
-    <p id="loginError" class="status" style="color: red;"></p>
+    <button onclick="checkPassword()" style="margin-top: 15px;">লগইন</button>
+    <p id="loginError" style="color: red; margin-top: 10px; text-align: center;"></p>
   </div>
 
-  <!-- এডমিন ফরম সেকশন -->
-  <div id="admin-box">
-    <h2>নতুন প্রোডাক্ট যোগ করুন</h2>
-    <label>প্রোডাক্টের নাম:</label>
-    <input type="text" id="name" placeholder="যেমন: টি-শার্ট">
+  <div id="dashboard-box" class="container" style="display: none;">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('orders-tab')"><i class="fas fa-shopping-bag"></i> অর্ডারসমূহ</button>
+      <button class="tab-btn" onclick="switchTab('add-product-tab')"><i class="fas fa-plus-circle"></i> প্রোডাক্ট যোগ করুন</button>
+      <button class="tab-btn" onclick="switchTab('add-category-tab')"><i class="fas fa-list"></i> ক্যাটাগরি</button>
+    </div>
 
-    <label>দাম (টাকা):</label>
-    <input type="number" id="price" placeholder="যেমন: ৫০০">
+    <!-- 1. ORDERS TAB -->
+    <div id="orders-tab" class="tab-content card active">
+      <h2>গ্রাহকদের অর্ডার তালিকা</h2>
+      <button onclick="loadOrders()" style="background:#003049; margin-bottom: 10px; width: auto; padding: 6px 15px;">রিফ্রেশ লিস্ট</button>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>গ্রাহক</th>
+              <th>মোবাইল</th>
+              <th>ঠিকানা</th>
+              <th>মোট টাকা</th>
+              <th>স্ট্যাটাস</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="orders-table-body">
+            <tr><td colspan="7">অর্ডার লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-    <label>ছবির URL (ImgBB থেকে):</label>
-    <input type="text" id="image_url" placeholder="https://i.ibb.co/...">
+    <!-- 2. ADD PRODUCT TAB -->
+    <div id="add-product-tab" class="tab-content card">
+      <h2>নতুন প্রোডাক্ট যোগ করুন</h2>
+      <label>প্রোডাক্টের নাম:</label>
+      <input type="text" id="p_name" placeholder="যেমন: চামড়ার ওয়ালেট">
 
-    <label>বিবরণ (Description):</label>
-    <textarea id="description" rows="3" placeholder="প্রোডাক্টের বিবরণ লিখুন"></textarea>
+      <div style="display: flex; gap: 10px;">
+        <div style="flex:1;">
+          <label>মূল্য (৳):</label>
+          <input type="number" id="p_price" placeholder="যেমন: ১০০০">
+        </div>
+        <div style="flex:1;">
+          <label>ডিসকাউন্ট মূল্য (৳):</label>
+          <input type="number" id="p_discount" placeholder="যেমন: ৮০০">
+        </div>
+      </div>
 
-    <button onclick="addProduct()">প্রোডাক্ট সেভ করুন</button>
-    <p id="statusMsg" class="status"></p>
+      <label>ক্যাটাগরি:</label>
+      <select id="p_category">
+        <option value="">ক্যাটাগরি সিলেক্ট করুন</option>
+      </select>
+
+      <label>প্রধান ছবির URL (ImgBB Direct Link):</label>
+      <input type="text" id="p_image" placeholder="https://i.ibb.co/...">
+
+      <label>স্টক পরিমাণ:</label>
+      <input type="number" id="p_stock" value="10">
+
+      <label>বিবরণ:</label>
+      <textarea id="p_desc" rows="3" placeholder="প্রোডাক্টের বিবরণ..."></textarea>
+
+      <button onclick="saveProduct()" style="margin-top: 15px;">প্রোডাক্ট সেভ করুন</button>
+      <p id="p_status" style="margin-top: 10px; font-weight: bold; text-align: center;"></p>
+    </div>
+
+    <!-- 3. ADD CATEGORY TAB -->
+    <div id="add-category-tab" class="tab-content card">
+      <h2>নতুন ক্যাটাগরি তৈরি করুন</h2>
+      <label>ক্যাটাগরির নাম:</label>
+      <input type="text" id="c_name" placeholder="যেমন: Electronics">
+      <label>ছবি / আইকন URL:</label>
+      <input type="text" id="c_image" placeholder="https://i.ibb.co/...">
+      <button onclick="saveCategory()" style="margin-top: 15px;">ক্যাটাগরি সেভ করুন</button>
+      <p id="c_status" style="margin-top: 10px; font-weight: bold; text-align: center;"></p>
+    </div>
   </div>
-</div>
 
 <script>
-  // সিক্রেট পাসওয়ার্ড
+  const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const SECRET_PASSWORD = "Bazaro2026Password";
 
   function checkPassword() {
-    const inputPass = document.getElementById("adminPassword").value;
-    if (inputPass === SECRET_PASSWORD) {
+    if (document.getElementById("adminPassword").value === SECRET_PASSWORD) {
       document.getElementById("login-box").style.display = "none";
-      document.getElementById("admin-box").style.display = "block";
+      document.getElementById("dashboard-box").style.display = "block";
+      loadCategoriesDropdown();
+      loadOrders();
     } else {
-      document.getElementById("loginError").innerText = "ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।";
+      document.getElementById("loginError").innerText = "ভুল পাসওয়ার্ড!";
     }
   }
 
-  async function addProduct() {
-    const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
 
-    const name = document.getElementById("name").value;
-    const price = document.getElementById("price").value;
-    const image_url = document.getElementById("image_url").value;
-    const description = document.getElementById("description").value;
-    const statusMsg = document.getElementById("statusMsg");
+  async function loadCategoriesDropdown() {
+    const { data } = await supabaseClient.from('categories').select('*');
+    const select = document.getElementById('p_category');
+    if (data) {
+      select.innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>' + 
+        data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+  }
 
-    if (!name || !price) {
-      statusMsg.style.color = "red";
-      statusMsg.innerText = "প্রোডাক্টের নাম এবং দাম অবশ্যই দিতে হবে!";
+  async function saveProduct() {
+    const name = document.getElementById('p_name').value;
+    const price = document.getElementById('p_price').value;
+    const discount_price = document.getElementById('p_discount').value || null;
+    const category_id = document.getElementById('p_category').value || null;
+    const image_url = document.getElementById('p_image').value;
+    const stock = document.getElementById('p_stock').value;
+    const description = document.getElementById('p_desc').value;
+    const status = document.getElementById('p_status');
+
+    if(!name || !price) { status.style.color='red'; status.innerText='নাম ও দাম আবশ্যক!'; return; }
+
+    status.style.color='blue'; status.innerText='সেভ হচ্ছে...';
+
+    const { error } = await supabaseClient.from('products').insert([{
+      name, price, discount_price, category_id, image_url, stock, description
+    }]);
+
+    if(error) { status.style.color='red'; status.innerText=error.message; }
+    else {
+      status.style.color='green'; status.innerText='প্রোডাক্ট সফলভাবে যুক্ত হয়েছে! 🎉';
+      document.getElementById('p_name').value = '';
+      document.getElementById('p_price').value = '';
+    }
+  }
+
+  async function saveCategory() {
+    const name = document.getElementById('c_name').value;
+    const image_url = document.getElementById('c_image').value;
+    const status = document.getElementById('c_status');
+    const slug = name.toLowerCase().replace(/\s+/g, '-');
+
+    if(!name) return;
+
+    const { error } = await supabaseClient.from('categories').insert([{ name, slug, image_url }]);
+    if(error) { status.style.color='red'; status.innerText=error.message; }
+    else {
+      status.style.color='green'; status.innerText='ক্যাটাগরি তৈরি হয়েছে!';
+      loadCategoriesDropdown();
+    }
+  }
+
+  async function loadOrders() {
+    const tbody = document.getElementById('orders-table-body');
+    const { data: orders, error } = await supabaseClient.from('orders').select('*').order('id', {ascending: false});
+    
+    if(error || !orders || orders.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7">কোনো অর্ডার পাওয়া যায়নি।</td></tr>';
       return;
     }
 
-    statusMsg.style.color = "blue";
-    statusMsg.innerText = "সেভ হচ্ছে...";
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td>#${o.id}</td>
+        <td>${o.customer_name}</td>
+        <td>${o.phone}</td>
+        <td>${o.district}, ${o.address}</td>
+        <td>৳${o.total_amount}</td>
+        <td><span class="badge badge-${o.status.toLowerCase()}">${o.status}</span></td>
+        <td>
+          <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:2px; font-size:11px;">
+            <option value="">Status</option>
+            <option value="Confirmed">Confirm</option>
+            <option value="Processing">Processing</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancel</option>
+          </select>
+        </td>
+      </tr>
+    `).join('');
+  }
 
-    const { data, error } = await supabaseClient
-      .from('products')
-      .insert([{ name, price, image_url, description }]);
-
-    if (error) {
-      statusMsg.style.color = "red";
-      statusMsg.innerText = "সমস্যা হয়েছে: " + error.message;
-    } else {
-      statusMsg.style.color = "green";
-      statusMsg.innerText = "প্রোডাক্ট সফলভাবে যুক্ত হয়েছে! 🎉";
-      document.getElementById("name").value = "";
-      document.getElementById("price").value = "";
-      document.getElementById("image_url").value = "";
-      document.getElementById("description").value = "";
-    }
+  async function updateOrderStatus(id, status) {
+    if(!status) return;
+    await supabaseClient.from('orders').update({ status }).eq('id', id);
+    loadOrders();
   }
 </script>
-
 </body>
 </html>
