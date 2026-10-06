@@ -1,24 +1,21 @@
 {
-  "name": "BAZARO",
   "short_name": "BAZARO",
-  "description": "এক বাজারে সবকিছু",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#ffffff",
-  "theme_color": "#ff9800",
+  "name": "BAZARO - Online Marketplace",
   "icons": [
     {
-      "src": "https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png",
-      "sizes": "192x192",
+      "src": "https://img.icons8.com/color/192/shopping-bag--v1.png",
       "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "192x192"
     },
     {
-      "src": "https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png",
-      "sizes": "512x512",
+      "src": "https://img.icons8.com/color/512/shopping-bag--v1.png",
       "type": "image/png",
-      "purpose": "any maskable"
+      "sizes": "512x512"
     }
-  ]
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0b132b",
+  "theme_color": "#f77f00",
+  "display": "standalone",
+  "orientation": "portrait"
 }
