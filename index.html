@@ -443,5 +443,51 @@
   updateCartUI();
   loadData();
 </script>
+
+<!-- BAZARO PWA Auto Install Banner -->
+<div id="pwa-install-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#0b132b; color:white; padding:12px 15px; z-index:9999; display:flex; justify-content:space-between; align-items:center; box-shadow:0 -2px 10px rgba(0,0,0,0.3);">
+  <div style="display:flex; align-items:center; gap:10px;">
+    <img src="https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png" style="width:38px; height:38px; border-radius:8px; object-fit:cover;">
+    <div>
+      <div style="font-weight:bold; font-size:14px; color:#ff9800;">BAZARO App</div>
+      <div style="font-size:11px; color:#ccc;">এক ক্লিকে ফোনে ইনস্টল করুন</div>
+    </div>
+  </div>
+  <button id="btn-pwa-install" style="background:#ff9800; color:white; border:none; padding:8px 15px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:13px;">ইনস্টল করুন</button>
+</div>
+
+<script>
+  let deferredPrompt;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('btn-pwa-install');
+
+  // ওয়েবসাইট লোড হলে ব্যানারটি শুরুতে লুকিয়ে রাখা
+  installBanner.style.display = 'none';
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // ব্রাউজারের ডিফল্ট প্রম্পট বন্ধ রাখা
+    e.preventDefault();
+    deferredPrompt = e;
+    // ওয়েবসাইট ওপেন হতেই কাস্টম ব্যানারটি দেখানো
+    installBanner.style.display = 'flex';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        console.log('User installed BAZARO app');
+      }
+      deferredPrompt = null;
+      installBanner.style.display = 'none';
+    }
+  });
+
+  window.addEventListener('appinstalled', () => {
+    installBanner.style.display = 'none';
+  });
+</script>
+
 </body>
 </html>
