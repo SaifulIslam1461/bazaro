@@ -1,2370 +1,477 @@
-```html
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50">
+<html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BAZARO | Modern Bangladeshi Marketplace</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BAZARO - Complete Online Marketplace</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#f77f00">
+
+  <!-- FontAwesome, Google Fonts & Supabase -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary: #f77f00;
+      --secondary: #0b132b;
+      --card-bg: #161f38;
+      --text: #ffffff;
+      --gray: #94a3b8;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Hind Siliguri', sans-serif; }
+    body { background: var(--secondary); color: var(--text); padding-bottom: 70px; }
+
+    /* Header & Navigation */
+    header { background: #1c2541; padding: 12px 20px; position: sticky; top:0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    .header-container { max-width: 1200px; margin: auto; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+    .logo { font-size: 24px; font-weight: bold; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
     
-    <!-- PWA Manifest Dynamic Injector Point -->
-    <link id="manifest-link" rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22BAZARO%20Marketplace%22%2C%22short_name%22%3A%22BAZARO%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23059669%22%2C%22theme_color%22%3A%22%23059669%22%7D">
-    <meta name="theme-color" content="#059669">
+    .search-box { flex: 1; max-width: 500px; display: flex; background: #0b132b; border-radius: 8px; border: 1px solid #2d3748; overflow: hidden; }
+    .search-box input { width: 100%; border: none; padding: 10px 15px; background: transparent; color: white; outline: none; }
+    .search-box button { background: var(--primary); border: none; padding: 0 18px; color: white; cursor: pointer; }
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#ecfdf5',
-                            100: '#d1fae5',
-                            500: '#10b981',
-                            600: '#059669',
-                            700: '#047857',
-                            800: '#065f46',
-                            900: '#064e3b',
-                        },
-                        accent: {
-                            500: '#f59e0b',
-                            600: '#d97706',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    .nav-icons { display: flex; gap: 15px; align-items: center; }
+    .icon-btn { position: relative; cursor: pointer; font-size: 18px; color: white; }
+    .icon-btn .badge { position: absolute; top: -8px; right: -8px; background: var(--primary); font-size: 10px; border-radius: 50%; padding: 2px 6px; font-weight: bold; }
 
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+
+    /* Categories Grid */
+    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+    .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 30px; }
+    .category-card { background: var(--card-bg); border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+    .category-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .category-card svg { width: 36px; height: 36px; fill: var(--primary); margin-bottom: 8px; }
+    .category-card span { display: block; font-size: 12px; font-weight: 600; }
+
+    /* Filters Section */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #1c2541; padding: 10px; border-radius: 8px; }
+    .filter-bar select { background: var(--secondary); color: white; border: 1px solid #2d3748; padding: 8px; border-radius: 6px; outline: none; }
+
+    /* Product Grid */
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+    .product-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+    .product-img { width: 100%; height: 200px; object-fit: cover; }
+    .product-info { padding: 12px; }
+    .product-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .price-box { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
+    .current-price { color: var(--primary); font-weight: bold; font-size: 16px; }
+    .old-price { color: var(--gray); text-decoration: line-through; font-size: 12px; }
+    .btn-add-cart { width: 100%; background: var(--primary); border: none; color: white; padding: 8px; border-radius: 6px; margin-top: 10px; cursor: pointer; font-weight: bold; }
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    /* Modal / Drawer */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
+    .modal-content { background: #161f38; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 20px; position: relative; }
+    .close-modal { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; color: var(--gray); }
 
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Custom scrollbars */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #059669; }
-        
-        /* Modal & Drawer animation transitions */
-        .drawer-overlay { transition: opacity 0.3s ease-in-out; }
-        .drawer-content { transition: transform 0.3s ease-in-out; }
-        
-        /* Print layout style for Invoices */
-        @media print {
-            body * { visibility: hidden; }
-            #printable-invoice, #printable-invoice * { visibility: visible; }
-            #printable-invoice { position: absolute; left: 0; top: 0; width: 100%; }
-        }
-    </style>
+    /* Checkout & Form */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 12px; margin-bottom: 4px; color: var(--gray); }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; background: #0b132b; border: 1px solid #2d3748; padding: 10px; border-radius: 6px; color: white; outline: none; }
+
+    /* Bottom App Banner */
+    #pwa-banner { display: none; position: fixed; bottom: 0; left:0; right:0; background: var(--primary); color: white; padding: 10px 20px; justify-content: space-between; align-items: center; z-index: 999; }
+  </style>
 </head>
-<body class="h-full text-slate-800 flex flex-col antialiased bg-slate-50">
+<body>
 
-    <div id="announcement-bar" class="bg-gradient-to-r from-brand-800 via-brand-600 to-brand-800 text-white text-xs font-medium py-2 px-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2 truncate">
-                <span class="bg-amber-400 text-slate-900 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wide">HOT</span>
-                <span id="announcement-text">⚡ Special Offer: Free Express Shipping inside Dhaka on orders over ৳2,000! Use Code: <strong>BAZARO10</strong></span>
-            </div>
-            <div class="hidden md:flex items-center space-x-6 text-xs">
-                <a href="javascript:void(0)" onclick="switchTab('tracking')" class="hover:underline flex items-center gap-1"><i class="fa-solid me-1 fa-truck-fast"></i> Track Order</a>
-                <a id="header-whatsapp-link" href="https://wa.me/8801700000000" target="_blank" class="hover:underline flex items-center gap-1 text-emerald-300 font-semibold"><i class="fa-brands fa-whatsapp text-sm"></i> Help: <span id="header-wa-num">+880 1700-000000</span></a>
-                <button id="pwa-install-btn" onclick="installPWA()" class="hidden bg-white/20 hover:bg-white/30 px-2 py-0.5 rounded flex items-center gap-1 text-white font-medium text-xs transition">
-                    <i class="fa-solid fa-download text-xs"></i> Install App
-                </button>
-            </div>
-        </div>
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="logo"><i class="fas fa-shopping-bag"></i> BAZARO</a>
+      
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="প্রোডাক্ট খুঁজুন (যেমন: T-Shirt, Belt)..." onkeyup="filterProducts()">
+        <button><i class="fas fa-search"></i></button>
+      </div>
+
+      <div class="nav-icons">
+        <div class="icon-btn" onclick="openOrderTrackModal()"><i class="fas fa-truck"></i></div>
+        <div class="icon-btn" onclick="openWishlistModal()"><i class="fas fa-heart"></i><span class="badge" id="wishlist-count">0</span></div>
+        <div class="icon-btn" onclick="openCartModal()"><i class="fas fa-shopping-cart"></i><span class="badge" id="cart-count">0</span></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- CATEGORIES SECTION WITH EMBEDDED SVG ICONS -->
+    <div class="section-title"><i class="fas fa-th-large"></i> ক্যাটাগরি সমূহ</div>
+    <div class="categories-grid" id="categoryContainer">
+      <!-- 1. Leather -->
+      <div class="category-card" onclick="filterByCategory('Leather')">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+        <span>Leather</span>
+      </div>
+      <!-- 2. Shoes -->
+      <div class="category-card" onclick="filterByCategory('Shoes')">
+        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L2 11v2l5-.8v8.8h2v-6h2v6h2v-10l-3.2-1.9z"/></svg>
+        <span>Shoes</span>
+      </div>
+      <!-- 3. Wallet -->
+      <div class="category-card" onclick="filterByCategory('Wallet')">
+        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        <span>Wallet</span>
+      </div>
+      <!-- 4. Belt -->
+      <div class="category-card" onclick="filterByCategory('Belt')">
+        <svg viewBox="0 0 24 24"><path d="M21 10H3c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-2c0-.55-.45-1-1-1zm-10 3H5v-2h6v2z"/></svg>
+        <span>Belt</span>
+      </div>
+      <!-- 5. Bag -->
+      <div class="category-card" onclick="filterByCategory('Bag')">
+        <svg viewBox="0 0 24 24"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z"/></svg>
+        <span>Bag</span>
+      </div>
+      <!-- 6. Fashion -->
+      <div class="category-card" onclick="filterByCategory('Fashion')">
+        <svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11zM12 22c4.97 0 9-4.03 9-9h-18c0 4.97 4.03 9 9 9z"/></svg>
+        <span>Fashion</span>
+      </div>
+      <!-- 7. T-Shirt -->
+      <div class="category-card" onclick="filterByCategory('T-Shirt')">
+        <svg viewBox="0 0 24 24"><path d="M16 2l-4 3-4-3-6 4 2 4 3-1v11h10V9l3 1 2-4z"/></svg>
+        <span>T-Shirt</span>
+      </div>
+      <!-- 8. Panjabi -->
+      <div class="category-card" onclick="filterByCategory('Panjabi')">
+        <svg viewBox="0 0 24 24"><path d="M12 2L4 5v17h16V5l-8-3zm0 4c.55 0 1 .45 1 1v4h-2V7c0-.55.45-1 1-1z"/></svg>
+        <span>Panjabi</span>
+      </div>
+      <!-- 9. Baby & Kids -->
+      <div class="category-card" onclick="filterByCategory('Baby & Kids')">
+        <svg viewBox="0 0 24 24"><path d="M12 2c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 21l4.28-1.42c1.03.38 2.14.58 3.37.58 4.97 0 9-4.03 9-9s-4.03-9-9-9zm-3 8c.83 0 1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5S8.17 10 9 10zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/></svg>
+        <span>Baby & Kids</span>
+      </div>
+      <!-- 10. Electronics -->
+      <div class="category-card" onclick="filterByCategory('Electronics')">
+        <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+        <span>Electronics</span>
+      </div>
+      <!-- 11. Home & Living -->
+      <div class="category-card" onclick="filterByCategory('Home & Living')">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>Home & Living</span>
+      </div>
+      <!-- 12. Food & Grocery -->
+      <div class="category-card" onclick="filterByCategory('Food & Grocery')">
+        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25z"/></svg>
+        <span>Food & Grocery</span>
+      </div>
+      <!-- 13. Beauty -->
+      <div class="category-card" onclick="filterByCategory('Beauty')">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span>Beauty</span>
+      </div>
+      <!-- 14. Sports -->
+      <div class="category-card" onclick="filterByCategory('Sports')">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 3.07c1.86.25 3.48 1.15 4.67 2.47L13 11.2V5.07zM5.07 11C5.32 9.14 6.22 7.52 7.54 6.33L11.2 11H5.07z"/></svg>
+        <span>Sports</span>
+      </div>
     </div>
 
-    <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 gap-4">
-                
-                <!-- Logo & Mobile Menu Toggle -->
-                <div class="flex items-center space-x-3">
-                    <button onclick="toggleCategoryDrawer()" class="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100 focus:outline-none">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-                    <a href="javascript:void(0)" onclick="switchTab('home')" class="flex items-center space-x-2 group">
-                        <div class="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center text-white font-black text-2xl shadow-md group-hover:bg-brand-700 transition">
-                            B
-                        </div>
-                        <div class="flex flex-col">
-                            <span id="brand-name-display" class="font-extrabold text-2xl tracking-tight text-slate-900 leading-none">BAZARO</span>
-                            <span class="text-[10px] tracking-widest text-brand-600 font-bold uppercase">Marketplace</span>
-                        </div>
-                    </a>
-                </div>
-
-                <!-- Desktop Mega Menu Trigger -->
-                <div class="hidden lg:block">
-                    <button onclick="toggleCategoryDrawer()" class="flex items-center space-x-2 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl font-semibold text-sm text-slate-700 transition">
-                        <i class="fa-solid fa-grid-2 text-brand-600"></i>
-                        <span>All Categories</span>
-                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 ml-1"></i>
-                    </button>
-                </div>
-
-                <!-- Instant Search Bar -->
-                <div class="flex-1 max-w-2xl relative hidden md:block">
-                    <div class="relative">
-                        <input type="text" id="main-search-input" onkeyup="handleSearchInput(event)" placeholder="Search products, brands, or categories in Bangladesh..." class="w-full pl-10 pr-24 py-2.5 bg-slate-100 border border-transparent rounded-xl text-sm focus:outline-none focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-200 transition">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </div>
-                        <button onclick="executeSearch()" class="absolute right-1 top-1 bottom-1 px-4 bg-brand-600 text-white rounded-lg text-xs font-semibold hover:bg-brand-700 transition flex items-center gap-1">
-                            Search
-                        </button>
-                    </div>
-                    <!-- Live Search Suggestions Dropdown -->
-                    <div id="search-suggestions" class="hidden absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 overflow-hidden max-h-80 overflow-y-auto"></div>
-                </div>
-
-                <!-- Right Actions Header -->
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <!-- Search Mobile Toggle -->
-                    <button onclick="toggleMobileSearch()" class="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
-                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
-                    </button>
-
-                    <!-- Quick WhatsApp Order -->
-                    <a id="quick-wa-btn" href="https://wa.me/8801700000000" target="_blank" title="Quick Order via WhatsApp" class="hidden sm:flex items-center space-x-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 px-3 py-2 rounded-xl text-xs font-bold transition">
-                        <i class="fa-brands fa-whatsapp text-lg text-emerald-600"></i>
-                        <span class="hidden xl:inline">Order via WhatsApp</span>
-                    </a>
-
-                    <!-- Wishlist Counter -->
-                    <button onclick="switchTab('wishlist')" class="relative p-2 text-slate-600 hover:bg-slate-100 rounded-xl transition">
-                        <i class="fa-regular fa-heart text-xl"></i>
-                        <span id="wishlist-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
-                    </button>
-
-                    <!-- Cart Drawer Trigger -->
-                    <button onclick="toggleCartDrawer()" class="relative flex items-center space-x-2 bg-brand-50 hover:bg-brand-100 text-brand-700 px-3 py-2 rounded-xl font-bold text-sm transition">
-                        <div class="relative">
-                            <i class="fa-solid fa-bag-shopping text-xl"></i>
-                            <span id="cart-badge" class="absolute -top-2 -right-2 bg-brand-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
-                        </div>
-                        <span id="cart-total-header" class="hidden sm:inline font-black text-sm">৳0</span>
-                    </button>
-
-                    <!-- Account / Admin Menu Dropdown -->
-                    <div class="relative">
-                        <button onclick="toggleUserDropdown()" class="p-2 text-slate-600 hover:bg-slate-100 rounded-xl flex items-center space-x-1">
-                            <i class="fa-regular fa-user text-xl"></i>
-                        </button>
-                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
-                            <div id="user-info-header" class="px-4 py-2 border-b border-slate-100">
-                                <p class="text-xs text-slate-400 font-medium">Welcome,</p>
-                                <p id="dropdown-user-name" class="text-sm font-bold text-slate-800 truncate">Guest Customer</p>
-                            </div>
-                            <div class="py-1">
-                                <button onclick="switchTab('profile')" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"><i class="fa-solid fa-user-circle text-slate-400"></i> My Profile & Orders</button>
-                                <button onclick="switchTab('tracking')" class="w-full text-left px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400"></i> Order Tracking</button>
-                                <button onclick="switchTab('admin')" class="w-full text-left px-4 py-2 text-xs font-bold text-brand-600 hover:bg-brand-50 flex items-center gap-2 border-t border-slate-100 mt-1 pt-2"><i class="fa-solid fa-shield-halved"></i> Admin Control Panel</button>
-                            </div>
-                            <div class="border-t border-slate-100 pt-1">
-                                <button id="auth-action-btn" onclick="handleAuthAction()" class="w-full text-left px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2"><i class="fa-solid fa-right-to-bracket"></i> Login / Register</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mobile Search Bar Expanded -->
-            <div id="mobile-search-bar" class="hidden pb-3 pt-1 md:hidden">
-                <div class="relative">
-                    <input type="text" id="mobile-search-input" onkeyup="handleSearchInput(event)" placeholder="Search products..." class="w-full pl-9 pr-16 py-2 bg-slate-100 border border-slate-200 rounded-lg text-sm">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
-                    <button onclick="executeSearch('mobile')" class="absolute right-1 top-1 bottom-1 px-3 bg-brand-600 text-white rounded text-xs font-semibold">Search</button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-        <!-- ================= PAGE 1: HOME PAGE ================= -->
-        <div id="tab-home" class="space-y-10">
-            
-            <!-- Hero Slider & Promotional Banner -->
-            <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Main Carousel -->
-                <div class="lg:col-span-8 relative bg-slate-900 rounded-3xl overflow-hidden shadow-xl text-white min-h-[320px] md:min-h-[400px] flex items-center">
-                    <div id="hero-slide-container" class="w-full h-full relative">
-                        <!-- Dynamic Slide Content -->
-                        <div class="absolute inset-0 bg-cover bg-center transition-all duration-700 filter brightness-75" id="hero-slide-bg" style="background-image: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80');"></div>
-                        <div class="relative z-10 p-8 md:p-12 max-w-xl flex flex-col justify-center h-full">
-                            <span id="hero-tag" class="inline-block bg-amber-400 text-slate-900 font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider mb-4 w-max shadow">Festive Collection 2026</span>
-                            <h1 id="hero-title" class="text-3xl md:text-5xl font-black tracking-tight leading-tight mb-4 drop-shadow-md">Premium Leather & Traditional Panjabi</h1>
-                            <p id="hero-subtitle" class="text-slate-200 text-sm md:text-base mb-6 line-clamp-2">Get up to 40% discount on genuine Bangladeshi handcrafted leather shoes, wallets & designer wear.</p>
-                            <div class="flex items-center space-x-4">
-                                <button onclick="filterByCategory('Leather')" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition flex items-center gap-2">
-                                    Shop Collection <i class="fa-solid fa-arrow-right text-xs"></i>
-                                </button>
-                                <button onclick="scrollToFlashSale()" class="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-semibold px-5 py-3 rounded-xl transition">
-                                    Flash Deals ⚡
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Carousel Controls -->
-                    <div class="absolute bottom-4 right-4 z-20 flex space-x-2">
-                        <button onclick="prevHeroSlide()" class="w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center text-white backdrop-blur transition"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-                        <button onclick="nextHeroSlide()" class="w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 flex items-center justify-center text-white backdrop-blur transition"><i class="fa-solid fa-chevron-right text-xs"></i></button>
-                    </div>
-                </div>
-
-                <!-- Side Highlight Cards -->
-                <div class="lg:col-span-4 flex flex-col justify-between space-y-4">
-                    <div class="bg-gradient-to-br from-amber-500 to-amber-700 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex-1 flex flex-col justify-between">
-                        <div class="relative z-10">
-                            <span class="bg-white/20 text-xs font-bold px-2.5 py-1 rounded-md uppercase">Hot Seller</span>
-                            <h3 class="text-2xl font-black mt-2">Genuine Leather Wallet</h3>
-                            <p class="text-amber-100 text-xs mt-1">RFID Blocking 100% Genuine Cowhide</p>
-                        </div>
-                        <div class="relative z-10 mt-4 flex justify-between items-end">
-                            <div>
-                                <span class="text-2xl font-black">৳1,150</span>
-                                <span class="text-xs text-amber-200 line-through ml-2">৳1,850</span>
-                            </div>
-                            <button onclick="openProductModal(2)" class="bg-white text-slate-900 font-bold px-4 py-2 rounded-xl text-xs hover:bg-amber-100 transition shadow">Order Now</button>
-                        </div>
-                        <i class="fa-solid fa-wallet absolute -bottom-4 -right-4 text-8xl opacity-20 text-white"></i>
-                    </div>
-
-                    <div class="bg-gradient-to-br from-emerald-800 to-emerald-950 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden flex-1 flex flex-col justify-between">
-                        <div class="relative z-10">
-                            <span class="bg-emerald-500/30 text-xs font-bold px-2.5 py-1 rounded-md uppercase text-emerald-300">New Arrival</span>
-                            <h3 class="text-2xl font-black mt-2">Royal Designer Panjabi</h3>
-                            <p class="text-emerald-200 text-xs mt-1">Premium Cotton Embroidery Work</p>
-                        </div>
-                        <div class="relative z-10 mt-4 flex justify-between items-end">
-                            <div>
-                                <span class="text-2xl font-black">৳2,450</span>
-                                <span class="text-xs text-emerald-300 line-through ml-2">৳3,200</span>
-                            </div>
-                            <button onclick="openProductModal(1)" class="bg-brand-500 text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-brand-600 transition shadow">View Details</button>
-                        </div>
-                        <i class="fa-solid fa-shirt absolute -bottom-4 -right-4 text-8xl opacity-15 text-white"></i>
-                    </div>
-                </div>
-            </section>
-
-            <section class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Explore Categories</h2>
-                        <p class="text-xs text-slate-500">Shop by genuine verified product categories</p>
-                    </div>
-                    <button onclick="toggleCategoryDrawer()" class="text-brand-600 font-bold text-xs hover:underline flex items-center gap-1">
-                        View All <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
-                </div>
-
-                <div id="category-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                    <!-- Categories injected via JS with inline SVGs -->
-                </div>
-            </section>
-
-            <section id="flash-sale-section" class="bg-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-2xl relative overflow-hidden">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 relative z-10">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-2xl bg-amber-400 text-slate-900 flex items-center justify-center font-black text-xl animate-pulse">
-                            ⚡
-                        </div>
-                        <div>
-                            <h2 class="text-2xl font-black tracking-tight flex items-center gap-2">
-                                FLASH SALE <span class="text-xs bg-rose-600 text-white font-bold px-2 py-0.5 rounded uppercase">Up to 50% OFF</span>
-                            </h2>
-                            <p class="text-xs text-slate-400">Limited quantities remaining at promotional pricing</p>
-                        </div>
-                    </div>
-
-                    <!-- Countdown Clock -->
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs text-slate-300 font-semibold mr-1">Ends In:</span>
-                        <div class="flex space-x-1 font-mono font-bold text-sm">
-                            <span id="timer-hours" class="bg-slate-800 text-amber-400 px-3 py-1.5 rounded-lg border border-slate-700">08</span> :
-                            <span id="timer-minutes" class="bg-slate-800 text-amber-400 px-3 py-1.5 rounded-lg border border-slate-700">42</span> :
-                            <span id="timer-seconds" class="bg-slate-800 text-amber-400 px-3 py-1.5 rounded-lg border border-slate-700">19</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Flash Sale Product Slider/Grid -->
-                <div id="flash-sale-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-                    <!-- Dynamic Flash Sale Items -->
-                </div>
-            </section>
-
-            <section class="space-y-6">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-                    <div>
-                        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Trending Products</h2>
-                        <p class="text-xs text-slate-500">Handpicked items with highest customer ratings</p>
-                    </div>
-
-                    <!-- Filter Tabs -->
-                    <div class="flex items-center space-x-2 overflow-x-auto pb-2 sm:pb-0">
-                        <button onclick="switchProductFilter('all')" class="product-tab-btn active px-4 py-2 rounded-xl text-xs font-bold transition bg-brand-600 text-white shadow" data-tab="all">All Products</button>
-                        <button onclick="switchProductFilter('featured')" class="product-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100" data-tab="featured">Featured</button>
-                        <button onclick="switchProductFilter('bestseller')" class="product-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100" data-tab="bestseller">Best Sellers</button>
-                        <button onclick="switchProductFilter('new')" class="product-tab-btn px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-slate-600 hover:bg-slate-100" data-tab="new">New Arrivals</button>
-                    </div>
-                </div>
-
-                <!-- Main Products Grid -->
-                <div id="main-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    <!-- Injected Products -->
-                </div>
-            </section>
-
-            <section class="bg-emerald-50/60 rounded-3xl p-8 border border-emerald-100">
-                <div class="text-center max-w-xl mx-auto mb-8">
-                    <span class="text-brand-600 font-extrabold text-xs uppercase tracking-widest">Customer Satisfaction</span>
-                    <h2 class="text-3xl font-extrabold text-slate-900 mt-1">Trusted By 50,000+ Buyers Across BD</h2>
-                    <p class="text-xs text-slate-500 mt-2">See what our verified customers say about product quality & delivery</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                        <div>
-                            <div class="flex text-amber-400 text-xs mb-3">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            </div>
-                            <p class="text-xs text-slate-600 italic leading-relaxed">"Order dynamic execution was so fast! Received my leather oxford shoes in Chittagong within 48 hours. Quality is 100% genuine."</p>
-                        </div>
-                        <div class="flex items-center space-x-3 mt-4 pt-4 border-t border-slate-100">
-                            <div class="w-9 h-9 rounded-full bg-brand-100 text-brand-700 font-bold flex items-center justify-center text-xs">TR</div>
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-800">Tariqur Rahman</h4>
-                                <span class="text-[10px] text-slate-400">Verified Buyer • Chittagong</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                        <div>
-                            <div class="flex text-amber-400 text-xs mb-3">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            </div>
-                            <p class="text-xs text-slate-600 italic leading-relaxed">"Panjabi cotton fabric quality and embroidery work is top notch for Eid. Packaging was secure and Cash on Delivery option gave peace of mind."</p>
-                        </div>
-                        <div class="flex items-center space-x-3 mt-4 pt-4 border-t border-slate-100">
-                            <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xs">SK</div>
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-800">Sharmin Khan</h4>
-                                <span class="text-[10px] text-slate-400">Verified Buyer • Dhaka</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                        <div>
-                            <div class="flex text-amber-400 text-xs mb-3">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
-                            </div>
-                            <p class="text-xs text-slate-600 italic leading-relaxed">"Awesome bKash instant checkout option and quick customer support via WhatsApp. Highly recommended marketplace in Bangladesh!"</p>
-                        </div>
-                        <div class="flex items-center space-x-3 mt-4 pt-4 border-t border-slate-100">
-                            <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">AH</div>
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-800">Arif Hossain</h4>
-                                <span class="text-[10px] text-slate-400">Verified Buyer • Sylhet</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Popular Brands -->
-            <section class="py-4">
-                <p class="text-center text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6">Partner Brands & Authentic Manufacturers</p>
-                <div class="flex flex-wrap items-center justify-center gap-8 opacity-70 grayscale hover:grayscale-0 transition-all">
-                    <span class="font-black text-xl text-slate-600 tracking-wider">APEX</span>
-                    <span class="font-black text-xl text-slate-600 tracking-wider">BATA</span>
-                    <span class="font-black text-xl text-slate-600 tracking-wider">BAY LEATHER</span>
-                    <span class="font-black text-xl text-slate-600 tracking-wider">AARONG</span>
-                    <span class="font-black text-xl text-slate-600 tracking-wider">LIFESTYLE</span>
-                    <span class="font-black text-xl text-slate-600 tracking-wider">CASIO</span>
-                </div>
-            </section>
-
-            <!-- Newsletter Box -->
-            <section class="bg-gradient-to-r from-brand-600 to-emerald-800 rounded-3xl p-8 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-                <div class="max-w-md">
-                    <span class="bg-amber-400 text-slate-900 text-[10px] font-black px-2.5 py-1 rounded uppercase">Get ৳200 Discount Voucher</span>
-                    <h3 class="text-3xl font-extrabold mt-3">Subscribe to BAZARO Mailer</h3>
-                    <p class="text-emerald-100 text-xs mt-2">Get secret flash sale codes, new arrival alerts, and weekly price drop notifications directly to your inbox.</p>
-                </div>
-                <form onsubmit="subscribeNewsletter(event)" class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
-                    <input type="email" id="newsletter-email" required placeholder="Enter your email address..." class="px-4 py-3.5 rounded-xl text-slate-800 text-sm focus:outline-none w-full sm:w-80 shadow">
-                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl text-sm transition shadow-lg shrink-0">Subscribe</button>
-                </form>
-            </section>
-        </div>
-
-        <!-- ================= PAGE 2: CATALOG / SEARCH RESULTS PAGE ================= -->
-        <div id="tab-catalog" class="hidden space-y-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <div>
-                    <h2 id="catalog-title" class="text-2xl font-extrabold text-slate-900">All Marketplace Products</h2>
-                    <p id="catalog-subtitle" class="text-xs text-slate-500">Showing all available products with instant filter options</p>
-                </div>
-
-                <!-- Sorting Dropdown -->
-                <div class="flex items-center space-x-3">
-                    <label class="text-xs font-semibold text-slate-500">Sort By:</label>
-                    <select id="catalog-sort-select" onchange="applyFiltersAndSort()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
-                        <option value="newest">Newest First</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
-                        <option value="bestselling">Best Selling</option>
-                        <option value="rating">Top Rated</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <!-- Filter Sidebar -->
-                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6 h-fit">
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <h3 class="font-extrabold text-sm text-slate-800 flex items-center gap-2"><i class="fa-solid fa-filter text-brand-600"></i> Filters</h3>
-                        <button onclick="resetFilters()" class="text-xs text-rose-600 hover:underline font-semibold">Reset All</button>
-                    </div>
-
-                    <!-- Category Filter -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Category</label>
-                        <select id="filter-category" onchange="applyFiltersAndSort()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700">
-                            <option value="all">All Categories</option>
-                            <!-- Injected dynamically -->
-                        </select>
-                    </div>
-
-                    <!-- Price Filter Slider -->
-                    <div>
-                        <div class="flex justify-between items-center text-xs font-bold text-slate-700 mb-2">
-                            <span>Max Price:</span>
-                            <span id="price-limit-display" class="text-brand-600">৳10,000</span>
-                        </div>
-                        <input type="range" id="filter-price-range" min="100" max="10000" step="100" value="10000" oninput="updatePriceRangeDisplay(this.value)" onchange="applyFiltersAndSort()" class="w-full accent-brand-600">
-                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-                            <span>৳100</span>
-                            <span>৳10,000</span>
-                        </div>
-                    </div>
-
-                    <!-- Brand Filter -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Brand</label>
-                        <select id="filter-brand" onchange="applyFiltersAndSort()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700">
-                            <option value="all">All Brands</option>
-                        </select>
-                    </div>
-
-                    <!-- Stock Status -->
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Availability</label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-600 cursor-pointer">
-                            <input type="checkbox" id="filter-in-stock" onchange="applyFiltersAndSort()" class="rounded text-brand-600 focus:ring-brand-500">
-                            <span>In Stock Only</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Products Grid -->
-                <div class="lg:col-span-3">
-                    <div id="catalog-products-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
-                        <!-- Filtered items injected -->
-                    </div>
-                    <div id="no-products-msg" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-100">
-                        <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3"></i>
-                        <h3 class="text-lg font-bold text-slate-700">No matching products found</h3>
-                        <p class="text-xs text-slate-400 mt-1">Try adjusting your category or price range filters</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 3: CHECKOUT PAGE ================= -->
-        <div id="tab-checkout" class="hidden space-y-6">
-            <div class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
-                <a href="javascript:void(0)" onclick="switchTab('home')" class="hover:underline">Home</a>
-                <span>/</span>
-                <span class="text-slate-800 font-bold">Checkout</span>
-            </div>
-
-            <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Complete Your Order</h2>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <!-- Delivery Details Form -->
-                <div class="lg:col-span-7 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                    <h3 class="text-lg font-extrabold text-slate-800 border-b border-slate-100 pb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-truck-ramps text-brand-600"></i> Delivery Address Details
-                    </h3>
-
-                    <form id="checkout-form" onsubmit="submitOrder(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Customer Full Name *</label>
-                                <input type="text" id="cust-name" required placeholder="e.g. Rahim Uddin" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-brand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Mobile Phone Number *</label>
-                                <input type="tel" id="cust-phone" required placeholder="017XXXXXXXX" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-brand-500">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Alternative Phone Number</label>
-                                <input type="tel" id="cust-alt-phone" placeholder="Optional relative contact" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-brand-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Email Address (Optional)</label>
-                                <input type="email" id="cust-email" placeholder="for order confirmation mail" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:outline-none focus:border-brand-500">
-                            </div>
-                        </div>
-
-                        <!-- Division / District / Upazila selects -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Division *</label>
-                                <select id="cust-division" onchange="handleDivisionChange()" required class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                                    <option value="">Select Division</option>
-                                    <option value="Dhaka">Dhaka</option>
-                                    <option value="Chittagong">Chittagong</option>
-                                    <option value="Rajshahi">Rajshahi</option>
-                                    <option value="Sylhet">Sylhet</option>
-                                    <option value="Khulna">Khulna</option>
-                                    <option value="Barisal">Barisal</option>
-                                    <option value="Rangpur">Rangpur</option>
-                                    <option value="Mymensingh">Mymensingh</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">District *</label>
-                                <input type="text" id="cust-district" required placeholder="e.g. Gazipur / Mirpur" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Upazila / Thana *</label>
-                                <input type="text" id="cust-upazila" required placeholder="e.g. Uttara / Savar" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Full Delivery Address *</label>
-                            <textarea id="cust-address" rows="2" required placeholder="House No, Road No, Area / Village name..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Delivery Notes / Instructions</label>
-                            <input type="text" id="cust-notes" placeholder="e.g. Call before delivery, deliver in afternoon" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                        </div>
-
-                        <div class="pt-4 border-t border-slate-100">
-                            <h3 class="text-base font-extrabold text-slate-800 mb-3 flex items-center gap-2">
-                                <i class="fa-solid fa-credit-card text-brand-600"></i> Select Payment Method
-                            </h3>
-
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <label class="border-2 border-brand-500 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer bg-brand-50/40 payment-radio">
-                                    <input type="radio" name="payment_method" value="COD" checked onchange="togglePaymentFields('COD')" class="hidden">
-                                    <i class="fa-solid fa-hand-holding-dollar text-2xl text-brand-600 mb-1"></i>
-                                    <span class="text-xs font-bold text-slate-800">Cash On Delivery</span>
-                                </label>
-
-                                <label class="border-2 border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer hover:border-pink-500 bg-white payment-radio">
-                                    <input type="radio" name="payment_method" value="bKash" onchange="togglePaymentFields('bKash')" class="hidden">
-                                    <span class="text-xs font-black text-pink-600 text-lg mb-1">bKash</span>
-                                    <span class="text-[10px] text-slate-500">Bkash Mobile</span>
-                                </label>
-
-                                <label class="border-2 border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer hover:border-orange-500 bg-white payment-radio">
-                                    <input type="radio" name="payment_method" value="Nagad" onchange="togglePaymentFields('Nagad')" class="hidden">
-                                    <span class="text-xs font-black text-orange-600 text-lg mb-1">Nagad</span>
-                                    <span class="text-[10px] text-slate-500">Nagad Pay</span>
-                                </label>
-
-                                <label class="border-2 border-slate-200 rounded-2xl p-3 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 bg-white payment-radio">
-                                    <input type="radio" name="payment_method" value="Rocket" onchange="togglePaymentFields('Rocket')" class="hidden">
-                                    <span class="text-xs font-black text-purple-600 text-lg mb-1">Rocket</span>
-                                    <span class="text-[10px] text-slate-500">DBBL Rocket</span>
-                                </label>
-                            </div>
-
-                            <!-- MFS TxID Input Subform -->
-                            <div id="mfs-details-box" class="hidden mt-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs space-y-2">
-                                <p class="font-bold text-amber-900">Please send payment to our official merchant account:</p>
-                                <p class="font-mono text-sm font-bold text-slate-800">Merchant Personal: <span class="text-brand-700">01700-000000</span></p>
-                                <div>
-                                    <label class="block font-bold text-slate-700 mt-2">Enter Transaction ID (TxID) *</label>
-                                    <input type="text" id="mfs-txid" placeholder="e.g. 9J8A7K2M" class="w-full mt-1 px-3 py-2 rounded-xl border border-amber-300 bg-white text-xs uppercase font-mono">
-                                </div>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="w-full mt-6 bg-brand-600 hover:bg-brand-700 text-white font-extrabold py-4 rounded-2xl text-base shadow-lg transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-lock text-sm"></i> Confirm & Place Order Now
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Order Summary Side Card -->
-                <div class="lg:col-span-5 space-y-4">
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                        <h3 class="text-lg font-extrabold text-slate-800 border-b border-slate-100 pb-3">Order Summary</h3>
-
-                        <div id="checkout-cart-items" class="space-y-3 max-h-72 overflow-y-auto pr-2 divide-y divide-slate-100">
-                            <!-- Items Injected -->
-                        </div>
-
-                        <!-- Coupon Code -->
-                        <div class="pt-3 border-t border-slate-100">
-                            <div class="flex gap-2">
-                                <input type="text" id="coupon-code-input" uppercase placeholder="Coupon Code (e.g. BAZARO10)" class="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs uppercase font-mono">
-                                <button onclick="applyCoupon()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs">Apply</button>
-                            </div>
-                            <p id="coupon-status-msg" class="text-[11px] mt-1 font-semibold"></p>
-                        </div>
-
-                        <!-- Calculation breakdown -->
-                        <div class="space-y-2 pt-3 border-t border-slate-100 text-xs">
-                            <div class="flex justify-between text-slate-600">
-                                <span>Subtotal</span>
-                                <span id="checkout-subtotal" class="font-bold text-slate-800">৳0</span>
-                            </div>
-                            <div class="flex justify-between text-slate-600">
-                                <span>Delivery Charge (<span id="delivery-location-label">Inside Dhaka</span>)</span>
-                                <span id="checkout-delivery" class="font-bold text-slate-800">৳60</span>
-                            </div>
-                            <div class="flex justify-between text-emerald-600">
-                                <span>Discount</span>
-                                <span id="checkout-discount" class="font-bold">-৳0</span>
-                            </div>
-                            <div class="flex justify-between text-base font-black text-slate-900 pt-3 border-t border-slate-200">
-                                <span>Total Payable</span>
-                                <span id="checkout-total" class="text-brand-600">৳0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Trust Badges -->
-                    <div class="bg-slate-100/70 p-4 rounded-2xl text-slate-600 text-xs space-y-2">
-                        <div class="flex items-center gap-2 font-bold text-slate-800">
-                            <i class="fa-solid fa-shield-check text-brand-600 text-base"></i> 100% Genuine & Secure Marketplace
-                        </div>
-                        <p class="text-[11px] leading-relaxed">Easy 7 days return policy on manufacturing defect products. Inspect your product during cash on delivery.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 4: USER PROFILE & ORDERS PAGE ================= -->
-        <div id="tab-profile" class="hidden space-y-6">
-            <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center space-x-4">
-                    <div class="w-16 h-16 rounded-2xl bg-brand-600 text-white font-black text-2xl flex items-center justify-center shadow-lg" id="profile-avatar">
-                        U
-                    </div>
-                    <div>
-                        <h2 id="profile-name-heading" class="text-xl font-black text-slate-900">Guest User</h2>
-                        <p id="profile-phone-sub" class="text-xs text-slate-500">Not logged in</p>
-                    </div>
-                </div>
-                <button onclick="handleAuthAction()" id="profile-auth-btn" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs">Login / Register Account</button>
-            </div>
-
-            <!-- Profile Tabs -->
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                <!-- Navigation Submenu -->
-                <div class="md:col-span-3 space-y-2">
-                    <button onclick="switchProfileSubTab('orders')" class="profile-nav-btn active w-full text-left px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between bg-brand-600 text-white shadow" data-sub="orders">
-                        <span><i class="fa-solid fa-box me-2"></i> My Orders</span>
-                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
-                    <button onclick="switchProfileSubTab('addresses')" class="profile-nav-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between bg-white text-slate-700 hover:bg-slate-100" data-sub="addresses">
-                        <span><i class="fa-solid fa-address-book me-2"></i> Saved Addresses</span>
-                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
-                    <button onclick="switchProfileSubTab('details')" class="profile-nav-btn w-full text-left px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between bg-white text-slate-700 hover:bg-slate-100" data-sub="details">
-                        <span><i class="fa-solid fa-user-gear me-2"></i> Account Details</span>
-                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                    </button>
-                </div>
-
-                <!-- Subtab Content -->
-                <div class="md:col-span-9 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                    
-                    <div id="profile-sub-orders" class="space-y-4">
-                        <h3 class="text-lg font-extrabold text-slate-800 border-b border-slate-100 pb-3">My Order History</h3>
-                        <div id="user-orders-list" class="space-y-4">
-                            <!-- Injected dynamically -->
-                        </div>
-                    </div>
-
-                    <!-- Addresses Tab -->
-                    <div id="profile-sub-addresses" class="hidden space-y-4">
-                        <h3 class="text-lg font-extrabold text-slate-800 border-b border-slate-100 pb-3">Saved Shipping Address</h3>
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
-                            <p class="font-bold text-slate-800" id="saved-addr-name">Rahim Uddin</p>
-                            <p class="text-slate-600" id="saved-addr-full">House 42, Road 11, Block D, Mirpur 10, Dhaka</p>
-                            <p class="text-slate-500">Phone: <span id="saved-addr-phone">+8801700000000</span></p>
-                        </div>
-                    </div>
-
-                    <!-- Account Details Tab -->
-                    <div id="profile-sub-details" class="hidden space-y-4">
-                        <h3 class="text-lg font-extrabold text-slate-800 border-b border-slate-100 pb-3">Edit Profile Info</h3>
-                        <form onsubmit="saveUserProfile(event)" class="space-y-3 max-w-md">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
-                                <input type="text" id="profile-edit-name" value="Rahim Uddin" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
-                                <input type="tel" id="profile-edit-phone" value="01700000000" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                            <button type="submit" class="bg-brand-600 text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-brand-700">Save Changes</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 5: ORDER TRACKING PAGE ================= -->
-        <div id="tab-tracking" class="hidden max-w-2xl mx-auto space-y-6">
-            <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center space-y-4">
-                <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-600 flex items-center justify-center mx-auto text-xl">
-                    <i class="fa-solid fa-truck-fast"></i>
-                </div>
-                <h2 class="text-2xl font-black text-slate-900">Track Your Order Status</h2>
-                <p class="text-xs text-slate-500 max-w-sm mx-auto">Enter your Order ID (e.g., BZR-982341) and Phone Number to see live dispatch updates.</p>
-
-                <form onsubmit="handleOrderTrackSubmit(event)" class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto pt-2">
-                    <input type="text" id="track-order-id" required uppercase placeholder="Order ID (BZR-XXXXXX)" class="px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs flex-1 uppercase">
-                    <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition">Track Order</button>
-                </form>
-            </div>
-
-            <!-- Tracking Result Box -->
-            <div id="tracking-result-card" class="hidden bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-                    <div>
-                        <span class="text-[10px] uppercase font-bold text-brand-600 tracking-wider">Order Found</span>
-                        <h3 id="track-result-id" class="text-xl font-black text-slate-900">BZR-982341</h3>
-                    </div>
-                    <span id="track-result-status-badge" class="bg-amber-100 text-amber-800 text-xs font-extrabold px-3 py-1 rounded-full">Packed</span>
-                </div>
-
-                <div class="py-4">
-                    <div class="relative flex items-center justify-between max-w-md mx-auto">
-                        <!-- Connecting Line -->
-                        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 z-0"></div>
-                        <div id="track-progress-bar" class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-brand-600 z-0 transition-all duration-500" style="width: 60%;"></div>
-
-                        <!-- Step 1 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="step-circle w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center">✓</div>
-                            <span class="text-[10px] font-bold text-slate-700 mt-2">Placed</span>
-                        </div>
-                        <!-- Step 2 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="step-circle w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center">✓</div>
-                            <span class="text-[10px] font-bold text-slate-700 mt-2">Confirmed</span>
-                        </div>
-                        <!-- Step 3 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="step-circle w-8 h-8 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center">✓</div>
-                            <span class="text-[10px] font-bold text-slate-700 mt-2">Packed</span>
-                        </div>
-                        <!-- Step 4 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="step-circle w-8 h-8 rounded-full bg-slate-200 text-slate-500 text-xs font-bold flex items-center justify-center">4</div>
-                            <span class="text-[10px] font-bold text-slate-400 mt-2">Shipped</span>
-                        </div>
-                        <!-- Step 5 -->
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="step-circle w-8 h-8 rounded-full bg-slate-200 text-slate-500 text-xs font-bold flex items-center justify-center">5</div>
-                            <span class="text-[10px] font-bold text-slate-400 mt-2">Delivered</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-2">
-                    <p class="font-bold text-slate-800">Estimated Delivery: <span id="track-est-date" class="text-brand-600">October 10, 2026</span></p>
-                    <p class="text-slate-500">Shipping to: <span id="track-dest-address">Uttara, Dhaka</span></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 6: WISHLIST PAGE ================= -->
-        <div id="tab-wishlist" class="hidden space-y-6">
-            <div class="flex items-center justify-between bg-white p-6 rounded-2xl border border-slate-200">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-slate-900">My Saved Wishlist</h2>
-                    <p class="text-xs text-slate-500">Save your favorite marketplace items to order later</p>
-                </div>
-                <button onclick="clearWishlist()" class="text-xs font-bold text-rose-600 hover:underline">Clear Wishlist</button>
-            </div>
-
-            <div id="wishlist-products-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                <!-- Wishlist Items Injected -->
-            </div>
-            
-            <div id="empty-wishlist-msg" class="hidden text-center py-16 bg-white rounded-2xl border border-slate-100">
-                <i class="fa-regular fa-heart text-5xl text-slate-300 mb-3"></i>
-                <h3 class="text-lg font-bold text-slate-700">Your Wishlist is Empty</h3>
-                <p class="text-xs text-slate-400 mt-1">Click the heart icon on any product to save it here</p>
-            </div>
-        </div>
-
-        <!-- ================= PAGE 7: FULL ADMIN CONTROL PANEL ================= -->
-        <div id="tab-admin" class="hidden space-y-6">
-            <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-500 text-slate-900 font-black text-2xl flex items-center justify-center">
-                        <i class="fa-solid fa-shield-halved"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-black tracking-tight">BAZARO Admin Portal</h2>
-                        <p class="text-xs text-slate-400">Complete store management without writing code</p>
-                    </div>
-                </div>
-
-                <!-- Admin Tab Switcher Buttons -->
-                <div class="flex items-center space-x-1 bg-slate-800 p-1.5 rounded-2xl overflow-x-auto">
-                    <button onclick="switchAdminSubTab('overview')" class="admin-tab-btn active px-3.5 py-2 rounded-xl text-xs font-bold transition bg-brand-600 text-white" data-admin="overview">Overview</button>
-                    <button onclick="switchAdminSubTab('products')" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-300 hover:text-white" data-admin="products">Products</button>
-                    <button onclick="switchAdminSubTab('categories')" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-300 hover:text-white" data-admin="categories">Categories</button>
-                    <button onclick="switchAdminSubTab('orders')" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-300 hover:text-white" data-admin="orders">Orders</button>
-                    <button onclick="switchAdminSubTab('settings')" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-slate-300 hover:text-white" data-admin="settings">Settings</button>
-                    <button onclick="switchAdminSubTab('db')" class="admin-tab-btn px-3.5 py-2 rounded-xl text-xs font-bold transition text-amber-400 hover:text-amber-300" data-admin="db">Database Schema</button>
-                </div>
-            </div>
-
-            <!-- ADMIN SUBTAB 1: OVERVIEW -->
-            <div id="admin-sub-overview" class="space-y-6">
-                <!-- Statistics Metric Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Sales</span>
-                            <h3 id="stat-total-sales" class="text-2xl font-black text-slate-900 mt-1">৳142,500</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-bangladeshi-taka-sign"></i>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Orders</span>
-                            <h3 id="stat-total-orders" class="text-2xl font-black text-slate-900 mt-1">48</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-cart-flatbed"></i>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Active Products</span>
-                            <h3 id="stat-total-products" class="text-2xl font-black text-slate-900 mt-1">16</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-boxes-stacked"></i>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between">
-                        <div>
-                            <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Low Stock Warning</span>
-                            <h3 id="stat-low-stock" class="text-2xl font-black text-rose-600 mt-1">2 Items</h3>
-                        </div>
-                        <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Orders Table Preview -->
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                    <h3 class="font-extrabold text-lg text-slate-800">Recent Customer Orders</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
-                                    <th class="p-3">Order ID</th>
-                                    <th class="p-3">Customer</th>
-                                    <th class="p-3">Phone</th>
-                                    <th class="p-3">Total</th>
-                                    <th class="p-3">Payment</th>
-                                    <th class="p-3">Status</th>
-                                    <th class="p-3 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-recent-orders-table" class="divide-y divide-slate-100">
-                                <!-- Injected -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ADMIN SUBTAB 2: PRODUCT MANAGEMENT -->
-            <div id="admin-sub-products" class="hidden space-y-6">
-                <div class="flex justify-between items-center bg-white p-6 rounded-3xl border border-slate-200">
-                    <h3 class="text-lg font-extrabold text-slate-800">Product Catalog Management</h3>
-                    <button onclick="openAddProductModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Add New Product
-                    </button>
-                </div>
-
-                <!-- Admin Products Table -->
-                <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
-                                    <th class="p-3">Item</th>
-                                    <th class="p-3">Category</th>
-                                    <th class="p-3">Price</th>
-                                    <th class="p-3">Stock</th>
-                                    <th class="p-3">Tags</th>
-                                    <th class="p-3 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-products-table" class="divide-y divide-slate-100">
-                                <!-- Injected -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ADMIN SUBTAB 3: CATEGORY MANAGEMENT -->
-            <div id="admin-sub-categories" class="hidden space-y-6">
-                <div class="flex justify-between items-center bg-white p-6 rounded-3xl border border-slate-200">
-                    <h3 class="text-lg font-extrabold text-slate-800">Categories System (14 Default Categories)</h3>
-                    <button onclick="openAddCategoryModal()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Add Category
-                    </button>
-                </div>
-
-                <div id="admin-categories-list-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    <!-- Dynamic categories list -->
-                </div>
-            </div>
-
-            <!-- ADMIN SUBTAB 4: ORDERS MANAGEMENT -->
-            <div id="admin-sub-orders" class="hidden space-y-6">
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                    <h3 class="font-extrabold text-lg text-slate-800">All Marketplace Customer Orders</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead>
-                                <tr class="bg-slate-50 text-slate-500 font-bold uppercase border-b border-slate-200">
-                                    <th class="p-3">Order ID</th>
-                                    <th class="p-3">Date</th>
-                                    <th class="p-3">Customer Details</th>
-                                    <th class="p-3">Division</th>
-                                    <th class="p-3">Total Amount</th>
-                                    <th class="p-3">Method / TxID</th>
-                                    <th class="p-3">Status</th>
-                                    <th class="p-3 text-right">Change Status / Print</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-all-orders-table" class="divide-y divide-slate-100">
-                                <!-- Injected -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="admin-sub-settings" class="hidden space-y-6">
-                <div class="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                    <div>
-                        <h3 class="text-xl font-extrabold text-slate-800">Website & Marketplace Branding Settings</h3>
-                        <p class="text-xs text-slate-500">Update store name, contact channels, charges, and homepage banners instantly without code editing!</p>
-                    </div>
-
-                    <form onsubmit="saveSiteSettings(event)" class="space-y-6 max-w-3xl">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Website Name</label>
-                                <input type="text" id="setting-site-name" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Official WhatsApp Phone Number</label>
-                                <input type="text" id="setting-wa-num" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Support Email</label>
-                                <input type="email" id="setting-email" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Facebook Page URL</label>
-                                <input type="url" id="setting-fb-link" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Delivery Charge Inside Dhaka (৳)</label>
-                                <input type="number" id="setting-charge-dhaka" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">Delivery Charge Outside Dhaka (৳)</label>
-                                <input type="number" id="setting-charge-outside" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Office / Warehouse Address</label>
-                            <input type="text" id="setting-office-address" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Homepage Hero Banner Image URL</label>
-                            <input type="url" id="setting-banner-url" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                        </div>
-
-                        <button type="submit" class="bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-6 py-3 rounded-2xl text-xs transition shadow-md">
-                            Save Site Settings Now
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- ADMIN SUBTAB 5: DATABASE READY SCHEMA EXPORTER -->
-            <div id="admin-sub-db" class="hidden space-y-6">
-                <div class="bg-slate-900 text-slate-200 p-6 md:p-8 rounded-3xl shadow-xl space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h3 class="text-xl font-mono font-bold text-amber-400">Database Schema Inspector & JSON Data Backup</h3>
-                            <p class="text-xs text-slate-400">Structured tables: users, products, categories, orders, order_items, payments, reviews, wishlists, coupons, settings</p>
-                        </div>
-                        <button onclick="exportDatabaseJSON()" class="bg-amber-400 text-slate-900 hover:bg-amber-300 font-extrabold text-xs px-4 py-2.5 rounded-xl flex items-center gap-2">
-                            <i class="fa-solid fa-download"></i> Download Full DB Export (.json)
-                        </button>
-                    </div>
-
-                    <pre id="db-json-viewer" class="bg-slate-950 p-4 rounded-2xl text-[11px] font-mono text-emerald-400 overflow-x-auto max-h-96 border border-slate-800">
-                    </pre>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <footer class="bg-slate-900 text-white pt-12 pb-24 md:pb-12 mt-16 border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 text-xs">
-                
-                <!-- About & Logo -->
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white font-black text-xl shadow">B</div>
-                        <span id="footer-site-name" class="font-extrabold text-2xl tracking-tight text-white">BAZARO</span>
-                    </div>
-                    <p id="footer-about-text" class="text-slate-400 leading-relaxed max-w-sm">
-                        BAZARO is Bangladesh's premier authentic marketplace platform offering handcrafted leather goods, traditional wear, electronics, and daily essentials with cash on delivery & fast shipping.
-                    </p>
-                    <div class="flex items-center space-x-3 text-slate-400">
-                        <a id="footer-fb-link" href="#" target="_blank" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-600 hover:text-white transition"><i class="fa-brands fa-facebook-f"></i></a>
-                        <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-600 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-brand-600 hover:text-white transition"><i class="fa-brands fa-youtube"></i></a>
-                    </div>
-                </div>
-
-                <!-- Quick Links -->
-                <div class="space-y-3">
-                    <h4 class="font-extrabold text-sm text-slate-200 uppercase tracking-wider">Customer Care</h4>
-                    <ul class="space-y-2 text-slate-400">
-                        <li><a href="javascript:void(0)" onclick="switchTab('tracking')" class="hover:text-brand-500">Track Order</a></li>
-                        <li><a href="javascript:void(0)" onclick="switchTab('profile')" class="hover:text-brand-500">My Account</a></li>
-                        <li><a href="javascript:void(0)" onclick="switchTab('wishlist')" class="hover:text-brand-500">Saved Wishlist</a></li>
-                        <li><a href="#" class="hover:text-brand-500">Return & Refund Policy</a></li>
-                    </ul>
-                </div>
-
-                <!-- Top Categories Footer -->
-                <div class="space-y-3">
-                    <h4 class="font-extrabold text-sm text-slate-200 uppercase tracking-wider">Popular Collections</h4>
-                    <ul class="space-y-2 text-slate-400">
-                        <li><a href="javascript:void(0)" onclick="filterByCategory('Leather')" class="hover:text-brand-500">Genuine Leather Goods</a></li>
-                        <li><a href="javascript:void(0)" onclick="filterByCategory('Panjabi')" class="hover:text-brand-500">Designer Panjabi</a></li>
-                        <li><a href="javascript:void(0)" onclick="filterByCategory('Shoes')" class="hover:text-brand-500">Oxford & Formal Shoes</a></li>
-                        <li><a href="javascript:void(0)" onclick="filterByCategory('Wallet')" class="hover:text-brand-500">Cowhide Wallets</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact & Office -->
-                <div class="space-y-3">
-                    <h4 class="font-extrabold text-sm text-slate-200 uppercase tracking-wider">Corporate Info</h4>
-                    <p class="text-slate-400"><i class="fa-solid fa-location-dot me-1 text-brand-500"></i> <span id="footer-office-text">Level 4, BAZARO Tower, Gulshan-2, Dhaka 1212</span></p>
-                    <p class="text-slate-400"><i class="fa-solid fa-envelope me-1 text-brand-500"></i> <span id="footer-email-text">support@bazaro.com.bd</span></p>
-                    <p class="text-slate-400"><i class="fa-brands fa-whatsapp me-1 text-brand-500"></i> <span id="footer-wa-text">+880 1700-000000</span></p>
-                </div>
-            </div>
-
-            <!-- Accepted Payment Gateways -->
-            <div class="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-                <p>&copy; 2026 BAZARO Marketplace Bangladesh. All rights reserved.</p>
-                <div class="flex items-center space-x-3">
-                    <span class="font-bold text-slate-400">Supported Payments:</span>
-                    <span class="bg-slate-800 text-pink-500 font-bold px-2 py-1 rounded">bKash</span>
-                    <span class="bg-slate-800 text-orange-500 font-bold px-2 py-1 rounded">Nagad</span>
-                    <span class="bg-slate-800 text-purple-500 font-bold px-2 py-1 rounded">Rocket</span>
-                    <span class="bg-slate-800 text-emerald-400 font-bold px-2 py-1 rounded">Cash On Delivery</span>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-2 px-4 z-40 flex justify-between items-center text-[10px] font-bold text-slate-500 shadow-lg">
-        <button onclick="switchTab('home')" class="mobile-nav-btn active flex flex-col items-center gap-1 text-brand-600" data-mobile="home">
-            <i class="fa-solid fa-house text-lg"></i>
-            <span>Home</span>
-        </button>
-        <button onclick="switchTab('catalog')" class="mobile-nav-btn flex flex-col items-center gap-1 hover:text-brand-600" data-mobile="catalog">
-            <i class="fa-solid fa-magnifying-glass text-lg"></i>
-            <span>Search</span>
-        </button>
-        <button onclick="switchTab('wishlist')" class="mobile-nav-btn flex flex-col items-center gap-1 hover:text-brand-600 relative" data-mobile="wishlist">
-            <i class="fa-regular fa-heart text-lg"></i>
-            <span>Wishlist</span>
-        </button>
-        <button onclick="switchTab('tracking')" class="mobile-nav-btn flex flex-col items-center gap-1 hover:text-brand-600" data-mobile="tracking">
-            <i class="fa-solid fa-truck-fast text-lg"></i>
-            <span>Orders</span>
-        </button>
-        <button onclick="switchTab('profile')" class="mobile-nav-btn flex flex-col items-center gap-1 hover:text-brand-600" data-mobile="profile">
-            <i class="fa-regular fa-user text-lg"></i>
-            <span>Account</span>
-        </button>
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+      <select id="sortFilter" onchange="filterProducts()">
+        <option value="newest">সর্বশেষ প্রোডাক্ট (Newest)</option>
+        <option value="price-low">দাম: কম থেকে বেশি</option>
+        <option value="price-high">দাম: বেশি থেকে কম</option>
+      </select>
     </div>
 
-
-    <!-- SLIDE-OVER CART DRAWER -->
-    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
-        <div class="drawer-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleCartDrawer()"></div>
-        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div class="drawer-content w-screen max-w-md bg-white shadow-2xl flex flex-col">
-                <div class="p-6 bg-slate-900 text-white flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-bag-shopping text-brand-500 text-xl"></i>
-                        <h2 class="text-lg font-extrabold">Your Shopping Bag</h2>
-                    </div>
-                    <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-
-                <div id="cart-drawer-items" class="flex-1 overflow-y-auto p-6 space-y-4 divide-y divide-slate-100">
-                    <!-- Dynamic Cart Items -->
-                </div>
-
-                <div class="p-6 bg-slate-50 border-t border-slate-200 space-y-4">
-                    <div class="flex justify-between items-center text-sm font-bold text-slate-800">
-                        <span>Subtotal:</span>
-                        <span id="cart-drawer-subtotal" class="text-xl font-black text-brand-600">৳0</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Shipping & delivery charges calculated during checkout.</p>
-                    <button onclick="goToCheckout()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-extrabold py-3.5 rounded-2xl text-sm transition shadow-lg flex items-center justify-center gap-2">
-                        Proceed To Checkout <i class="fa-solid fa-arrow-right text-xs"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <!-- PRODUCTS GRID -->
+    <div class="section-title"><i class="fas fa-fire"></i> সব প্রোডাক্ট</div>
+    <div class="products-grid" id="productsContainer">
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--gray);">প্রোডাক্ট লোড হচ্ছে...</div>
     </div>
+  </div>
 
-    <!-- CATEGORIES MEGA MENU DRAWER -->
-    <div id="category-drawer" class="fixed inset-0 z-50 overflow-hidden hidden">
-        <div class="drawer-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleCategoryDrawer()"></div>
-        <div class="fixed inset-y-0 left-0 max-w-full flex pr-10">
-            <div class="drawer-content w-screen max-w-sm bg-white shadow-2xl flex flex-col">
-                <div class="p-6 bg-brand-600 text-white flex items-center justify-between">
-                    <h2 class="text-lg font-extrabold flex items-center gap-2"><i class="fa-solid fa-grid-2"></i> All Categories</h2>
-                    <button onclick="toggleCategoryDrawer()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                </div>
-                <div id="category-drawer-list" class="flex-1 overflow-y-auto p-4 space-y-1">
-                    <!-- Category list items with icons -->
-                </div>
-            </div>
+  <!-- CHECKOUT & CART MODAL -->
+  <div class="modal" id="cartModal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeCartModal()">&times;</span>
+      <h3 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-shopping-bag"></i> শপিং কার্ট ও চেকআউট</h3>
+      
+      <div id="cartItemsContainer"></div>
+
+      <hr style="border-color:#2d3748; margin: 15px 0;">
+
+      <!-- ORDER FORM -->
+      <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
+        <h4 style="margin-bottom:10px; color:#fff;">শিপিং তথ্য (Customer Order Form)</h4>
+        
+        <div class="form-group">
+          <label>গ্রাহকের নাম *</label>
+          <input type="text" id="custName" required placeholder="আপনার নাম লিখুন">
         </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label>মোবাইল নম্বর *</label>
+            <input type="tel" id="custPhone" required placeholder="017XXXXXXXX">
+          </div>
+          <div class="form-group">
+            <label>বিকল্প নম্বর (Optional)</label>
+            <input type="tel" id="custAltPhone" placeholder="018XXXXXXXX">
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+          <div class="form-group">
+            <label>বিভাগ *</label>
+            <input type="text" id="custDivision" required placeholder="যেমন: ঢাকা">
+          </div>
+          <div class="form-group">
+            <label>জেলা *</label>
+            <input type="text" id="custDistrict" required placeholder="যেমন: ফেনী">
+          </div>
+          <div class="form-group">
+            <label>উপজেলা *</label>
+            <input type="text" id="custUpazila" required placeholder="যেমন: পরশুরাম">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>সম্পূর্ণ ঠিকানা *</label>
+          <textarea id="custAddress" rows="2" required placeholder="গ্রাম/হাউস নম্বর, রোড নম্বর..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>পেমেন্ট মেথড *</label>
+          <select id="payMethod">
+            <option value="COD">Cash on Delivery (ক্যাশ অন ডেলিভারি)</option>
+            <option value="bKash">bKash (বিকাশ)</option>
+            <option value="Nagad">Nagad (নগদ)</option>
+            <option value="Rocket">Rocket (রকেট)</option>
+          </select>
+        </div>
+
+        <div style="background:#0b132b; padding:12px; border-radius:8px; margin-top:15px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>সাবটোটাল:</span><span id="summarySubtotal">৳ 0</span></div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>ডেলিভারি চার্জ:</span><span id="summaryDelivery">৳ 60</span></div>
+          <hr style="border-color:#2d3748; margin: 5px 0;">
+          <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px; color:var(--primary);"><span>সর্বমোট:</span><span id="summaryTotal">৳ 60</span></div>
+        </div>
+
+        <button type="submit" class="btn-add-cart" style="padding:12px; font-size:16px; margin-top:15px;">অর্ডার নিশ্চিত করুন</button>
+      </form>
     </div>
+  </div>
 
-    <div id="product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity bg-slate-900/70 backdrop-blur-sm" onclick="closeProductModal()"></div>
-            
-            <div class="inline-block w-full max-w-4xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white rounded-3xl shadow-2xl relative z-10">
-                <button onclick="closeProductModal()" class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 p-6 md:p-8">
-                    <!-- Image Gallery Column -->
-                    <div class="md:col-span-6 space-y-4">
-                        <div class="aspect-square rounded-2xl bg-slate-100 overflow-hidden border border-slate-200 relative">
-                            <img id="modal-main-img" src="" alt="Product" class="w-full h-full object-cover">
-                            <span id="modal-badge-tag" class="absolute top-3 left-3 bg-amber-400 text-slate-900 font-extrabold text-[10px] px-2.5 py-1 rounded-md uppercase">Flash Sale</span>
-                        </div>
-                        <div id="modal-thumbnails" class="flex space-x-2 overflow-x-auto pb-1">
-                            <!-- Thumbnails injected -->
-                        </div>
-                    </div>
-
-                    <!-- Details Column -->
-                    <div class="md:col-span-6 space-y-4 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center space-x-2 text-xs text-slate-400 mb-1">
-                                <span id="modal-brand" class="font-bold text-brand-600">Apex Leather</span>
-                                <span>•</span>
-                                <span id="modal-category">Leather</span>
-                            </div>
-                            <h2 id="modal-title" class="text-2xl font-black text-slate-900 leading-tight">Genuine Leather Men's Oxford Shoe</h2>
-                            
-                            <!-- Rating -->
-                            <div class="flex items-center space-x-2 mt-2">
-                                <div id="modal-stars" class="flex text-amber-400 text-xs"></div>
-                                <span id="modal-rating-num" class="text-xs font-bold text-slate-700">4.9</span>
-                                <span class="text-[11px] text-slate-400">(<span id="modal-reviews-count">28</span> customer reviews)</span>
-                            </div>
-
-                            <!-- Price Breakdown -->
-                            <div class="mt-4 flex items-baseline space-x-3">
-                                <span id="modal-price" class="text-3xl font-black text-slate-900">৳3,450</span>
-                                <span id="modal-old-price" class="text-sm font-semibold text-slate-400 line-through">৳4,800</span>
-                                <span id="modal-discount-tag" class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">28% OFF</span>
-                            </div>
-
-                            <!-- Variants: Size & Color -->
-                            <div class="mt-5 space-y-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Select Size:</label>
-                                    <div id="modal-size-variants" class="flex flex-wrap gap-2">
-                                        <!-- 38, 39, 40, 41, 42, 43, 44 -->
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Select Color:</label>
-                                    <div id="modal-color-variants" class="flex flex-wrap gap-2">
-                                        <!-- Black, Brown, White, Tan, Coffee -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Stock Status -->
-                            <div class="mt-4 flex items-center space-x-2 text-xs">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                                <span id="modal-stock-status" class="font-bold text-emerald-700">In Stock (14 items left)</span>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="space-y-2 pt-4 border-t border-slate-100">
-                            <div class="flex gap-2">
-                                <button onclick="addModalItemToCart()" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-extrabold py-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-bag-shopping"></i> Add To Cart
-                                </button>
-                                <button onclick="buyNowModalItem()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl text-xs transition shadow flex items-center justify-center gap-2">
-                                    Buy Now
-                                </button>
-                            </div>
-
-                            <a id="modal-wa-order-btn" href="#" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-extrabold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 border border-emerald-200">
-                                <i class="fa-brands fa-whatsapp text-lg text-emerald-600"></i> Direct WhatsApp Quick Order
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabs: Features, Specs, Reviews -->
-                <div class="p-6 md:p-8 bg-slate-50 border-t border-slate-200">
-                    <div class="flex space-x-4 border-b border-slate-200 pb-2 mb-4">
-                        <button onclick="switchModalTab('specs')" class="modal-tab-btn active text-xs font-bold text-brand-600 pb-2 border-b-2 border-brand-600" data-mtab="specs">Specifications</button>
-                        <button onclick="switchModalTab('reviews')" class="modal-tab-btn text-xs font-bold text-slate-500 hover:text-slate-800 pb-2" data-mtab="reviews">Customer Reviews</button>
-                    </div>
-
-                    <div id="modal-tab-specs" class="space-y-2 text-xs text-slate-600">
-                        <div class="grid grid-cols-2 gap-2 bg-white p-4 rounded-xl border border-slate-200">
-                            <span class="font-bold text-slate-700">Material:</span> <span>100% Top Grain Calfskin Leather</span>
-                            <span class="font-bold text-slate-700">Sole:</span> <span>Slip Resistant Rubber Sole</span>
-                            <span class="font-bold text-slate-700">Origin:</span> <span>Made in Bangladesh</span>
-                            <span class="font-bold text-slate-700">Warranty:</span> <span>6 Months Stitching Warranty</span>
-                        </div>
-                    </div>
-
-                    <div id="modal-tab-reviews" class="hidden space-y-4">
-                        <!-- Review list -->
-                        <div id="modal-reviews-container" class="space-y-3"></div>
-
-                        <!-- Write Review Form -->
-                        <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-3">
-                            <h4 class="text-xs font-bold text-slate-800">Write a Review & Rating</h4>
-                            <form onsubmit="submitProductReview(event)" class="space-y-2">
-                                <div class="flex items-center space-x-2">
-                                    <label class="text-xs font-semibold">Rating:</label>
-                                    <select id="review-rating-val" class="text-xs border rounded p-1 bg-slate-50">
-                                        <option value="5">5 Stars ★★★★★</option>
-                                        <option value="4">4 Stars ★★★★☆</option>
-                                        <option value="3">3 Stars ★★★☆☆</option>
-                                    </select>
-                                </div>
-                                <textarea id="review-text" required rows="2" placeholder="Write your honest product feedback..." class="w-full text-xs p-2 rounded-xl border border-slate-200 bg-slate-50"></textarea>
-                                <button type="submit" class="bg-brand-600 text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-brand-700">Submit Review</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- ORDER TRACKING MODAL -->
+  <div class="modal" id="trackModal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeTrackModal()">&times;</span>
+      <h3 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-truck"></i> অর্ডার ট্র্যাকিং</h3>
+      <div class="form-group">
+        <label>অর্ডার আইডি / মোবাইল নম্বর দিন</label>
+        <input type="text" id="trackInput" placeholder="যেমন: 1001 অথবা 017XXXXXXXX">
+      </div>
+      <button class="btn-add-cart" onclick="trackOrder()">ট্র্যাক করুন</button>
+      <div id="trackResult" style="margin-top:15px;"></div>
     </div>
+  </div>
 
-    <div id="auth-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeAuthModal()"></div>
-            <div class="bg-white rounded-3xl p-8 max-w-sm w-full relative z-10 shadow-2xl space-y-6">
-                <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+  <!-- PWA INSTALL BANNER -->
+  <div id="pwa-banner">
+    <div><b>BAZARO App</b> ইনস্টল করুন দ্রুত কেনাকাটার জন্য</div>
+    <button onclick="installPWA()" style="background:#0b132b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">ইনস্টল</button>
+  </div>
 
-                <div class="text-center">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white font-black text-2xl flex items-center justify-center mx-auto mb-2">B</div>
-                    <h3 class="text-xl font-extrabold text-slate-900">BAZARO Customer Auth</h3>
-                    <p class="text-xs text-slate-500">Login or create account to track orders</p>
-                </div>
+<script>
+  // SUPABASE CONFIGURATION
+  const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                <form onsubmit="submitAuthForm(event)" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Mobile Phone / Email</label>
-                        <input type="text" id="auth-identifier" required placeholder="017XXXXXXXX" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
-                        <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
-                    </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-xs transition">
-                        Login / Sign Up
-                    </button>
-                </form>
-            </div>
+  let cart = [];
+  let wishlist = [];
+  let allProducts = [];
+
+  // Initialize
+  window.addEventListener('DOMContentLoaded', () => {
+    fetchProducts();
+    initPWA();
+  });
+
+  // Fetch Products
+  async function fetchProducts() {
+    const { data, error } = await db.from('products').select('*').order('id', { ascending: false });
+    if (!error && data) {
+      allProducts = data;
+      renderProducts(allProducts);
+    } else {
+      document.getElementById('productsContainer').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">প্রোডাক্ট লোড হতে সমস্যা হয়েছে</div>`;
+    }
+  }
+
+  // Render Products
+  function renderProducts(products) {
+    const container = document.getElementById('productsContainer');
+    if (products.length === 0) {
+      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--gray);">কোনো প্রোডাক্ট পাওয়া যায়নি</div>`;
+      return;
+    }
+
+    container.innerHTML = products.map(p => `
+      <div class="product-card">
+        <img src="${p.image_url}" class="product-img" alt="${p.name}">
+        <div class="product-info">
+          <div class="product-title">${p.name}</div>
+          <div class="price-box">
+            <span class="current-price">৳ ${p.discount_price || p.price}</span>
+            ${p.discount_price ? `<span class="old-price">৳ ${p.price}</span>` : ''}
+          </div>
+          <button class="btn-add-cart" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> কার্টে রাখুন</button>
         </div>
-    </div>
+      </div>
+    `).join('');
+  }
 
-    <div id="add-product-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
-        <div class="flex items-center justify-center min-h-screen px-4 py-6">
-            <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm" onclick="closeAddProductModal()"></div>
-            <div class="bg-white rounded-3xl p-6 md:p-8 max-w-xl w-full relative z-10 shadow-2xl space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                    <h3 class="text-lg font-extrabold text-slate-900">Add New Marketplace Product</h3>
-                    <button onclick="closeAddProductModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
-                </div>
+  // Search & Filter
+  function filterProducts() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const sort = document.getElementById('sortFilter').value;
 
-                <form onsubmit="saveNewProduct(event)" class="space-y-3 text-xs">
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Product Name *</label>
-                        <input type="text" id="admin-prod-name" required placeholder="e.g. Leather Oxford Shoes" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                    </div>
+    let filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Category *</label>
-                            <select id="admin-prod-cat" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                                <!-- Dynamic -->
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Brand Name</label>
-                            <input type="text" id="admin-prod-brand" placeholder="e.g. Apex" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                        </div>
-                    </div>
+    if (sort === 'price-low') filtered.sort((a,b) => (a.discount_price||a.price) - (b.discount_price||b.price));
+    if (sort === 'price-high') filtered.sort((a,b) => (b.discount_price||b.price) - (a.discount_price||a.price));
 
-                    <div class="grid grid-cols-3 gap-3">
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Price (৳) *</label>
-                            <input type="number" id="admin-prod-price" required class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Old Price (৳)</label>
-                            <input type="number" id="admin-prod-oldprice" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-700 mb-1">Stock Qty *</label>
-                            <input type="number" id="admin-prod-stock" required value="20" class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                        </div>
-                    </div>
+    renderProducts(filtered);
+  }
 
-                    <div>
-                        <label class="block font-bold text-slate-700 mb-1">Main Image URL</label>
-                        <input type="url" id="admin-prod-img" required placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                    </div>
+  function filterByCategory(catName) {
+    const filtered = allProducts.filter(p => p.category === catName);
+    renderProducts(filtered.length ? filtered : allProducts);
+  }
 
-                    <div class="flex gap-4 pt-2">
-                        <label class="flex items-center space-x-1 font-bold text-slate-700">
-                            <input type="checkbox" id="admin-prod-flash"> Flash Sale
-                        </label>
-                        <label class="flex items-center space-x-1 font-bold text-slate-700">
-                            <input type="checkbox" id="admin-prod-featured"> Featured
-                        </label>
-                    </div>
+  // Cart Management
+  function addToCart(pId) {
+    const prod = allProducts.find(p => p.id === pId);
+    if (!prod) return;
+    
+    const existing = cart.find(item => item.id === pId);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ ...prod, qty: 1 });
+    }
+    updateCartUI();
+    alert('প্রোডাক্ট কার্টে যুক্ত হয়েছে!');
+  }
 
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-extrabold py-3 rounded-xl text-xs transition">
-                        Save Product To Catalog
-                    </button>
-                </form>
-            </div>
+  function updateCartUI() {
+    document.getElementById('cart-count').innerText = cart.reduce((acc, i) => acc + i.qty, 0);
+    
+    const container = document.getElementById('cartItemsContainer');
+    let subtotal = 0;
+
+    container.innerHTML = cart.map(item => {
+      const itemPrice = item.discount_price || item.price;
+      subtotal += itemPrice * item.qty;
+      return `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#0b132b; padding:8px; border-radius:6px;">
+          <div>
+            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
+            <div style="color:var(--primary); font-size:12px;">৳ ${itemPrice} x ${item.qty}</div>
+          </div>
+          <button onclick="removeFromCart(${item.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">&times;</button>
         </div>
-    </div>
+      `;
+    }).join('');
 
-    <!-- PRINTABLE INVOICE TEMPLATE CONTAINER -->
-    <div id="printable-invoice" class="hidden p-8 bg-white text-slate-900 font-sans">
-        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
-            <div>
-                <h1 class="text-3xl font-black tracking-tight">BAZARO MARKETPLACE</h1>
-                <p class="text-xs text-slate-500">Official Order Tax Invoice</p>
-            </div>
-            <div class="text-right text-xs">
-                <p class="font-bold text-lg" id="inv-order-id">BZR-982341</p>
-                <p id="inv-date">Date: Oct 07, 2026</p>
-            </div>
+    const delivery = 60;
+    document.getElementById('summarySubtotal').innerText = '৳ ' + subtotal;
+    document.getElementById('summaryDelivery').innerText = '৳ ' + delivery;
+    document.getElementById('summaryTotal').innerText = '৳ ' + (subtotal + delivery);
+  }
+
+  function removeFromCart(id) {
+    cart = cart.filter(i => i.id !== id);
+    updateCartUI();
+  }
+
+  // Checkout Handle
+  async function handlePlaceOrder(e) {
+    e.preventDefault();
+    if (cart.length === 0) return alert('আপনার কার্ট খালি!');
+
+    const orderPayload = {
+      customer_name: document.getElementById('custName').value,
+      phone: document.getElementById('custPhone').value,
+      alt_phone: document.getElementById('custAltPhone').value,
+      division: document.getElementById('custDivision').value,
+      district: document.getElementById('custDistrict').value,
+      upazila: document.getElementById('custUpazila').value,
+      full_address: document.getElementById('custAddress').value,
+      payment_method: document.getElementById('payMethod').value,
+      total_amount: parseFloat(document.getElementById('summaryTotal').innerText.replace('৳ ', '')),
+      status: 'Order Placed'
+    };
+
+    const { data, error } = await db.from('orders').insert([orderPayload]).select();
+    
+    if (!error && data) {
+      alert(`🎉 অর্ডার সফল হয়েছে! আপনার অর্ডার ID: #${data[0].id}`);
+      cart = [];
+      updateCartUI();
+      closeCartModal();
+    } else {
+      alert('অর্ডার সাবমিট করতে সমস্যা হয়েছে: ' + error.message);
+    }
+  }
+
+  // Modals
+  function openCartModal() { document.getElementById('cartModal').style.display = 'flex'; }
+  function closeCartModal() { document.getElementById('cartModal').style.display = 'none'; }
+  function openOrderTrackModal() { document.getElementById('trackModal').style.display = 'flex'; }
+  function closeTrackModal() { document.getElementById('trackModal').style.display = 'none'; }
+
+  // Track Order
+  async function trackOrder() {
+    const val = document.getElementById('trackInput').value.trim();
+    if (!val) return;
+
+    const { data } = await db.from('orders').select('*').or(`id.eq.${val},phone.eq.${val}`);
+    const res = document.getElementById('trackResult');
+
+    if (data && data.length > 0) {
+      res.innerHTML = data.map(o => `
+        <div style="background:#0b132b; padding:10px; border-radius:6px; margin-top:8px;">
+          <div><b>Order #${o.id}</b> - <span style="color:var(--primary);">${o.status}</span></div>
+          <div style="font-size:12px; color:var(--gray);">মোট টাকা: ৳${o.total_amount} | পেমেন্ট: ${o.payment_method}</div>
         </div>
-
-        <div class="grid grid-cols-2 gap-4 text-xs mb-6">
-            <div>
-                <h4 class="font-bold border-b pb-1 mb-1">Customer Delivery Address</h4>
-                <p id="inv-cust-name" class="font-bold">Rahim Uddin</p>
-                <p id="inv-cust-phone">Phone: 01700000000</p>
-                <p id="inv-cust-address">Mirpur 10, Dhaka</p>
-            </div>
-            <div>
-                <h4 class="font-bold border-b pb-1 mb-1">Payment & Order Method</h4>
-                <p id="inv-payment-method">Payment: Cash on Delivery</p>
-                <p id="inv-txid">TxID: N/A</p>
-            </div>
-        </div>
-
-        <table class="w-full text-left text-xs border-collapse mb-6">
-            <thead>
-                <tr class="bg-slate-100 border-y border-slate-300 font-bold">
-                    <th class="p-2">Product Item</th>
-                    <th class="p-2">Variant</th>
-                    <th class="p-2">Price</th>
-                    <th class="p-2">Qty</th>
-                    <th class="p-2 text-right">Total</th>
-                </tr>
-            </thead>
-            <tbody id="inv-items-table" class="divide-y divide-slate-200">
-                <!-- Items -->
-            </tbody>
-        </table>
-
-        <div class="flex justify-end text-xs">
-            <div class="w-48 space-y-1">
-                <div class="flex justify-between"><span>Subtotal:</span><span id="inv-subtotal">৳0</span></div>
-                <div class="flex justify-between"><span>Delivery:</span><span id="inv-delivery">৳60</span></div>
-                <div class="flex justify-between font-bold text-sm border-t pt-1"><span>Total Paid:</span><span id="inv-total">৳0</span></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const DEFAULT_CATEGORIES = [
-            { name: 'Leather', icon: '<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>' },
-            { name: 'Shoes', icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>' },
-            { name: 'Wallet', icon: '<path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>' },
-            { name: 'Belt', icon: '<path d="M12 2L2 7l10 5 10-5-10-5zm0 9l-10-5v11l10 5 10-5V6l-10 5z"/>' },
-            { name: 'Bag', icon: '<path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z"/>' },
-            { name: 'Fashion', icon: '<path d="M12 2l-5.5 9h11z M12 22l5.5-9h-11z"/>' },
-            { name: 'T-Shirt', icon: '<path d="M15.81 8.14L13.5 4h-3L8.19 8.14 3 6l2 14h14l2-14z"/>' },
-            { name: 'Panjabi', icon: '<path d="M12 2L4 5v14l8 3 8-3V5l-8-3zm0 4c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2z"/>' },
-            { name: 'Baby & Kids', icon: '<path d="M12 2a5 5 0 0 0-5 5c0 2.22 1.45 4.1 3.5 4.75V15H8v2h2.5v3h3v-3H16v-2h-2.5v-3.25C15.55 11.1 17 9.22 17 7a5 5 0 0 0-5-5z"/>' },
-            { name: 'Electronics', icon: '<path d="M15 1H9v2h6V1zm-4 13h2v-2h-2v2zm8-6H5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm0 12H5V10h14v10z"/>' },
-            { name: 'Home & Living', icon: '<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>' },
-            { name: 'Food & Grocery', icon: '<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.46 3.9 3.45 4.35L5 22h2l1.32-6.6 2.68 6.6h2l-1.55-8.65C10.54 12.9 11 11.12 11 9z"/>' },
-            { name: 'Beauty', icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>' },
-            { name: 'Sports', icon: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>' }
-        ];
-
-        const DEMO_PRODUCTS = [
-            {
-                id: 1,
-                name: "Royal Designer Embroidery Panjabi",
-                category: "Panjabi",
-                brand: "Aarong Style",
-                price: 2450,
-                oldPrice: 3200,
-                rating: 4.9,
-                reviewsCount: 32,
-                stock: 15,
-                image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80",
-                gallery: [
-                    "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80",
-                    "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=600&q=80"
-                ],
-                isFlashSale: true,
-                isFeatured: true,
-                isBestSeller: true,
-                isNew: false
-            },
-            {
-                id: 2,
-                name: "Genuine Cowhide Leather Slim Wallet",
-                category: "Wallet",
-                brand: "Apex Leather",
-                price: 1150,
-                oldPrice: 1850,
-                rating: 4.8,
-                reviewsCount: 45,
-                stock: 25,
-                image: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80",
-                gallery: [
-                    "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80"
-                ],
-                isFlashSale: true,
-                isFeatured: true,
-                isBestSeller: true,
-                isNew: false
-            },
-            {
-                id: 3,
-                name: "Handcrafted Italian Leather Oxford Shoes",
-                category: "Shoes",
-                brand: "Bay Leather",
-                price: 3850,
-                oldPrice: 4900,
-                rating: 5.0,
-                reviewsCount: 19,
-                stock: 8,
-                image: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=600&q=80",
-                gallery: [
-                    "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=600&q=80"
-                ],
-                isFlashSale: false,
-                isFeatured: true,
-                isBestSeller: false,
-                isNew: true
-            },
-            {
-                id: 4,
-                name: "Full Grain Formal Leather Belt (Automatic Buckle)",
-                category: "Belt",
-                brand: "Bata Premium",
-                price: 950,
-                oldPrice: 1400,
-                rating: 4.7,
-                reviewsCount: 28,
-                stock: 30,
-                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80",
-                gallery: [
-                    "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80"
-                ],
-                isFlashSale: true,
-                isFeatured: false,
-                isBestSeller: true,
-                isNew: false
-            },
-            {
-                id: 5,
-                name: "Waterproof Travel Laptop Messenger Bag",
-                category: "Bag",
-                brand: "Lifestyle",
-                price: 2100,
-                oldPrice: 2800,
-                rating: 4.6,
-                reviewsCount: 14,
-                stock: 12,
-                image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80",
-                gallery: [
-                    "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80"
-                ],
-                isFlashSale: false,
-                isFeatured: true,
-                isBestSeller: false,
-                isNew: true
-            },
-            {
-                id: 6,
-                name: "100% Premium Comb Cotton Polo T-Shirt",
-                category: "T-Shirt",
-                brand: "Fabrilife",
-                price: 650,
-                oldPrice: 900,
-                rating: 4.5,
-                reviewsCount: 52,
-                stock: 40,
-                image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
-                gallery: [
-                    "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80"
-                ],
-                isFlashSale: true,
-                isFeatured: false,
-                isBestSeller: true,
-                isNew: false
-            }
-        ];
-
-        /* STORE STATE persistance */
-        let storeData = {
-            products: JSON.parse(localStorage.getItem('bazaro_products')) || DEMO_PRODUCTS,
-            categories: JSON.parse(localStorage.getItem('bazaro_categories')) || DEFAULT_CATEGORIES,
-            cart: JSON.parse(localStorage.getItem('bazaro_cart')) || [],
-            wishlist: JSON.parse(localStorage.getItem('bazaro_wishlist')) || [],
-            orders: JSON.parse(localStorage.getItem('bazaro_orders')) || [
-                {
-                    id: "BZR-982341",
-                    date: "2026-10-06",
-                    customer: { name: "Rahim Uddin", phone: "01700000000", division: "Dhaka", address: "Mirpur 10" },
-                    items: [{ id: 1, name: "Royal Designer Embroidery Panjabi", qty: 1, price: 2450 }],
-                    total: 2510,
-                    deliveryCharge: 60,
-                    paymentMethod: "bKash",
-                    txId: "8K9A2M1L",
-                    status: "Packed"
-                }
-            ],
-            settings: JSON.parse(localStorage.getItem('bazaro_settings')) || {
-                siteName: "BAZARO",
-                waNum: "+880 1700-000000",
-                email: "support@bazaro.com.bd",
-                fbLink: "https://facebook.com/bazaro.bd",
-                chargeDhaka: 60,
-                chargeOutside: 120,
-                officeAddress: "Level 4, BAZARO Tower, Gulshan-2, Dhaka 1212",
-                bannerUrl: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80"
-            },
-            user: JSON.parse(localStorage.getItem('bazaro_user')) || { name: "Rahim Uddin", phone: "01700000000", loggedIn: true }
-        };
-
-        let selectedVariant = { size: '40', color: 'Black' };
-        let currentModalProductId = null;
-        let activeCoupon = null;
-
-        /* Save state helper */
-        function saveStoreState() {
-            localStorage.setItem('bazaro_products', JSON.stringify(storeData.products));
-            localStorage.setItem('bazaro_categories', JSON.stringify(storeData.categories));
-            localStorage.setItem('bazaro_cart', JSON.stringify(storeData.cart));
-            localStorage.setItem('bazaro_wishlist', JSON.stringify(storeData.wishlist));
-            localStorage.setItem('bazaro_orders', JSON.stringify(storeData.orders));
-            localStorage.setItem('bazaro_settings', JSON.stringify(storeData.settings));
-            localStorage.setItem('bazaro_user', JSON.stringify(storeData.user));
-            updateBadgesAndHeader();
-        }
-
-        window.onload = function() {
-            renderCategoryGrid();
-            renderCategoryDrawerList();
-            renderFlashSaleProducts();
-            renderMainProducts('all');
-            renderWishlistGrid();
-            renderAdminTables();
-            updateBadgesAndHeader();
-            applySiteSettingsUI();
-            startFlashSaleTimer();
-            setupPWA();
-        };
-
-        /* PWA Integration */
-        let deferredPrompt;
-        function setupPWA() {
-            if ('serviceWorker' in navigator) {
-                // Register inline SW mock
-                const swCode = `self.addEventListener('fetch', function(e) { e.respondWith(fetch(e.request)); });`;
-                const blob = new Blob([swCode], { type: 'text/javascript' });
-                navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
-            }
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                document.getElementById('pwa-install-btn').classList.remove('hidden');
-            });
-        }
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
-            } else {
-                alert('App installation ready or already installed.');
-            }
-        }
-
-        /* Navigation Tab Switching */
-        function switchTab(tabId) {
-            const tabs = ['home', 'catalog', 'checkout', 'profile', 'tracking', 'wishlist', 'admin'];
-            tabs.forEach(t => {
-                const el = document.getElementById(`tab-${t}`);
-                if (el) el.classList.add('hidden');
-            });
-
-            const target = document.getElementById(`tab-${tabId}`);
-            if (target) target.classList.remove('hidden');
-
-            // Update mobile navbar highlight
-            document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-                btn.classList.remove('text-brand-600', 'active');
-                if (btn.dataset.mobile === tabId) {
-                    btn.classList.add('text-brand-600', 'active');
-                }
-            });
-
-            if (tabId === 'catalog') renderCatalogProducts();
-            if (tabId === 'checkout') renderCheckoutSummary();
-            if (tabId === 'profile') renderUserProfile();
-            if (tabId === 'admin') renderAdminTables();
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function renderCategoryGrid() {
-            const container = document.getElementById('category-cards-grid');
-            container.innerHTML = storeData.categories.map(cat => `
-                <div onclick="filterByCategory('${cat.name}')" class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md hover:border-brand-500 cursor-pointer transition flex flex-col items-center text-center group">
-                    <div class="w-12 h-12 rounded-2xl bg-brand-50 group-hover:bg-brand-600 text-brand-600 group-hover:text-white flex items-center justify-center mb-2 transition">
-                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">${cat.icon || '<path d="M12 2L2 7l10 5 10-5-10-5z"/>'}</svg>
-                    </div>
-                    <span class="text-xs font-bold text-slate-800 group-hover:text-brand-600 truncate w-full">${cat.name}</span>
-                </div>
-            `).join('');
-        }
-
-        function renderCategoryDrawerList() {
-            const container = document.getElementById('category-drawer-list');
-            container.innerHTML = storeData.categories.map(cat => `
-                <button onclick="filterByCategory('${cat.name}'); toggleCategoryDrawer();" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 flex items-center justify-between">
-                    <span class="flex items-center gap-3">
-                        <svg class="w-5 h-5 fill-brand-600" viewBox="0 0 24 24">${cat.icon || ''}</svg>
-                        ${cat.name}
-                    </span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                </button>
-            `).join('');
-        }
-
-        function filterByCategory(catName) {
-            switchTab('catalog');
-            document.getElementById('filter-category').value = catName;
-            applyFiltersAndSort();
-        }
-
-        function createProductCardHTML(product) {
-            const isWish = storeData.wishlist.includes(product.id);
-            return `
-                <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-lg transition flex flex-col justify-between group">
-                    <div class="relative aspect-square bg-slate-100 overflow-hidden cursor-pointer" onclick="openProductModal(${product.id})">
-                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        ${product.isFlashSale ? '<span class="absolute top-2 left-2 bg-rose-600 text-white font-extrabold text-[10px] px-2 py-0.5 rounded shadow uppercase">Flash Deals</span>' : ''}
-                        
-                        <button onclick="event.stopPropagation(); toggleWishlist(${product.id})" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-slate-700 flex items-center justify-center shadow transition">
-                            <i class="${isWish ? 'fa-solid text-rose-500' : 'fa-regular'} fa-heart"></i>
-                        </button>
-                    </div>
-
-                    <div class="p-4 flex-1 flex flex-col justify-between space-y-2">
-                        <div>
-                            <span class="text-[10px] font-bold text-brand-600 uppercase tracking-wider">${product.category}</span>
-                            <h3 onclick="openProductModal(${product.id})" class="text-xs font-bold text-slate-800 line-clamp-2 cursor-pointer hover:text-brand-600 transition mt-0.5">${product.name}</h3>
-                        </div>
-
-                        <div>
-                            <div class="flex items-center space-x-1 text-amber-400 text-[10px] mb-1">
-                                <i class="fa-solid fa-star"></i>
-                                <span class="font-bold text-slate-700">${product.rating || 4.8}</span>
-                            </div>
-
-                            <div class="flex items-baseline justify-between">
-                                <div>
-                                    <span class="text-sm font-black text-slate-900">৳${product.price}</span>
-                                    ${product.oldPrice ? `<span class="text-[10px] text-slate-400 line-through ml-1">৳${product.oldPrice}</span>` : ''}
-                                </div>
-                                <button onclick="quickAddToCart(${product.id})" class="bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white w-8 h-8 rounded-xl flex items-center justify-center transition shadow-sm">
-                                    <i class="fa-solid fa-plus text-xs"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderFlashSaleProducts() {
-            const container = document.getElementById('flash-sale-products-grid');
-            const flashItems = storeData.products.filter(p => p.isFlashSale);
-            container.innerHTML = flashItems.map(p => createProductCardHTML(p)).join('');
-        }
-
-        function renderMainProducts(filter = 'all') {
-            const container = document.getElementById('main-products-grid');
-            let items = storeData.products;
-            if (filter === 'featured') items = items.filter(p => p.isFeatured);
-            if (filter === 'bestseller') items = items.filter(p => p.isBestSeller);
-            if (filter === 'new') items = items.filter(p => p.isNew);
-
-            container.innerHTML = items.map(p => createProductCardHTML(p)).join('');
-        }
-
-        function switchProductFilter(filterType) {
-            document.querySelectorAll('.product-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-brand-600', 'text-white', 'shadow');
-                btn.classList.add('bg-white', 'text-slate-600');
-                if (btn.dataset.tab === filterType) {
-                    btn.classList.add('bg-brand-600', 'text-white', 'shadow');
-                    btn.classList.remove('bg-white', 'text-slate-600');
-                }
-            });
-            renderMainProducts(filterType);
-        }
-
-        function renderCatalogProducts() {
-            const catSelect = document.getElementById('filter-category');
-            catSelect.innerHTML = '<option value="all">All Categories</option>' + 
-                storeData.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
-            const brandSelect = document.getElementById('filter-brand');
-            const brands = [...new Set(storeData.products.map(p => p.brand || 'Generic'))];
-            brandSelect.innerHTML = '<option value="all">All Brands</option>' + 
-                brands.map(b => `<option value="${b}">${b}</option>`).join('');
-
-            applyFiltersAndSort();
-        }
-
-        function applyFiltersAndSort() {
-            const category = document.getElementById('filter-category').value;
-            const maxPrice = parseFloat(document.getElementById('filter-price-range').value);
-            const brand = document.getElementById('filter-brand').value;
-            const inStock = document.getElementById('filter-in-stock').checked;
-            const sortBy = document.getElementById('catalog-sort-select').value;
-
-            let filtered = storeData.products.filter(p => {
-                if (category !== 'all' && p.category !== category) return false;
-                if (p.price > maxPrice) return false;
-                if (brand !== 'all' && p.brand !== brand) return false;
-                if (inStock && p.stock <= 0) return false;
-                return true;
-            });
-
-            // Sorting
-            if (sortBy === 'price-low') filtered.sort((a,b) => a.price - b.price);
-            if (sortBy === 'price-high') filtered.sort((a,b) => b.price - a.price);
-            if (sortBy === 'rating') filtered.sort((a,b) => b.rating - a.rating);
-
-            const grid = document.getElementById('catalog-products-grid');
-            const noMsg = document.getElementById('no-products-msg');
-
-            if (filtered.length === 0) {
-                grid.innerHTML = '';
-                noMsg.classList.remove('hidden');
-            } else {
-                noMsg.classList.add('hidden');
-                grid.innerHTML = filtered.map(p => createProductCardHTML(p)).join('');
-            }
-        }
-
-        function updatePriceRangeDisplay(val) {
-            document.getElementById('price-limit-display').innerText = `৳${parseInt(val).toLocaleString()}`;
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-category').value = 'all';
-            document.getElementById('filter-price-range').value = 10000;
-            document.getElementById('price-limit-display').innerText = '৳10,000';
-            document.getElementById('filter-brand').value = 'all';
-            document.getElementById('filter-in-stock').checked = false;
-            applyFiltersAndSort();
-        }
-
-        function openProductModal(id) {
-            const product = storeData.products.find(p => p.id === id);
-            if (!product) return;
-
-            currentModalProductId = id;
-            document.getElementById('modal-main-img').src = product.image;
-            document.getElementById('modal-brand').innerText = product.brand || 'BAZARO Exclusive';
-            document.getElementById('modal-category').innerText = product.category;
-            document.getElementById('modal-title').innerText = product.name;
-            document.getElementById('modal-price').innerText = `৳${product.price}`;
-            document.getElementById('modal-old-price').innerText = product.oldPrice ? `৳${product.oldPrice}` : '';
-            document.getElementById('modal-stock-status').innerText = product.stock > 0 ? `In Stock (${product.stock} items available)` : 'Out of Stock';
-
-            // Variant Selectors
-            const sizes = ['38', '39', '40', '41', '42', '43', '44'];
-            document.getElementById('modal-size-variants').innerHTML = sizes.map(s => `
-                <button type="button" onclick="selectVariant('size', '${s}')" class="variant-size-btn border ${selectedVariant.size === s ? 'border-brand-600 bg-brand-50 text-brand-700 font-bold' : 'border-slate-200 text-slate-700'} px-3 py-1 rounded-lg text-xs transition">${s}</button>
-            `).join('');
-
-            const colors = ['Black', 'Brown', 'White', 'Tan', 'Coffee'];
-            document.getElementById('modal-color-variants').innerHTML = colors.map(c => `
-                <button type="button" onclick="selectVariant('color', '${c}')" class="variant-color-btn border ${selectedVariant.color === c ? 'border-brand-600 bg-brand-50 text-brand-700 font-bold' : 'border-slate-200 text-slate-700'} px-3 py-1 rounded-lg text-xs transition">${c}</button>
-            `).join('');
-
-            // WhatsApp direct order button URL
-            const waMsg = encodeURIComponent(`Hi BAZARO, I want to order:\nProduct: ${product.name}\nPrice: ৳${product.price}\nSize: ${selectedVariant.size}, Color: ${selectedVariant.color}`);
-            document.getElementById('modal-wa-order-btn').href = `https://wa.me/${storeData.settings.waNum.replace(/[^0-9]/g, '')}?text=${waMsg}`;
-
-            document.getElementById('product-modal').classList.remove('hidden');
-        }
-
-        function closeProductModal() {
-            document.getElementById('product-modal').classList.add('hidden');
-        }
-
-        function selectVariant(type, value) {
-            selectedVariant[type] = value;
-            openProductModal(currentModalProductId);
-        }
-
-        /* Cart logic */
-        function quickAddToCart(productId) {
-            const prod = storeData.products.find(p => p.id === productId);
-            if (!prod) return;
-
-            const existing = storeData.cart.find(i => i.id === productId && i.size === '40');
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                storeData.cart.push({
-                    id: prod.id,
-                    name: prod.name,
-                    price: prod.price,
-                    image: prod.image,
-                    size: '40',
-                    color: 'Black',
-                    qty: 1
-                });
-            }
-            saveStoreState();
-            toggleCartDrawer();
-        }
-
-        function addModalItemToCart() {
-            if (!currentModalProductId) return;
-            const prod = storeData.products.find(p => p.id === currentModalProductId);
-            
-            storeData.cart.push({
-                id: prod.id,
-                name: prod.name,
-                price: prod.price,
-                image: prod.image,
-                size: selectedVariant.size,
-                color: selectedVariant.color,
-                qty: 1
-            });
-            saveStoreState();
-            closeProductModal();
-            toggleCartDrawer();
-        }
-
-        function buyNowModalItem() {
-            addModalItemToCart();
-            switchTab('checkout');
-        }
-
-        function toggleCartDrawer() {
-            const drawer = document.getElementById('cart-drawer');
-            drawer.classList.toggle('hidden');
-            renderCartDrawer();
-        }
-
-        function renderCartDrawer() {
-            const container = document.getElementById('cart-drawer-items');
-            if (storeData.cart.length === 0) {
-                container.innerHTML = '<div class="text-center py-12 text-slate-400 text-xs"><i class="fa-solid fa-bag-shopping text-3xl mb-2"></i><p>Your shopping cart is empty</p></div>';
-                document.getElementById('cart-drawer-subtotal').innerText = '৳0';
-                return;
-            }
-
-            let subtotal = 0;
-            container.innerHTML = storeData.cart.map((item, idx) => {
-                subtotal += item.price * item.qty;
-                return `
-                    <div class="flex items-center justify-between gap-3 pt-3">
-                        <img src="${item.image}" class="w-14 h-14 rounded-xl object-cover bg-slate-100">
-                        <div class="flex-1 text-xs">
-                            <h4 class="font-bold text-slate-800 line-clamp-1">${item.name}</h4>
-                            <p class="text-[10px] text-slate-400">Size: ${item.size} • Color: ${item.color}</p>
-                            <span class="font-black text-brand-600">৳${item.price}</span>
-                        </div>
-                        <div class="flex items-center space-x-1 bg-slate-100 rounded-lg p-1">
-                            <button onclick="updateCartQty(${idx}, -1)" class="w-5 h-5 rounded bg-white text-xs font-bold text-slate-700">-</button>
-                            <span class="text-xs font-bold px-1">${item.qty}</span>
-                            <button onclick="updateCartQty(${idx}, 1)" class="w-5 h-5 rounded bg-white text-xs font-bold text-slate-700">+</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            document.getElementById('cart-drawer-subtotal').innerText = `৳${subtotal.toLocaleString()}`;
-        }
-
-        function updateCartQty(idx, delta) {
-            storeData.cart[idx].qty += delta;
-            if (storeData.cart[idx].qty <= 0) {
-                storeData.cart.splice(idx, 1);
-            }
-            saveStoreState();
-            renderCartDrawer();
-        }
-
-        function updateBadgesAndHeader() {
-            const cartQty = storeData.cart.reduce((a,b) => a + b.qty, 0);
-            const cartTotal = storeData.cart.reduce((a,b) => a + (b.price * b.qty), 0);
-            document.getElementById('cart-badge').innerText = cartQty;
-            document.getElementById('cart-total-header').innerText = `৳${cartTotal.toLocaleString()}`;
-            document.getElementById('wishlist-badge').innerText = storeData.wishlist.length;
-        }
-
-        function renderCheckoutSummary() {
-            const container = document.getElementById('checkout-cart-items');
-            if (storeData.cart.length === 0) {
-                container.innerHTML = '<p class="text-xs text-slate-400 py-4">No items in cart to checkout</p>';
-            } else {
-                container.innerHTML = storeData.cart.map(item => `
-                    <div class="flex justify-between items-center text-xs py-2">
-                        <div class="flex items-center space-x-2">
-                            <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover">
-                            <div>
-                                <p class="font-bold text-slate-800 line-clamp-1">${item.name}</p>
-                                <p class="text-[10px] text-slate-400">Qty: ${item.qty} (${item.size}/${item.color})</p>
-                            </div>
-                        </div>
-                        <span class="font-bold text-slate-900">৳${item.price * item.qty}</span>
-                    </div>
-                `).join('');
-            }
-
-            calculateTotals();
-        }
-
-        function handleDivisionChange() {
-            const division = document.getElementById('cust-division').value;
-            const isDhaka = division === 'Dhaka';
-            const charge = isDhaka ? storeData.settings.chargeDhaka : storeData.settings.chargeOutside;
-            
-            document.getElementById('delivery-location-label').innerText = isDhaka ? 'Inside Dhaka' : 'Outside Dhaka';
-            document.getElementById('checkout-delivery').innerText = `৳${charge}`;
-            calculateTotals();
-        }
-
-        function calculateTotals() {
-            const subtotal = storeData.cart.reduce((a,b) => a + (b.price * b.qty), 0);
-            const division = document.getElementById('cust-division').value;
-            const delivery = division === 'Dhaka' ? storeData.settings.chargeDhaka : storeData.settings.chargeOutside;
-            
-            let discount = 0;
-            if (activeCoupon === 'BAZARO10') discount = Math.round(subtotal * 0.10);
-
-            const total = subtotal + delivery - discount;
-
-            document.getElementById('checkout-subtotal').innerText = `৳${subtotal.toLocaleString()}`;
-            document.getElementById('checkout-discount').innerText = `-৳${discount.toLocaleString()}`;
-            document.getElementById('checkout-total').innerText = `৳${Math.max(0, total).toLocaleString()}`;
-        }
-
-        function applyCoupon() {
-            const code = document.getElementById('coupon-code-input').value.trim().toUpperCase();
-            if (code === 'BAZARO10') {
-                activeCoupon = 'BAZARO10';
-                document.getElementById('coupon-status-msg').innerText = '✓ Coupon BAZARO10 Applied! 10% Off';
-                document.getElementById('coupon-status-msg').className = 'text-[11px] mt-1 font-semibold text-emerald-600';
-            } else {
-                document.getElementById('coupon-status-msg').innerText = 'Invalid Coupon Code';
-                document.getElementById('coupon-status-msg').className = 'text-[11px] mt-1 font-semibold text-rose-600';
-            }
-            calculateTotals();
-        }
-
-        function togglePaymentFields(method) {
-            const box = document.getElementById('mfs-details-box');
-            if (method === 'COD') {
-                box.classList.add('hidden');
-            } else {
-                box.classList.remove('hidden');
-            }
-        }
-
-        function submitOrder(e) {
-            e.preventDefault();
-            if (storeData.cart.length === 0) {
-                alert('Your cart is empty!');
-                return;
-            }
-
-            const name = document.getElementById('cust-name').value;
-            const phone = document.getElementById('cust-phone').value;
-            const division = document.getElementById('cust-division').value;
-            const district = document.getElementById('cust-district').value;
-            const upazila = document.getElementById('cust-upazila').value;
-            const address = document.getElementById('cust-address').value;
-            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-            const txId = document.getElementById('mfs-txid').value;
-
-            const orderId = `BZR-${Math.floor(100000 + Math.random() * 900000)}`;
-            const subtotal = storeData.cart.reduce((a,b) => a + (b.price * b.qty), 0);
-            const delivery = division === 'Dhaka' ? storeData.settings.chargeDhaka : storeData.settings.chargeOutside;
-
-            const newOrder = {
-                id: orderId,
-                date: new Date().toISOString().split('T')[0],
-                customer: { name, phone, division, district, upazila, address },
-                items: [...storeData.cart],
-                subtotal,
-                deliveryCharge: delivery,
-                total: subtotal + delivery,
-                paymentMethod,
-                txId: txId || 'N/A',
-                status: 'Order Placed'
-            };
-
-            storeData.orders.unshift(newOrder);
-            storeData.cart = [];
-            saveStoreState();
-
-            alert(`🎉 Order Placed Successfully!\nYour Order ID is: ${orderId}`);
-            switchTab('tracking');
-            document.getElementById('track-order-id').value = orderId;
-            handleOrderTrackSubmit(new Event('submit'));
-        }
-
-        function handleOrderTrackSubmit(e) {
-            if (e) e.preventDefault();
-            const orderId = document.getElementById('track-order-id').value.trim().toUpperCase();
-            const order = storeData.orders.find(o => o.id === orderId);
-
-            const resultCard = document.getElementById('tracking-result-card');
-            if (order) {
-                resultCard.classList.remove('hidden');
-                document.getElementById('track-result-id').innerText = order.id;
-                document.getElementById('track-result-status-badge').innerText = order.status;
-                document.getElementById('track-dest-address').innerText = `${order.customer.upazila || ''}, ${order.customer.division}`;
-
-                // Update Progress bar width
-                const stages = ['Order Placed', 'Confirmed', 'Processing', 'Packed', 'Shipped', 'Delivered'];
-                const idx = stages.indexOf(order.status);
-                const percent = Math.max(10, ((idx + 1) / stages.length) * 100);
-                document.getElementById('track-progress-bar').style.width = `${percent}%`;
-            } else {
-                alert('Order ID not found in database. Check your Order ID.');
-            }
-        }
-
-        function switchAdminSubTab(subId) {
-            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-brand-600', 'text-white');
-                if (btn.dataset.admin === subId) btn.classList.add('bg-brand-600', 'text-white');
-            });
-
-            ['overview', 'products', 'categories', 'orders', 'settings', 'db'].forEach(s => {
-                const el = document.getElementById(`admin-sub-${s}`);
-                if (el) el.classList.add('hidden');
-            });
-
-            document.getElementById(`admin-sub-${subId}`).classList.remove('hidden');
-            if (subId === 'db') renderDatabaseJSON();
-        }
-
-        function renderAdminTables() {
-            // Stat metrics
-            const totalSales = storeData.orders.reduce((a,b) => a + (b.total || 0), 0);
-            document.getElementById('stat-total-sales').innerText = `৳${totalSales.toLocaleString()}`;
-            document.getElementById('stat-total-orders').innerText = storeData.orders.length;
-            document.getElementById('stat-total-products').innerText = storeData.products.length;
-
-            // Admin Products Table
-            const prodTable = document.getElementById('admin-products-table');
-            prodTable.innerHTML = storeData.products.map(p => `
-                <tr>
-                    <td class="p-3 flex items-center space-x-2">
-                        <img src="${p.image}" class="w-8 h-8 rounded object-cover">
-                        <span class="font-bold text-slate-800">${p.name}</span>
-                    </td>
-                    <td class="p-3">${p.category}</td>
-                    <td class="p-3 font-bold">৳${p.price}</td>
-                    <td class="p-3">${p.stock}</td>
-                    <td class="p-3">${p.isFlashSale ? '<span class="bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded text-[10px]">Flash</span>' : ''}</td>
-                    <td class="p-3 text-right">
-                        <button onclick="deleteProduct(${p.id})" class="text-rose-600 hover:underline">Delete</button>
-                    </td>
-                </tr>
-            `).join('');
-
-            // Admin Orders Table
-            const orderTable = document.getElementById('admin-all-orders-table');
-            orderTable.innerHTML = storeData.orders.map(o => `
-                <tr>
-                    <td class="p-3 font-mono font-bold text-brand-600">${o.id}</td>
-                    <td class="p-3">${o.date}</td>
-                    <td class="p-3">${o.customer?.name} (${o.customer?.phone})</td>
-                    <td class="p-3">${o.customer?.division}</td>
-                    <td class="p-3 font-bold">৳${o.total}</td>
-                    <td class="p-3">${o.paymentMethod} / <span class="font-mono">${o.txId}</span></td>
-                    <td class="p-3"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">${o.status}</span></td>
-                    <td class="p-3 text-right space-x-1">
-                        <select onchange="updateOrderStatus('${o.id}', this.value)" class="text-[10px] bg-slate-100 rounded border">
-                            <option value="Order Placed" ${o.status === 'Order Placed' ? 'selected' : ''}>Placed</option>
-                            <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>Processing</option>
-                            <option value="Packed" ${o.status === 'Packed' ? 'selected' : ''}>Packed</option>
-                            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                        </select>
-                        <button onclick="printOrderInvoice('${o.id}')" class="text-slate-700 bg-slate-200 px-2 py-1 rounded"><i class="fa-solid fa-print"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updateOrderStatus(orderId, newStatus) {
-            const order = storeData.orders.find(o => o.id === orderId);
-            if (order) {
-                order.status = newStatus;
-                saveStoreState();
-                renderAdminTables();
-            }
-        }
-
-        function printOrderInvoice(orderId) {
-            const order = storeData.orders.find(o => o.id === orderId);
-            if (!order) return;
-
-            document.getElementById('inv-order-id').innerText = order.id;
-            document.getElementById('inv-cust-name').innerText = order.customer.name;
-            document.getElementById('inv-cust-phone').innerText = `Phone: ${order.customer.phone}`;
-            document.getElementById('inv-cust-address').innerText = `${order.customer.address}, ${order.customer.division}`;
-            document.getElementById('inv-payment-method').innerText = `Payment: ${order.paymentMethod}`;
-            document.getElementById('inv-txid').innerText = `TxID: ${order.txId}`;
-
-            document.getElementById('inv-items-table').innerHTML = order.items.map(i => `
-                <tr>
-                    <td class="p-2">${i.name}</td>
-                    <td class="p-2">${i.size || 'N/A'}</td>
-                    <td class="p-2">৳${i.price}</td>
-                    <td class="p-2">${i.qty}</td>
-                    <td class="p-2 text-right">৳${i.price * i.qty}</td>
-                </tr>
-            `).join('');
-
-            document.getElementById('inv-subtotal').innerText = `৳${order.subtotal || order.total}`;
-            document.getElementById('inv-delivery').innerText = `৳${order.deliveryCharge || 60}`;
-            document.getElementById('inv-total').innerText = `৳${order.total}`;
-
-            window.print();
-        }
-
-        /* Save Settings */
-        function applySiteSettingsUI() {
-            document.getElementById('brand-name-display').innerText = storeData.settings.siteName;
-            document.getElementById('footer-site-name').innerText = storeData.settings.siteName;
-            document.getElementById('header-wa-num').innerText = storeData.settings.waNum;
-            document.getElementById('footer-wa-text').innerText = storeData.settings.waNum;
-            document.getElementById('footer-email-text').innerText = storeData.settings.email;
-            document.getElementById('footer-office-text').innerText = storeData.settings.officeAddress;
-            document.getElementById('header-whatsapp-link').href = `https://wa.me/${storeData.settings.waNum.replace(/[^0-9]/g, '')}`;
-
-            // Fill form inputs in settings tab
-            document.getElementById('setting-site-name').value = storeData.settings.siteName;
-            document.getElementById('setting-wa-num').value = storeData.settings.waNum;
-            document.getElementById('setting-email').value = storeData.settings.email;
-            document.getElementById('setting-fb-link').value = storeData.settings.fbLink;
-            document.getElementById('setting-charge-dhaka').value = storeData.settings.chargeDhaka;
-            document.getElementById('setting-charge-outside').value = storeData.settings.chargeOutside;
-            document.getElementById('setting-office-address').value = storeData.settings.officeAddress;
-            document.getElementById('setting-banner-url').value = storeData.settings.bannerUrl;
-        }
-
-        function saveSiteSettings(e) {
-            e.preventDefault();
-            storeData.settings = {
-                siteName: document.getElementById('setting-site-name').value,
-                waNum: document.getElementById('setting-wa-num').value,
-                email: document.getElementById('setting-email').value,
-                fbLink: document.getElementById('setting-fb-link').value,
-                chargeDhaka: parseFloat(document.getElementById('setting-charge-dhaka').value),
-                chargeOutside: parseFloat(document.getElementById('setting-charge-outside').value),
-                officeAddress: document.getElementById('setting-office-address').value,
-                bannerUrl: document.getElementById('setting-banner-url').value
-            };
-            saveStoreState();
-            applySiteSettingsUI();
-            alert('Website settings updated live successfully!');
-        }
-
-        /* Database Exporter */
-        function renderDatabaseJSON() {
-            document.getElementById('db-json-viewer').innerText = JSON.stringify(storeData, null, 2);
-        }
-
-        function exportDatabaseJSON() {
-            const blob = new Blob([JSON.stringify(storeData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'bazaro_marketplace_database.json';
-            a.click();
-        }
-
-        /* Countdown timer */
-        function startFlashSaleTimer() {
-            let seconds = 31339;
-            setInterval(() => {
-                seconds--;
-                const h = Math.floor(seconds / 3600);
-                const m = Math.floor((seconds % 3600) / 60);
-                const s = seconds % 60;
-                document.getElementById('timer-hours').innerText = String(h).padStart(2, '0');
-                document.getElementById('timer-minutes').innerText = String(m).padStart(2, '0');
-                document.getElementById('timer-seconds').innerText = String(s).padStart(2, '0');
-            }, 1000);
-        }
-
-        /* UI Toggle Drawer Helpers */
-        function toggleCategoryDrawer() {
-            document.getElementById('category-drawer').classList.toggle('hidden');
-        }
-
-        function toggleUserDropdown() {
-            document.getElementById('user-dropdown').classList.toggle('hidden');
-        }
-
-        function toggleWishlist(id) {
-            const idx = storeData.wishlist.indexOf(id);
-            if (idx > -1) storeData.wishlist.splice(idx, 1);
-            else storeData.wishlist.push(id);
-            saveStoreState();
-            renderFlashSaleProducts();
-            renderMainProducts();
-            renderWishlistGrid();
-        }
-
-        function renderWishlistGrid() {
-            const container = document.getElementById('wishlist-products-grid');
-            const emptyMsg = document.getElementById('empty-wishlist-msg');
-            const items = storeData.products.filter(p => storeData.wishlist.includes(p.id));
-
-            if (items.length === 0) {
-                container.innerHTML = '';
-                emptyMsg.classList.remove('hidden');
-            } else {
-                emptyMsg.classList.add('hidden');
-                container.innerHTML = items.map(p => createProductCardHTML(p)).join('');
-            }
-        }
-    </script>
+      `).join('');
+    } else {
+      res.innerHTML = `<div style="color:red; font-size:13px; margin-top:10px;">কোনো অর্ডার পাওয়া যায়নি।</div>`;
+    }
+  }
+
+  // PWA Prompt
+  let deferredPrompt;
+  function initPWA() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js');
+    }
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwa-banner').style.display = 'flex';
+    });
+  }
+
+  function installPWA() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt = null;
+      document.getElementById('pwa-banner').style.display = 'none';
+    }
+  }
+</script>
 </body>
 </html>
-```
