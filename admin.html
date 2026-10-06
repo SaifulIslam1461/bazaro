@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BAZARO Admin Panel</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; margin: 0; }
+    .container { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
+    label { font-weight: bold; display: block; margin-top: 10px; }
+    input, textarea, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { background: #28a745; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 15px; }
+    button:hover { background: #218838; }
+    #login-box { display: block; }
+    #admin-box { display: none; }
+    .status { margin-top: 10px; font-weight: bold; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- লগইন সেকশন -->
+  <div id="login-box">
+    <h2>Admin Login</h2>
+    <label>পাসওয়ার্ড দিন:</label>
+    <input type="password" id="adminPassword" placeholder="পাসওয়ার্ড লিখুন">
+    <button onclick="checkPassword()">লগইন করুন</button>
+    <p id="loginError" class="status" style="color: red;"></p>
+  </div>
+
+  <!-- এডমিন ফরম সেকশন -->
+  <div id="admin-box">
+    <h2>নতুন প্রোডাক্ট যোগ করুন</h2>
+    <label>প্রোডাক্টের নাম:</label>
+    <input type="text" id="name" placeholder="যেমন: টি-শার্ট">
+
+    <label>দাম (টাকা):</label>
+    <input type="number" id="price" placeholder="যেমন: ৫০০">
+
+    <label>ছবির URL (ImgBB থেকে):</label>
+    <input type="text" id="image_url" placeholder="https://i.ibb.co/...">
+
+    <label>বিবরণ (Description):</label>
+    <textarea id="description" rows="3" placeholder="প্রোডাক্টের বিবরণ লিখুন"></textarea>
+
+    <button onclick="addProduct()">প্রোডাক্ট সেভ করুন</button>
+    <p id="statusMsg" class="status"></p>
+  </div>
+</div>
+
+<script>
+  // Supabase কনফিগারেশন
+  const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // সিক্রেট পাসওয়ার্ড (আপনি চাইলে পরে পরিবর্তন করতে পারেন)
+  const SECRET_PASSWORD = "Bazaro2026Password";
+
+  function checkPassword() {
+    const inputPass = document.getElementById("adminPassword").value;
+    if (inputPass === SECRET_PASSWORD) {
+      document.getElementById("login-box").style.display = "none";
+      document.getElementById("admin-box").style.display = "block";
+    } else {
+      document.getElementById("loginError").innerText = "ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।";
+    }
+  }
+
+  async function addProduct() {
+    const name = document.getElementById("name").value;
+    const price = document.getElementById("price").value;
+    const image_url = document.getElementById("image_url").value;
+    const description = document.getElementById("description").value;
+    const statusMsg = document.getElementById("statusMsg");
+
+    if (!name || !price) {
+      statusMsg.style.color = "red";
+      statusMsg.innerText = "প্রোডাক্টের নাম এবং দাম অবশ্যই দিতে হবে!";
+      return;
+    }
+
+    statusMsg.style.color = "blue";
+    statusMsg.innerText = "সেভ হচ্ছে...";
+
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{ name, price, image_url, description }]);
+
+    if (error) {
+      statusMsg.style.color = "red";
+      statusMsg.innerText = "সমস্যা হয়েছে: " + error.message;
+    } else {
+      statusMsg.style.color = "green";
+      statusMsg.innerText = "প্রোডাক্ট সফলভাবে যুক্ত হয়েছে! 🎉";
+      document.getElementById("name").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("image_url").value = "";
+      document.getElementById("description").value = "";
+    }
+  }
+</script>
+
+</body>
+</html>
