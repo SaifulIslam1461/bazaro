@@ -3,61 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAZARO Admin Dashboard</title>
+  <title>BAZARO - Pro Admin Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { box-sizing: border-box; font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    body { background: #f0f2f5; color: #333; }
-    .header { background: #0b132b; color: white; padding: 15px; text-align: center; }
-    .container { max-width: 900px; margin: 20px auto; padding: 15px; }
-    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    h2 { margin-bottom: 15px; color: #1d3557; font-size: 18px; border-bottom: 2px solid #f77f00; padding-bottom: 5px; }
-    label { font-weight: bold; display: block; margin-top: 10px; font-size: 13px; }
-    input, select, textarea, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; font-size: 14px; }
-    button { background: #28a745; color: white; font-weight: bold; border: none; cursor: pointer; }
-    button:hover { opacity: 0.9; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; }
-    .tab-btn { background: #e9ecef; color: #333; padding: 10px; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; flex: 1; }
-    .tab-btn.active { background: #f77f00; color: white; font-weight: bold; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f8f9fa; }
-    .badge { padding: 3px 8px; border-radius: 12px; font-size: 11px; color: white; font-weight: bold; }
-    .badge-pending { background: #ffc107; color: black; }
-    .badge-confirmed { background: #17a2b8; }
-    .badge-delivered { background: #28a745; }
-    .badge-cancelled { background: #dc3545; }
-    #login-box { max-width: 400px; margin: 80px auto; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #f4f6f9; color: #333; padding-bottom: 50px; }
+    header { background: #0b132b; color: #fff; padding: 15px 20px; text-align: center; }
+    .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
+    
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 18px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px; font-weight: bold; }
+    .tab-btn.active { background: #f77f00; color: white; }
+
+    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: bold; border-bottom: 2px solid #f77f00; padding-bottom: 8px; margin-bottom: 15px; color: #0b132b; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+
+    label { display: block; font-size: 13px; font-weight: 600; margin-top: 10px; color: #444; }
+    input, select, textarea { width: 100%; padding: 9px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+    textarea { resize: vertical; }
+
+    .checkbox-group { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .checkbox-group label { font-size: 13px; font-weight: normal; margin-top: 0; cursor: pointer; }
+
+    .submit-btn { background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 20px; width: 100%; }
+    .submit-btn:hover { background: #218838; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+    th, td { border: 1px solid #ddd; padding: 10px; font-size: 12px; text-align: left; }
+    th { background: #0b132b; color: white; }
+    
+    .badge { padding: 3px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; }
+    .bg-pending { background: #ffc107; color: #000; }
+    .bg-delivered { background: #28a745; }
+    .bg-cancelled { background: #dc3545; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h1>BAZARO Admin Dashboard</h1>
-  </div>
+  <header>
+    <h2>BAZARO - Pro Admin Dashboard</h2>
+  </header>
 
-  <div id="login-box" class="card">
-    <h2>এডমিন লগইন</h2>
-    <label>পাসওয়ার্ড:</label>
-    <input type="password" id="adminPassword" placeholder="পাসওয়ার্ড লিখুন">
-    <button onclick="checkPassword()" style="margin-top: 15px;">লগইন</button>
-    <p id="loginError" style="color: red; margin-top: 10px; text-align: center;"></p>
-  </div>
-
-  <div id="dashboard-box" class="container" style="display: none;">
-    <div class="tabs">
-      <button class="tab-btn active" onclick="switchTab('orders-tab')"><i class="fas fa-shopping-bag"></i> অর্ডারসমূহ</button>
-      <button class="tab-btn" onclick="switchTab('add-product-tab')"><i class="fas fa-plus-circle"></i> প্রোডাক্ট যোগ করুন</button>
-      <button class="tab-btn" onclick="switchTab('add-category-tab')"><i class="fas fa-list"></i> ক্যাটাগরি</button>
+  <div class="container">
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-orders')"><i class="fas fa-shopping-bag"></i> অর্ডারসমূহ</button>
+      <button class="tab-btn" onclick="switchTab('tab-add-product')"><i class="fas fa-plus-circle"></i> নতুন প্রোডাক্ট যোগ</button>
+      <button class="tab-btn" onclick="switchTab('tab-category')"><i class="fas fa-list"></i> ক্যাটাগরি ম্যানেজ</button>
     </div>
 
-    <!-- 1. ORDERS TAB -->
-    <div id="orders-tab" class="tab-content card active">
-      <h2>গ্রাহকদের অর্ডার তালিকা</h2>
-      <button onclick="loadOrders()" style="background:#003049; margin-bottom: 10px; width: auto; padding: 6px 15px;">রিফ্রেশ লিস্ট</button>
+    <!-- ORDERS TAB -->
+    <div id="tab-orders" class="tab-content card">
+      <div class="card-title">গ্রাহকদের অর্ডার তালিকা</div>
+      <button onclick="loadOrders()" style="padding: 6px 12px; cursor:pointer;"><i class="fas fa-sync"></i> রিফ্রেশ</button>
       <div style="overflow-x: auto;">
         <table>
           <thead>
@@ -67,175 +68,352 @@
               <th>মোবাইল</th>
               <th>ঠিকানা</th>
               <th>মোট টাকা</th>
+              <th>পেমেন্ট</th>
               <th>স্ট্যাটাস</th>
               <th>অ্যাকশন</th>
             </tr>
           </thead>
-          <tbody id="orders-table-body">
-            <tr><td colspan="7">অর্ডার লোড হচ্ছে...</td></tr>
+          <tbody id="orders-list">
+            <tr><td colspan="8" style="text-align:center;">লোড হচ্ছে...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- 2. ADD PRODUCT TAB -->
-    <div id="add-product-tab" class="tab-content card">
-      <h2>নতুন প্রোডাক্ট যোগ করুন</h2>
-      <label>প্রোডাক্টের নাম:</label>
-      <input type="text" id="p_name" placeholder="যেমন: চামড়ার ওয়ালেট">
-
-      <div style="display: flex; gap: 10px;">
-        <div style="flex:1;">
-          <label>মূল্য (৳):</label>
-          <input type="number" id="p_price" placeholder="যেমন: ১০০০">
+    <!-- ADD PRODUCT TAB -->
+    <div id="tab-add-product" class="tab-content card" style="display: none;">
+      <form id="product-form" onsubmit="saveProduct(event)">
+        
+        <!-- Product Info -->
+        <div class="card-title">১. Product Information</div>
+        <div class="grid-2">
+          <div>
+            <label>Product Name *</label>
+            <input type="text" id="p_name" oninput="generateSlug()" required placeholder="যেমন: JS Leather Brown Sandal">
+          </div>
+          <div>
+            <label>Product Slug (Auto)</label>
+            <input type="text" id="p_slug" readonly style="background: #eee;">
+          </div>
         </div>
-        <div style="flex:1;">
-          <label>ডিসকাউন্ট মূল্য (৳):</label>
-          <input type="number" id="p_discount" placeholder="যেমন: ৮০০">
+        <div class="grid-3">
+          <div>
+            <label>SKU Code</label>
+            <input type="text" id="p_sku" placeholder="SKU-1001">
+          </div>
+          <div>
+            <label>Brand Name</label>
+            <input type="text" id="p_brand" placeholder="JS Leather">
+          </div>
+          <div>
+            <label>Product Type</label>
+            <input type="text" id="p_type" placeholder="Sandal / Watch / Shirt">
+          </div>
         </div>
-      </div>
+        <div class="grid-2">
+          <div>
+            <label>Category *</label>
+            <select id="p_category" required>
+              <option value="">ক্যাটাগরি সিলেক্ট করুন</option>
+            </select>
+          </div>
+          <div>
+            <label>Subcategory</label>
+            <input type="text" id="p_subcategory" placeholder="Men Footwear">
+          </div>
+        </div>
 
-      <label>ক্যাটাগরি:</label>
-      <select id="p_category">
-        <option value="">ক্যাটাগরি সিলেক্ট করুন</option>
-      </select>
+        <!-- Pricing -->
+        <div class="card-title" style="margin-top:25px;">২. Pricing & Profit</div>
+        <div class="grid-3">
+          <div>
+            <label>Regular Price (৳) *</label>
+            <input type="number" id="p_price" oninput="calculateMargin()" required placeholder="1800">
+          </div>
+          <div>
+            <label>Discount Price (৳)</label>
+            <input type="number" id="p_discount_price" oninput="calculateMargin()" placeholder="1590">
+          </div>
+          <div>
+            <label>Discount % (Auto)</label>
+            <input type="text" id="p_disc_percent" readonly style="background: #eee;">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Cost Price (Admin Only ৳)</label>
+            <input type="number" id="p_cost" oninput="calculateMargin()" placeholder="1000">
+          </div>
+          <div>
+            <label>Profit Margin (Auto ৳)</label>
+            <input type="text" id="p_profit" readonly style="background: #eee; font-weight:bold; color:green;">
+          </div>
+        </div>
 
-      <label>প্রধান ছবির URL (ImgBB Direct Link):</label>
-      <input type="text" id="p_image" placeholder="https://i.ibb.co/...">
+        <!-- Inventory -->
+        <div class="card-title" style="margin-top:25px;">৩. Inventory & Stock</div>
+        <div class="grid-3">
+          <div>
+            <label>Stock Quantity *</label>
+            <input type="number" id="p_stock" value="10" required>
+          </div>
+          <div>
+            <label>Low Stock Alert</label>
+            <input type="number" id="p_low_stock" value="5">
+          </div>
+          <div>
+            <label>Stock Status</label>
+            <select id="p_stock_status">
+              <option value="In Stock">In Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+              <option value="Pre Order">Pre Order</option>
+            </select>
+          </div>
+        </div>
 
-      <label>স্টক পরিমাণ:</label>
-      <input type="number" id="p_stock" value="10">
+        <!-- Product Variants -->
+        <div class="card-title" style="margin-top:25px;">৪. Product Variants</div>
+        <label>Available Sizes:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="sizes" value="38"> 38</label>
+          <label><input type="checkbox" name="sizes" value="39"> 39</label>
+          <label><input type="checkbox" name="sizes" value="40"> 40</label>
+          <label><input type="checkbox" name="sizes" value="41"> 41</label>
+          <label><input type="checkbox" name="sizes" value="42"> 42</label>
+          <label><input type="checkbox" name="sizes" value="43"> 43</label>
+          <label><input type="checkbox" name="sizes" value="44"> 44</label>
+        </div>
 
-      <label>বিবরণ:</label>
-      <textarea id="p_desc" rows="3" placeholder="প্রোডাক্টের বিবরণ..."></textarea>
+        <label style="margin-top: 15px;">Available Colors:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="colors" value="Black"> Black</label>
+          <label><input type="checkbox" name="colors" value="Brown"> Brown</label>
+          <label><input type="checkbox" name="colors" value="White"> White</label>
+          <label><input type="checkbox" name="colors" value="Tan"> Tan</label>
+          <label><input type="checkbox" name="colors" value="Coffee"> Coffee</label>
+        </div>
 
-      <button onclick="saveProduct()" style="margin-top: 15px;">প্রোডাক্ট সেভ করুন</button>
-      <p id="p_status" style="margin-top: 10px; font-weight: bold; text-align: center;"></p>
+        <!-- Images -->
+        <div class="card-title" style="margin-top:25px;">৫. Product Images (Direct Image URLs)</div>
+        <label>Main Image URL *</label>
+        <input type="url" id="p_image" required placeholder="https://i.ibb.co/.../main.jpg">
+        <div class="grid-2">
+          <div><label>Gallery Image 1</label><input type="url" id="p_g1" placeholder="URL 1"></div>
+          <div><label>Gallery Image 2</label><input type="url" id="p_g2" placeholder="URL 2"></div>
+          <div><label>Gallery Image 3</label><input type="url" id="p_g3" placeholder="URL 3"></div>
+          <div><label>Gallery Image 4</label><input type="url" id="p_g4" placeholder="URL 4"></div>
+        </div>
+
+        <!-- Descriptions -->
+        <div class="card-title" style="margin-top:25px;">৬. Descriptions & Features</div>
+        <label>Short Description</label>
+        <textarea id="p_short_desc" rows="2" placeholder="সংক্ষিপ্ত বিবরণ..."></textarea>
+        
+        <label>Full Description</label>
+        <textarea id="p_desc" rows="4" placeholder="বিস্তারিত বিবরণ..."></textarea>
+        
+        <label>Product Features (Comma Separated)</label>
+        <textarea id="p_features" rows="2" placeholder="100% Genuine Leather, Durable Rubber Sole, Soft Footbed"></textarea>
+
+        <!-- Specifications -->
+        <div class="card-title" style="margin-top:25px;">৭. Specifications</div>
+        <div class="grid-3">
+          <div><label>Material</label><input type="text" id="p_material" placeholder="Genuine Leather"></div>
+          <div><label>Weight</label><input type="text" id="p_weight" placeholder="500g"></div>
+          <div><label>Origin Country</label><input type="text" id="p_origin" value="Bangladesh"></div>
+          <div><label>Warranty</label><input type="text" id="p_warranty" placeholder="30 Days"></div>
+          <div><label>Gender Target</label>
+            <select id="p_gender">
+              <option value="Men">Men</option>
+              <option value="Women">Women</option>
+              <option value="Unisex">Unisex</option>
+              <option value="Kids">Kids</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Shipping & Labels -->
+        <div class="card-title" style="margin-top:25px;">৮. Shipping & Label</div>
+        <div class="grid-3">
+          <div><label>Inside City Delivery (৳)</label><input type="number" id="p_del_in" value="60"></div>
+          <div><label>Outside City Delivery (৳)</label><input type="number" id="p_del_out" value="120"></div>
+          <div><label>Delivery Time</label><input type="text" id="p_del_time" value="2-4 Days"></div>
+        </div>
+        <label>Product Label / Tag</label>
+        <select id="p_label">
+          <option value="">None</option>
+          <option value="New Arrival">New Arrival</option>
+          <option value="Best Seller">Best Seller</option>
+          <option value="Featured Product">Featured Product</option>
+          <option value="Hot Deal">Hot Deal</option>
+          <option value="Flash Sale">Flash Sale</option>
+        </select>
+
+        <!-- SEO -->
+        <div class="card-title" style="margin-top:25px;">৯. SEO</div>
+        <label>SEO Title</label>
+        <input type="text" id="p_seo_title" placeholder="Buy Genuine Leather Sandals in BD">
+        <label>SEO Description</label>
+        <textarea id="p_seo_desc" rows="2"></textarea>
+        <label>Tags (Comma Separated)</label>
+        <input type="text" id="p_tags" placeholder="sandal, leather, mens shoe">
+
+        <button type="submit" class="submit-btn"><i class="fas fa-save"></i> প্রোডাক্ট সেভ করুন</button>
+      </form>
     </div>
 
-    <!-- 3. ADD CATEGORY TAB -->
-    <div id="add-category-tab" class="tab-content card">
-      <h2>নতুন ক্যাটাগরি তৈরি করুন</h2>
-      <label>ক্যাটাগরির নাম:</label>
-      <input type="text" id="c_name" placeholder="যেমন: Electronics">
-      <label>ছবি / আইকন URL:</label>
-      <input type="text" id="c_image" placeholder="https://i.ibb.co/...">
-      <button onclick="saveCategory()" style="margin-top: 15px;">ক্যাটাগরি সেভ করুন</button>
-      <p id="c_status" style="margin-top: 10px; font-weight: bold; text-align: center;"></p>
+    <!-- CATEGORY TAB -->
+    <div id="tab-category" class="tab-content card" style="display: none;">
+      <div class="card-title">নতুন ক্যাটাগরি তৈরি করুন</div>
+      <form onsubmit="saveCategory(event)">
+        <label>ক্যাটাগরির নাম *</label>
+        <input type="text" id="cat_name" required placeholder="Electronics / Fashion">
+        <label>ছবি / আইকন URL</label>
+        <input type="url" id="cat_icon" placeholder="https://i.ibb.co/...">
+        <button type="submit" class="submit-btn" style="background:#f77f00;">ক্যাটাগরি সেভ করুন</button>
+      </form>
     </div>
+
   </div>
 
 <script>
   const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
   const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const SECRET_PASSWORD = "Bazaro2026Password";
-
-  function checkPassword() {
-    if (document.getElementById("adminPassword").value === SECRET_PASSWORD) {
-      document.getElementById("login-box").style.display = "none";
-      document.getElementById("dashboard-box").style.display = "block";
-      loadCategoriesDropdown();
-      loadOrders();
-    } else {
-      document.getElementById("loginError").innerText = "ভুল পাসওয়ার্ড!";
-    }
-  }
 
   function switchTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
+    document.getElementById(tabId).style.display = 'block';
     event.currentTarget.classList.add('active');
   }
 
-  async function loadCategoriesDropdown() {
-    const { data } = await supabaseClient.from('categories').select('*');
-    const select = document.getElementById('p_category');
-    if (data) {
-      select.innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>' + 
-        data.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-    }
-  }
-
-  async function saveProduct() {
+  function generateSlug() {
     const name = document.getElementById('p_name').value;
-    const price = document.getElementById('p_price').value;
-    const discount_price = document.getElementById('p_discount').value || null;
-    const category_id = document.getElementById('p_category').value || null;
-    const image_url = document.getElementById('p_image').value;
-    const stock = document.getElementById('p_stock').value;
-    const description = document.getElementById('p_desc').value;
-    const status = document.getElementById('p_status');
+    document.getElementById('p_slug').value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  }
 
-    if(!name || !price) { status.style.color='red'; status.innerText='নাম ও দাম আবশ্যক!'; return; }
+  function calculateMargin() {
+    const reg = parseFloat(document.getElementById('p_price').value) || 0;
+    const disc = parseFloat(document.getElementById('p_discount_price').value) || reg;
+    const cost = parseFloat(document.getElementById('p_cost').value) || 0;
 
-    status.style.color='blue'; status.innerText='সেভ হচ্ছে...';
+    if (reg > 0 && disc < reg) {
+      const perc = Math.round(((reg - disc) / reg) * 100);
+      document.getElementById('p_disc_percent').value = perc + '% OFF';
+    } else {
+      document.getElementById('p_disc_percent').value = '0%';
+    }
 
-    const { error } = await supabaseClient.from('products').insert([{
-      name, price, discount_price, category_id, image_url, stock, description
-    }]);
+    const profit = disc - cost;
+    document.getElementById('p_profit').value = '৳ ' + profit;
+  }
 
-    if(error) { status.style.color='red'; status.innerText=error.message; }
-    else {
-      status.style.color='green'; status.innerText='প্রোডাক্ট সফলভাবে যুক্ত হয়েছে! 🎉';
-      document.getElementById('p_name').value = '';
-      document.getElementById('p_price').value = '';
+  async function loadCategories() {
+    const { data } = await supabaseClient.from('categories').select('*');
+    if(data) {
+      document.getElementById('p_category').innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>' + 
+        data.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
     }
   }
 
-  async function saveCategory() {
-    const name = document.getElementById('c_name').value;
-    const image_url = document.getElementById('c_image').value;
-    const status = document.getElementById('c_status');
-    const slug = name.toLowerCase().replace(/\s+/g, '-');
+  async function saveProduct(e) {
+    e.preventDefault();
+    const sizes = Array.from(document.querySelectorAll('input[name="sizes"]:checked')).map(cb => cb.value);
+    const colors = Array.from(document.querySelectorAll('input[name="colors"]:checked')).map(cb => cb.value);
 
-    if(!name) return;
+    const productData = {
+      name: document.getElementById('p_name').value,
+      slug: document.getElementById('p_slug').value,
+      sku: document.getElementById('p_sku').value,
+      brand: document.getElementById('p_brand').value,
+      category: document.getElementById('p_category').value,
+      subcategory: document.getElementById('p_subcategory').value,
+      product_type: document.getElementById('p_type').value,
+      price: parseFloat(document.getElementById('p_price').value),
+      discount_price: parseFloat(document.getElementById('p_discount_price').value) || null,
+      cost_price: parseFloat(document.getElementById('p_cost').value) || null,
+      stock: parseInt(document.getElementById('p_stock').value),
+      low_stock_alert: parseInt(document.getElementById('p_low_stock').value),
+      stock_status: document.getElementById('p_stock_status').value,
+      sizes: sizes,
+      colors: colors,
+      image_url: document.getElementById('p_image').value,
+      gallery_1: document.getElementById('p_g1').value || null,
+      gallery_2: document.getElementById('p_g2').value || null,
+      gallery_3: document.getElementById('p_g3').value || null,
+      gallery_4: document.getElementById('p_g4').value || null,
+      short_description: document.getElementById('p_short_desc').value,
+      description: document.getElementById('p_desc').value,
+      features: document.getElementById('p_features').value,
+      material: document.getElementById('p_material').value,
+      weight: document.getElementById('p_weight').value,
+      origin_country: document.getElementById('p_origin').value,
+      warranty: document.getElementById('p_warranty').value,
+      gender: document.getElementById('p_gender').value,
+      delivery_inside: parseFloat(document.getElementById('p_del_in').value),
+      delivery_outside: parseFloat(document.getElementById('p_del_out').value),
+      delivery_time: document.getElementById('p_del_time').value,
+      product_label: document.getElementById('p_label').value || null,
+      seo_title: document.getElementById('p_seo_title').value,
+      seo_description: document.getElementById('p_seo_desc').value,
+      tags: document.getElementById('p_tags').value
+    };
 
-    const { error } = await supabaseClient.from('categories').insert([{ name, slug, image_url }]);
-    if(error) { status.style.color='red'; status.innerText=error.message; }
-    else {
-      status.style.color='green'; status.innerText='ক্যাটাগরি তৈরি হয়েছে!';
-      loadCategoriesDropdown();
+    const { error } = await supabaseClient.from('products').insert([productData]);
+    if (error) {
+      alert('Error saving product: ' + error.message);
+    } else {
+      alert('🎉 সফলভাবে প্রোডাক্ট যোগ হয়েছে!');
+      document.getElementById('product-form').reset();
     }
+  }
+
+  async function saveCategory(e) {
+    e.preventDefault();
+    const name = document.getElementById('cat_name').value;
+    const image_url = document.getElementById('cat_icon').value;
+
+    const { error } = await supabaseClient.from('categories').insert([{ name, image_url }]);
+    if (error) alert(error.message);
+    else { alert('ক্যাটাগরি যুক্ত হয়েছে!'); location.reload(); }
   }
 
   async function loadOrders() {
-    const tbody = document.getElementById('orders-table-body');
-    const { data: orders, error } = await supabaseClient.from('orders').select('*').order('id', {ascending: false});
-    
-    if(error || !orders || orders.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">কোনো অর্ডার পাওয়া যায়নি।</td></tr>';
-      return;
+    const { data: orders } = await supabaseClient.from('orders').select('*').order('id', { ascending: false });
+    const tbody = document.getElementById('orders-list');
+    if (orders && orders.length > 0) {
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td>#${o.id}</td>
+          <td><b>${o.customer_name}</b></td>
+          <td>${o.phone}</td>
+          <td>${o.address}, ${o.district}</td>
+          <td>৳ ${o.total_amount}</td>
+          <td>${o.payment_method}</td>
+          <td><span class="badge bg-pending">${o.status}</span></td>
+          <td>
+            <select onchange="updateStatus(${o.id}, this.value)">
+              <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
+              <option value="Confirmed" ${o.status==='Confirmed'?'selected':''}>Confirmed</option>
+              <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+              <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
     }
-
-    tbody.innerHTML = orders.map(o => `
-      <tr>
-        <td>#${o.id}</td>
-        <td>${o.customer_name}</td>
-        <td>${o.phone}</td>
-        <td>${o.district}, ${o.address}</td>
-        <td>৳${o.total_amount}</td>
-        <td><span class="badge badge-${o.status.toLowerCase()}">${o.status}</span></td>
-        <td>
-          <select onchange="updateOrderStatus(${o.id}, this.value)" style="padding:2px; font-size:11px;">
-            <option value="">Status</option>
-            <option value="Confirmed">Confirm</option>
-            <option value="Processing">Processing</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-            <option value="Cancelled">Cancel</option>
-          </select>
-        </td>
-      </tr>
-    `).join('');
   }
 
-  async function updateOrderStatus(id, status) {
-    if(!status) return;
+  async function updateStatus(id, status) {
     await supabaseClient.from('orders').update({ status }).eq('id', id);
-    loadOrders();
+    alert('অর্ডার স্ট্যাটাস আপডেট হয়েছে!');
   }
+
+  loadCategories();
+  loadOrders();
 </script>
 </body>
 </html>
