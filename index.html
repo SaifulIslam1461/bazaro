@@ -3,338 +3,473 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAZARO - এক বাজারে সবকিছু</title>
+  <title>BAZARO - Pro Admin Dashboard</title>
   
   <!-- PWA Manifest & Theme Color -->
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#ff9800">
-  
-  <!-- FontAwesome Icons & Google Fonts -->
+  <meta name="theme-color" content="#f77f00">
+
+  <!-- Supabase & FontAwesome & Fonts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Supabase Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', 'Segoe UI', sans-serif; }
-    body { background: #0a0f1d; color: #ffffff; padding-bottom: 80px; }
-
-    /* Premium Header */
-    header {
-      background: linear-gradient(135deg, #161f38, #0b132b);
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      border-bottom: 1px solid rgba(255, 152, 0, 0.2);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .brand img { width: 42px; height: 42px; border-radius: 10px; border: 2px solid #ff9800; }
-    .brand-title { font-size: 24px; font-weight: 700; color: #ff9800; letter-spacing: 1px; }
-    .brand-sub { font-size: 11px; color: #cbd5e1; margin-top: -3px; }
+    body { background: #0b132b; color: #ffffff; padding-bottom: 70px; }
     
-    .header-actions { display: flex; align-items: center; gap: 15px; }
-    .cart-icon { position: relative; font-size: 22px; color: #ff9800; cursor: pointer; transition: transform 0.2s; }
-    .cart-icon:hover { transform: scale(1.1); }
-    .cart-count {
-      position: absolute; top: -8px; right: -10px; background: #e53e3e;
-      color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold;
+    /* Header */
+    header { 
+      background: linear-gradient(135deg, #1c2541, #0b132b); 
+      color: #fff; padding: 18px 20px; text-align: center; 
+      border-bottom: 2px solid #f77f00; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      display: flex; justify-content: space-between; align-items: center;
     }
+    .brand-title { font-size: 20px; font-weight: bold; color: #f77f00; }
 
-    /* Main Container */
-    .container { padding: 15px; max-width: 1200px; margin: auto; }
-
-    /* Modern Search Bar */
-    .search-box {
-      display: flex; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,152,0,0.3);
-      border-radius: 12px; overflow: hidden; margin-bottom: 25px; backdrop-filter: blur(5px);
-    }
-    .search-box input {
-      flex: 1; border: none; padding: 12px 16px; outline: none; font-size: 14px; color: #fff; background: transparent;
-    }
-    .search-box input::placeholder { color: #94a3b8; }
-    .search-box button {
-      background: linear-gradient(135deg, #ff9800, #e67e22); border: none; padding: 0 20px; color: white; font-size: 16px; cursor: pointer;
-    }
-
-    /* Section Titles */
-    .section-title {
-      font-size: 19px; font-weight: 700; margin-bottom: 15px; color: #ff9800;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .section-title i { font-size: 16px; }
-
-    /* Categories Horizontal Scroll */
-    .categories-grid {
-      display: flex; gap: 12px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 30px;
-      scrollbar-width: thin; scrollbar-color: #ff9800 transparent;
-    }
-    .category-card {
-      min-width: 95px; background: #161f38; border: 1px solid rgba(255,255,255,0.05);
-      border-radius: 14px; padding: 12px 8px; text-align: center; cursor: pointer;
-      flex-shrink: 0; transition: all 0.3s ease;
-    }
-    .category-card:hover { transform: translateY(-4px); border-color: #ff9800; background: #1c284e; }
-    .category-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 6px; border-radius: 8px; }
-    .category-card span { font-size: 12px; display: block; color: #e2e8f0; font-weight: 600; white-space: nowrap; }
-
-    /* Product Grid */
-    .products-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 16px;
-    }
-    .product-card {
-      background: #161f38; border-radius: 14px; overflow: hidden; display: flex;
-      flex-direction: column; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2); transition: all 0.3s ease;
-    }
-    .product-card:hover { transform: translateY(-5px); border-color: rgba(255,152,0,0.5); }
-    .product-img-box { position: relative; width: 100%; height: 160px; background: #ffffff; overflow: hidden; }
-    .product-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-    .product-card:hover img { transform: scale(1.05); }
+    .container { max-width: 1050px; margin: 20px auto; padding: 0 15px; }
     
-    .product-info { padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-    .product-title { font-size: 14px; font-weight: 600; color: #f8fafc; height: 40px; overflow: hidden; line-height: 1.3; margin-bottom: 8px; }
-    .price-box { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
-    .main-price { font-size: 17px; font-weight: 700; color: #ff9800; }
-    .old-price { font-size: 12px; color: #64748b; text-decoration: line-through; }
+    /* Navigation Tabs */
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
+    .tab-btn { 
+      padding: 12px 20px; border: 1px solid rgba(255,255,255,0.1); background: #1c2541; 
+      color: #cbd5e1; cursor: pointer; border-radius: 8px; font-weight: bold; font-size: 14px;
+      transition: all 0.3s; flex: 1; text-align: center; min-width: 140px;
+    }
+    .tab-btn.active, .tab-btn:hover { background: linear-gradient(135deg, #f77f00, #e67e22); color: white; border-color: #f77f00; }
     
-    .btn-buy {
-      width: 100%; background: linear-gradient(135deg, #ff9800, #f39c12); color: #0b132b; border: none; padding: 9px;
-      border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-      transition: all 0.2s;
+    /* Cards */
+    .card { background: #161f38; padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 20px rgba(0,0,0,0.3); margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: bold; border-bottom: 2px solid #f77f00; padding-bottom: 8px; margin-bottom: 20px; color: #f77f00; display: flex; align-items: center; gap: 8px; }
+    
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+    
+    label { display: block; font-size: 13px; font-weight: 600; margin-top: 12px; color: #e2e8f0; }
+    input, select, textarea { 
+      width: 100%; padding: 11px; margin-top: 6px; border: 1px solid #2d3748; 
+      border-radius: 6px; font-size: 13px; background: #0b132b; color: #fff; outline: none;
     }
-    .btn-buy:hover { background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; }
-
-    /* Floating WhatsApp Button */
-    .whatsapp-btn {
-      position: fixed; bottom: 80px; right: 20px; background: #25d366; color: white;
-      width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      font-size: 28px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); z-index: 999;
-      text-decoration: none; transition: transform 0.3s;
+    input:focus, select:focus, textarea:focus { border-color: #f77f00; }
+    textarea { resize: vertical; }
+    
+    .checkbox-group { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; background: #0b132b; padding: 10px; border-radius: 6px; }
+    .checkbox-group label { font-size: 13px; font-weight: normal; margin-top: 0; cursor: pointer; color: #fff; }
+    
+    .submit-btn { 
+      background: linear-gradient(135deg, #28a745, #218838); color: white; border: none; 
+      padding: 13px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; 
+      margin-top: 25px; width: 100%; transition: opacity 0.2s;
     }
-    .whatsapp-btn:hover { transform: scale(1.1); }
+    .submit-btn:hover { opacity: 0.9; }
 
-    /* Customer Bottom Navigation */
-    .bottom-nav {
-      position: fixed; bottom: 0; left: 0; right: 0; background: #161f38;
-      display: flex; justify-content: space-around; padding: 10px 0;
-      border-top: 1px solid rgba(255,152,0,0.2); z-index: 1000; box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
-    }
-    .nav-item { text-align: center; color: #94a3b8; text-decoration: none; font-size: 11px; font-weight: 600; cursor: pointer; transition: color 0.2s; }
-    .nav-item i { font-size: 19px; display: block; margin-bottom: 3px; }
-    .nav-item.active, .nav-item:hover { color: #ff9800; }
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #0b132b; border-radius: 8px; overflow: hidden; }
+    th, td { border: 1px solid #2d3748; padding: 12px; font-size: 13px; text-align: left; }
+    th { background: #1c2541; color: #f77f00; font-weight: bold; }
+    
+    .badge { padding: 4px 10px; border-radius: 20px; color: white; font-size: 11px; font-weight: bold; }
+    .bg-pending { background: #ffc107; color: #000; }
+    .bg-confirmed { background: #17a2b8; }
+    .bg-delivered { background: #28a745; }
+    .bg-cancelled { background: #dc3545; }
 
-    /* PWA Install Banner Style */
+    /* App Install Banner */
     #pwa-install-banner {
-      display: none; position: fixed; bottom: 70px; left: 15px; right: 15px;
-      background: linear-gradient(135deg, #ff9800, #e67e22); color: white; padding: 12px 16px; border-radius: 12px;
-      z-index: 9999; justify-content: space-between; align-items: center;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      display: none; position: fixed; bottom: 15px; left: 15px; right: 15px;
+      background: linear-gradient(135deg, #f77f00, #e67e22); color: white; padding: 12px 18px; border-radius: 12px;
+      z-index: 9999; justify-content: space-between; align-items: center; box-shadow: 0 8px 25px rgba(0,0,0,0.5);
     }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
   <header>
-    <div class="brand">
-      <img src="https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png" onerror="this.src='https://img.icons8.com/color/512/shopping-bag.png'">
-      <div>
-        <div class="brand-title">BAZARO</div>
-        <div class="brand-sub">এক বাজারে সবকিছু</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <div class="cart-icon" onclick="openCart()">
-        <i class="fas fa-shopping-cart"></i>
-        <span class="cart-count" id="cart-count">0</span>
-      </div>
-    </div>
+    <div class="brand-title"><i class="fas fa-user-shield"></i> BAZARO - Admin Dashboard</div>
+    <button onclick="location.reload()" style="background:#f77f00; border:none; color:white; padding:6px 12px; border-radius:5px; cursor:pointer;"><i class="fas fa-sync"></i> রিফ্রেশ</button>
   </header>
 
   <div class="container">
-    <!-- Search Bar -->
-    <div class="search-box">
-      <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="পণ্য বা ক্যাটাগরি খুঁজুন...">
-      <button><i class="fas fa-search"></i></button>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-orders', event)"><i class="fas fa-shopping-bag"></i> অর্ডারসমূহ</button>
+      <button class="tab-btn" onclick="switchTab('tab-add-product', event)"><i class="fas fa-plus-circle"></i> প্রোডাক্ট যোগ করুন</button>
+      <button class="tab-btn" onclick="switchTab('tab-category', event)"><i class="fas fa-list"></i> ক্যাটাগরি ম্যানেজ</button>
     </div>
 
-    <!-- Categories -->
-    <div class="section-title"><i class="fas fa-th-large"></i> ক্যাটাগরিসমূহ</div>
-    <div class="categories-grid" id="categories-container">
-      <!-- Dynamic Categories Loading -->
+    <!-- ORDERS TAB -->
+    <div id="tab-orders" class="tab-content card">
+      <div class="card-title"><i class="fas fa-list-alt"></i> গ্রাহকদের অর্ডার তালিকা</div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>গ্রাহক</th>
+              <th>মোবাইল</th>
+              <th>ঠিকানা</th>
+              <th>মোট টাকা</th>
+              <th>পেমেন্ট</th>
+              <th>স্ট্যাটাস</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="orders-list">
+            <tr><td colspan="8" style="text-align:center; padding: 20px;">অর্ডার লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Products List -->
-    <div class="section-title"><i class="fas fa-bolt"></i> জনপ্রিয় পণ্যসমূহ</div>
-    <div class="products-grid" id="products-container">
-      <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #94a3b8;">
-        <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>পণ্য লোড হচ্ছে...
+    <!-- ADD PRODUCT TAB -->
+    <div id="tab-add-product" class="tab-content card" style="display: none;">
+      <form id="product-form" onsubmit="saveProduct(event)">
+        
+        <div class="card-title">১. Product Basic Details</div>
+        <div class="grid-2">
+          <div>
+            <label>Product Name *</label>
+            <input type="text" id="p_name" oninput="generateSlug()" required placeholder="যেমন: JS Leather Brown Sandal">
+          </div>
+          <div>
+            <label>Product Slug (Auto)</label>
+            <input type="text" id="p_slug" readonly style="background: #111a33;">
+          </div>
+        </div>
+        <div class="grid-3">
+          <div>
+            <label>SKU Code</label>
+            <input type="text" id="p_sku" placeholder="SKU-1001">
+          </div>
+          <div>
+            <label>Brand Name</label>
+            <input type="text" id="p_brand" placeholder="JS Leather">
+          </div>
+          <div>
+            <label>Product Type</label>
+            <input type="text" id="p_type" placeholder="Sandal / Watch / Shirt">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Category *</label>
+            <select id="p_category" required>
+              <option value="">ক্যাটাগরি সিলেক্ট করুন</option>
+            </select>
+          </div>
+          <div>
+            <label>Subcategory</label>
+            <input type="text" id="p_subcategory" placeholder="Men Footwear">
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-top:25px;">২. Pricing & Profit</div>
+        <div class="grid-3">
+          <div>
+            <label>Regular Price (৳) *</label>
+            <input type="number" id="p_price" oninput="calculateMargin()" required placeholder="1800">
+          </div>
+          <div>
+            <label>Discount Price (৳)</label>
+            <input type="number" id="p_discount_price" oninput="calculateMargin()" placeholder="1590">
+          </div>
+          <div>
+            <label>Discount % (Auto)</label>
+            <input type="text" id="p_disc_percent" readonly style="background: #111a33;">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label>Cost Price (Admin Only ৳)</label>
+            <input type="number" id="p_cost" oninput="calculateMargin()" placeholder="1000">
+          </div>
+          <div>
+            <label>Profit Margin (Auto ৳)</label>
+            <input type="text" id="p_profit" readonly style="background: #111a33; font-weight:bold; color:#28a745;">
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-top:25px;">৩. Inventory & Stock</div>
+        <div class="grid-3">
+          <div>
+            <label>Stock Quantity *</label>
+            <input type="number" id="p_stock" value="10" required>
+          </div>
+          <div>
+            <label>Low Stock Alert</label>
+            <input type="number" id="p_low_stock" value="5">
+          </div>
+          <div>
+            <label>Stock Status</label>
+            <select id="p_stock_status">
+              <option value="In Stock">In Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+              <option value="Pre Order">Pre Order</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card-title" style="margin-top:25px;">৪. Product Variants</div>
+        <label>Available Sizes:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="sizes" value="38"> 38</label>
+          <label><input type="checkbox" name="sizes" value="39"> 39</label>
+          <label><input type="checkbox" name="sizes" value="40"> 40</label>
+          <label><input type="checkbox" name="sizes" value="41"> 41</label>
+          <label><input type="checkbox" name="sizes" value="42"> 42</label>
+          <label><input type="checkbox" name="sizes" value="43"> 43</label>
+          <label><input type="checkbox" name="sizes" value="44"> 44</label>
+        </div>
+        <label style="margin-top: 15px;">Available Colors:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="colors" value="Black"> Black</label>
+          <label><input type="checkbox" name="colors" value="Brown"> Brown</label>
+          <label><input type="checkbox" name="colors" value="White"> White</label>
+          <label><input type="checkbox" name="colors" value="Tan"> Tan</label>
+          <label><input type="checkbox" name="colors" value="Coffee"> Coffee</label>
+        </div>
+
+        <div class="card-title" style="margin-top:25px;">৫. Product Images (Direct Image URLs)</div>
+        <label>Main Image URL *</label>
+        <input type="url" id="p_image" required placeholder="https://i.ibb.co/.../main.jpg">
+        <div class="grid-2">
+          <div><label>Gallery Image 1</label><input type="url" id="p_g1" placeholder="URL 1"></div>
+          <div><label>Gallery Image 2</label><input type="url" id="p_g2" placeholder="URL 2"></div>
+          <div><label>Gallery Image 3</label><input type="url" id="p_g3" placeholder="URL 3"></div>
+          <div><label>Gallery Image 4</label><input type="url" id="p_g4" placeholder="URL 4"></div>
+        </div>
+
+        <div class="card-title" style="margin-top:25px;">৬. Descriptions & Features</div>
+        <label>Short Description</label>
+        <textarea id="p_short_desc" rows="2" placeholder="সংক্ষিপ্ত বিবরণ..."></textarea>
+        
+        <label>Full Description</label>
+        <textarea id="p_desc" rows="4" placeholder="বিস্তারিত বিবরণ..."></textarea>
+        
+        <label>Product Features (Comma Separated)</label>
+        <textarea id="p_features" rows="2" placeholder="100% Genuine Leather, Durable Rubber Sole"></textarea>
+
+        <div class="card-title" style="margin-top:25px;">৭. Specifications & Shipping</div>
+        <div class="grid-3">
+          <div><label>Material</label><input type="text" id="p_material" placeholder="Genuine Leather"></div>
+          <div><label>Weight</label><input type="text" id="p_weight" placeholder="500g"></div>
+          <div><label>Warranty</label><input type="text" id="p_warranty" placeholder="30 Days"></div>
+          <div><label>Inside City Delivery (৳)</label><input type="number" id="p_del_in" value="60"></div>
+          <div><label>Outside City Delivery (৳)</label><input type="number" id="p_del_out" value="120"></div>
+          <div><label>Delivery Time</label><input type="text" id="p_del_time" value="2-4 Days"></div>
+        </div>
+
+        <button type="submit" class="submit-btn"><i class="fas fa-save"></i> প্রোডাক্ট সেভ করুন</button>
+      </form>
+    </div>
+
+    <!-- CATEGORY TAB -->
+    <div id="tab-category" class="tab-content card" style="display: none;">
+      <div class="card-title"><i class="fas fa-folder-plus"></i> নতুন ক্যাটাগরি যোগ করুন</div>
+      <form onsubmit="saveCategory(event)">
+        <label>ক্যাটাগরির নাম *</label>
+        <input type="text" id="cat_name" required placeholder="যেমন: Electronics / Shoes">
+        <label>ক্যাটাগরি ছবি / আইকন URL</label>
+        <input type="url" id="cat_icon" placeholder="https://img.icons8.com/color/512/category.png">
+        <button type="submit" class="submit-btn" style="background: linear-gradient(135deg, #f77f00, #e67e22);">ক্যাটাগরি সেভ করুন</button>
+      </form>
+
+      <div class="card-title" style="margin-top:30px;"><i class="fas fa-list"></i> বর্তমান ক্যাটাগরিসমূহ</div>
+      <div id="category-list" class="grid-3">
+        <!-- Loaded dynamically -->
       </div>
     </div>
   </div>
 
-  <!-- WhatsApp Chat Button -->
-  <a href="https://wa.me/8801800000000?text=Hello%20BAZARO,%20I%20have%20a%20query" target="_blank" class="whatsapp-btn" title="WhatsApp-এ মেসেজ দিন">
-    <i class="fab fa-whatsapp"></i>
-  </a>
-
-  <!-- Customer Bottom Navigation -->
-  <div class="bottom-nav">
-    <div class="nav-item active" onclick="navClick('home')"><i class="fas fa-home"></i>হোম</div>
-    <div class="nav-item" onclick="navClick('category')"><i class="fas fa-list-ul"></i>ক্যাটাগরি</div>
-    <div class="nav-item" onclick="openCart()"><i class="fas fa-shopping-bag"></i>কার্ট</div>
-    <div class="nav-item" onclick="navClick('orders')"><i class="fas fa-truck"></i>অর্ডার</div>
-    <div class="nav-item" onclick="navClick('profile')"><i class="fas fa-user-circle"></i>প্রোফাইল</div>
-  </div>
-
-  <!-- PWA Auto Install Banner -->
+  <!-- Admin PWA Install Banner -->
   <div id="pwa-install-banner">
     <div style="display:flex; align-items:center; gap:12px;">
-      <img src="https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png" style="width:40px; height:40px; border-radius:8px; object-fit:cover; background:#fff;" onerror="this.src='https://img.icons8.com/color/512/shopping-bag.png'">
+      <i class="fas fa-user-shield fa-2x" style="color: #0b132b;"></i>
       <div>
-        <div style="font-weight:bold; font-size:14px; color:#0b132b;">BAZARO App</div>
-        <div style="font-size:11px; color:#1e293b;">ফোন অ্যাপ হিসেবে ইনস্টল করুন</div>
+        <div style="font-weight:bold; font-size:14px; color:#0b132b;">BAZARO Admin App</div>
+        <div style="font-size:11px; color:#1e293b;">হোম স্ক্রিনে অ্যাডমিন অ্যাপ ইনস্টল করুন</div>
       </div>
     </div>
     <button id="btn-pwa-install" style="background:#0b132b; color:white; border:none; padding:8px 14px; border-radius:8px; font-weight:bold; cursor:pointer; font-size:12px;">ইনস্টল</button>
   </div>
 
-  <script>
-    // Supabase Initialization
-    const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+  const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    let allProducts = [];
-    let cartCount = 0;
+  function switchTab(tabId, evt) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    if(evt) evt.currentTarget.classList.add('active');
+  }
 
-    // Load Products & Categories
-    async function loadData() {
-      try {
-        // Categories
-        const { data: categories } = await supabaseClient.from('categories').select('*');
-        const catContainer = document.getElementById('categories-container');
-        if (categories && categories.length > 0) {
-          catContainer.innerHTML = categories.map(c => `
-            <div class="category-card" onclick="filterByCategory('${c.name}')">
-              <img src="${c.image_url}" onerror="this.src='https://img.icons8.com/color/512/category.png'">
-              <span>${c.name}</span>
-            </div>
-          `).join('');
-        } else {
-          catContainer.innerHTML = '<div style="font-size:13px; color:#94a3b8; padding: 10px;">কোনো ক্যাটাগরি পাওয়া যায়নি</div>';
-        }
+  function generateSlug() {
+    const name = document.getElementById('p_name').value;
+    document.getElementById('p_slug').value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  }
 
-        // Products
-        const { data: products } = await supabaseClient.from('products').select('*').order('id', {ascending: false});
-        allProducts = products || [];
-        renderProducts(allProducts);
-
-      } catch (error) {
-        console.error("Data load error:", error);
-      }
+  function calculateMargin() {
+    const reg = parseFloat(document.getElementById('p_price').value) || 0;
+    const disc = parseFloat(document.getElementById('p_discount_price').value) || reg;
+    const cost = parseFloat(document.getElementById('p_cost').value) || 0;
+    
+    if (reg > 0 && disc < reg) {
+      const perc = Math.round(((reg - disc) / reg) * 100);
+      document.getElementById('p_disc_percent').value = perc + '% OFF';
+    } else {
+      document.getElementById('p_disc_percent').value = '0%';
     }
+    const profit = disc - cost;
+    document.getElementById('p_profit').value = '৳ ' + profit;
+  }
 
-    function renderProducts(products) {
-      const prodContainer = document.getElementById('products-container');
-      if (products && products.length > 0) {
-        prodContainer.innerHTML = products.map(p => `
-          <div class="product-card">
-            <div class="product-img-box">
-              <img src="${p.image_url}" onerror="this.src='https://img.icons8.com/color/512/product.png'">
-            </div>
-            <div class="product-info">
-              <div class="product-title">${p.name}</div>
-              <div class="price-box">
-                <span class="main-price">৳${p.discount_price || p.price}</span>
-                ${p.discount_price ? `<span class="old-price">৳${p.price}</span>` : ''}
-              </div>
-              <button class="btn-buy" onclick="addToCart('${p.name}')">
-                <i class="fas fa-cart-plus"></i> অর্ডার করুন
-              </button>
-            </div>
-          </div>
-        `).join('');
-      } else {
-        prodContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #94a3b8;">কোনো পণ্য পাওয়া যায়নি!</div>';
-      }
+  async function loadCategories() {
+    const { data } = await supabaseClient.from('categories').select('*');
+    const selectEl = document.getElementById('p_category');
+    const listEl = document.getElementById('category-list');
+
+    if(data && data.length > 0) {
+      selectEl.innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>' + 
+        data.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+      listEl.innerHTML = data.map(c => `
+        <div style="background:#0b132b; padding:10px; border-radius:8px; display:flex; align-items:center; gap:10px; border:1px solid #2d3748;">
+          <img src="${c.image_url}" style="width:35px; height:35px; border-radius:6px; object-fit:cover;" onerror="this.src='https://img.icons8.com/color/512/category.png'">
+          <span style="font-size:14px; font-weight:bold;">${c.name}</span>
+        </div>
+      `).join('');
+    } else {
+      listEl.innerHTML = '<div style="color:#94a3b8;">কোনো ক্যাটাগরি তৈরি করা নেই।</div>';
     }
+  }
 
-    // Filter Functions
-    function filterProducts() {
-      const query = document.getElementById('search-input').value.toLowerCase();
-      const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
-      renderProducts(filtered);
+  async function saveProduct(e) {
+    e.preventDefault();
+    const sizes = Array.from(document.querySelectorAll('input[name="sizes"]:checked')).map(cb => cb.value);
+    const colors = Array.from(document.querySelectorAll('input[name="colors"]:checked')).map(cb => cb.value);
+
+    const productData = {
+      name: document.getElementById('p_name').value,
+      slug: document.getElementById('p_slug').value,
+      sku: document.getElementById('p_sku').value,
+      brand: document.getElementById('p_brand').value,
+      category: document.getElementById('p_category').value,
+      subcategory: document.getElementById('p_subcategory').value,
+      product_type: document.getElementById('p_type').value,
+      price: parseFloat(document.getElementById('p_price').value),
+      discount_price: parseFloat(document.getElementById('p_discount_price').value) || null,
+      cost_price: parseFloat(document.getElementById('p_cost').value) || null,
+      stock: parseInt(document.getElementById('p_stock').value),
+      low_stock_alert: parseInt(document.getElementById('p_low_stock').value),
+      stock_status: document.getElementById('p_stock_status').value,
+      sizes: sizes,
+      colors: colors,
+      image_url: document.getElementById('p_image').value,
+      gallery_1: document.getElementById('p_g1').value || null,
+      gallery_2: document.getElementById('p_g2').value || null,
+      gallery_3: document.getElementById('p_g3').value || null,
+      gallery_4: document.getElementById('p_g4').value || null,
+      short_description: document.getElementById('p_short_desc').value,
+      description: document.getElementById('p_desc').value,
+      features: document.getElementById('p_features').value,
+      material: document.getElementById('p_material').value,
+      weight: document.getElementById('p_weight').value,
+      warranty: document.getElementById('p_warranty').value,
+      delivery_inside: parseFloat(document.getElementById('p_del_in').value),
+      delivery_outside: parseFloat(document.getElementById('p_del_out').value),
+      delivery_time: document.getElementById('p_del_time').value
+    };
+
+    const { error } = await supabaseClient.from('products').insert([productData]);
+    if (error) {
+      alert('প্রোডাক্ট সেভ করার সময়ে সমস্যা হয়েছে: ' + error.message);
+    } else {
+      alert('🎉 সফলভাবে নতুন প্রোডাক্ট যুক্ত হয়েছে!');
+      document.getElementById('product-form').reset();
     }
+  }
 
-    function filterByCategory(catName) {
-      const filtered = allProducts.filter(p => p.category === catName);
-      renderProducts(filtered.length > 0 ? filtered : allProducts);
+  async function saveCategory(e) {
+    e.preventDefault();
+    const name = document.getElementById('cat_name').value;
+    const image_url = document.getElementById('cat_icon').value;
+
+    const { error } = await supabaseClient.from('categories').insert([{ name, image_url }]);
+    if (error) alert(error.message);
+    else { 
+      alert('ক্যাটাগরি যুক্ত হয়েছে!'); 
+      document.getElementById('cat_name').value = '';
+      document.getElementById('cat_icon').value = '';
+      loadCategories(); 
     }
+  }
 
-    // Cart and Nav Actions
-    function addToCart(pName) {
-      cartCount++;
-      document.getElementById('cart-count').innerText = cartCount;
-      alert(`"${pName}" আপনার কার্টে যুক্ত করা হয়েছে!`);
+  async function loadOrders() {
+    const { data: orders } = await supabaseClient.from('orders').select('*').order('id', { ascending: false });
+    const tbody = document.getElementById('orders-list');
+    
+    if (orders && orders.length > 0) {
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td>#${o.id}</td>
+          <td><b>${o.customer_name || 'N/A'}</b></td>
+          <td>${o.phone || 'N/A'}</td>
+          <td>${o.address || 'N/A'}</td>
+          <td>৳ ${o.total_amount || 0}</td>
+          <td>${o.payment_method || 'COD'}</td>
+          <td><span class="badge bg-${(o.status || 'pending').toLowerCase()}">${o.status || 'Pending'}</span></td>
+          <td>
+            <select onchange="updateStatus(${o.id}, this.value)" style="padding: 4px; font-size:12px;">
+              <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
+              <option value="Confirmed" ${o.status==='Confirmed'?'selected':''}>Confirmed</option>
+              <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+              <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px;">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
     }
+  }
 
-    function openCart() {
-      alert(`আপনার কার্টে মোট ${cartCount} টি পণ্য রয়েছে।`);
-    }
+  async function updateStatus(id, status) {
+    await supabaseClient.from('orders').update({ status }).eq('id', id);
+    alert('অর্ডার স্ট্যাটাস পরিবর্তন হয়েছে!');
+    loadOrders();
+  }
 
-    function navClick(type) {
-      if(type === 'home') {
-        renderProducts(allProducts);
-      } else if(type === 'orders') {
-        alert("আপনার পূর্বের অর্ডারের তালিকা দেখতে শীঘ্রই লগইন ফিচার যুক্ত হচ্ছে।");
-      } else if(type === 'profile') {
-        alert("গ্রাহক প্রোফাইল অপশন চালু রয়েছে।");
-      } else if(type === 'category') {
-        window.scrollTo({ top: 150, behavior: 'smooth' });
-      }
-    }
+  loadCategories();
+  loadOrders();
 
-    loadData();
-
-    // PWA Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
-      });
-    }
-
-    // PWA Banner Trigger Logic
-    let deferredPrompt;
-    const installBanner = document.getElementById('pwa-install-banner');
-    const installBtn = document.getElementById('btn-pwa-install');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBanner.style.display = 'flex';
+  // PWA Registration & Install Banner Logic
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW error:', err));
     });
+  }
 
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        installBanner.style.display = 'none';
-      } else {
-        alert('আপনার ব্রাউজারের ৩-ডট (⋮) মেনুতে ক্লিক করে "Add to Home screen" বা "Install App"-এ চাপ দিন।');
-      }
-    });
+  let deferredPrompt;
+  const installBanner = document.getElementById('pwa-install-banner');
+  const installBtn = document.getElementById('btn-pwa-install');
 
-    window.addEventListener('appinstalled', () => {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBanner.style.display = 'flex';
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
       installBanner.style.display = 'none';
-    });
-  </script>
+    } else {
+      alert('ব্রাউজারের ৩-ডট মেনু থেকে "Add to Home screen" চাপুন।');
+    }
+  });
+</script>
 </body>
 </html>
