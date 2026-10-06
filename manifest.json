@@ -9,13 +9,13 @@
   "theme_color": "#ff9800",
   "icons": [
     {
-      "src": "https://via.placeholder.com/192/ff9800/ffffff?text=BAZARO",
+      "src": "https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://via.placeholder.com/512/ff9800/ffffff?text=BAZARO",
+      "src": "https://zwpoxufpeluqtdooeekr.supabase.co/storage/v1/object/public/products/1775317765955.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
