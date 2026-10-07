@@ -1,477 +1,889 @@
+```html
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAZARO - Complete Online Marketplace</title>
-  
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#f77f00">
-
-  <!-- FontAwesome, Google Fonts & Supabase -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    :root {
-      --primary: #f77f00;
-      --secondary: #0b132b;
-      --card-bg: #161f38;
-      --text: #ffffff;
-      --gray: #94a3b8;
-    }
-
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Hind Siliguri', sans-serif; }
-    body { background: var(--secondary); color: var(--text); padding-bottom: 70px; }
-
-    /* Header & Navigation */
-    header { background: #1c2541; padding: 12px 20px; position: sticky; top:0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .header-container { max-width: 1200px; margin: auto; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
-    .logo { font-size: 24px; font-weight: bold; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-    
-    .search-box { flex: 1; max-width: 500px; display: flex; background: #0b132b; border-radius: 8px; border: 1px solid #2d3748; overflow: hidden; }
-    .search-box input { width: 100%; border: none; padding: 10px 15px; background: transparent; color: white; outline: none; }
-    .search-box button { background: var(--primary); border: none; padding: 0 18px; color: white; cursor: pointer; }
-
-    .nav-icons { display: flex; gap: 15px; align-items: center; }
-    .icon-btn { position: relative; cursor: pointer; font-size: 18px; color: white; }
-    .icon-btn .badge { position: absolute; top: -8px; right: -8px; background: var(--primary); font-size: 10px; border-radius: 50%; padding: 2px 6px; font-weight: bold; }
-
-    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-
-    /* Categories Grid */
-    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-    .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 30px; }
-    .category-card { background: var(--card-bg); border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-    .category-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-    .category-card svg { width: 36px; height: 36px; fill: var(--primary); margin-bottom: 8px; }
-    .category-card span { display: block; font-size: 12px; font-weight: 600; }
-
-    /* Filters Section */
-    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #1c2541; padding: 10px; border-radius: 8px; }
-    .filter-bar select { background: var(--secondary); color: white; border: 1px solid #2d3748; padding: 8px; border-radius: 6px; outline: none; }
-
-    /* Product Grid */
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-    .product-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-    .product-img { width: 100%; height: 200px; object-fit: cover; }
-    .product-info { padding: 12px; }
-    .product-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .price-box { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
-    .current-price { color: var(--primary); font-weight: bold; font-size: 16px; }
-    .old-price { color: var(--gray); text-decoration: line-through; font-size: 12px; }
-    .btn-add-cart { width: 100%; background: var(--primary); border: none; color: white; padding: 8px; border-radius: 6px; margin-top: 10px; cursor: pointer; font-weight: bold; }
-    
-    /* Modal / Drawer */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
-    .modal-content { background: #161f38; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 20px; position: relative; }
-    .close-modal { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; color: var(--gray); }
-
-    /* Checkout & Form */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; margin-bottom: 4px; color: var(--gray); }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; background: #0b132b; border: 1px solid #2d3748; padding: 10px; border-radius: 6px; color: white; outline: none; }
-
-    /* Bottom App Banner */
-    #pwa-banner { display: none; position: fixed; bottom: 0; left:0; right:0; background: var(--primary); color: white; padding: 10px 20px; justify-content: space-between; align-items: center; z-index: 999; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance & WiFi Management</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .tab-active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        /* Custom scrollbar for mobile overflow */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-800 pb-20 md:pb-5">
 
-  <!-- HEADER -->
-  <header>
-    <div class="header-container">
-      <a href="#" class="logo"><i class="fas fa-shopping-bag"></i> BAZARO</a>
-      
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="প্রোডাক্ট খুঁজুন (যেমন: T-Shirt, Belt)..." onkeyup="filterProducts()">
-        <button><i class="fas fa-search"></i></button>
-      </div>
+    <!-- Top Navigation Header -->
+    <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <i class="fa-solid fa-wallet text-2xl"></i>
+                <h1 class="text-xl font-bold tracking-wide">স্মার্ট ফিন্যান্স ও ওয়াইফাই ম্যানেজার</h1>
+            </div>
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <button onclick="exportData()" class="bg-blue-800 hover:bg-blue-900 text-xs px-2.5 py-1.5 rounded flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i> ব্যাকআপ
+                </button>
+                <label for="importFile" class="bg-blue-800 hover:bg-blue-900 text-xs px-2.5 py-1.5 rounded cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-upload"></i> রিস্টোর
+                </label>
+                <input type="file" id="importFile" class="hidden" onchange="importData(event)" accept=".json">
+            </div>
+        </div>
+    </header>
 
-      <div class="nav-icons">
-        <div class="icon-btn" onclick="openOrderTrackModal()"><i class="fas fa-truck"></i></div>
-        <div class="icon-btn" onclick="openWishlistModal()"><i class="fas fa-heart"></i><span class="badge" id="wishlist-count">0</span></div>
-        <div class="icon-btn" onclick="openCartModal()"><i class="fas fa-shopping-cart"></i><span class="badge" id="cart-count">0</span></div>
-      </div>
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 py-4">
+
+        <!-- Mobile & Desktop Navigation Tabs Bar -->
+        <nav class="bg-white shadow rounded-lg mb-4 overflow-x-auto no-scrollbar flex space-x-1 sm:space-x-4 p-2 text-sm font-medium border text-gray-600">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-chart-pie text-blue-600"></i> ড্যাশবোর্ড
+            </button>
+            <button onclick="switchTab('income')" id="tab-income" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-money-bill-wave text-green-600"></i> দৈনিক আয়
+            </button>
+            <button onclick="switchTab('expense')" id="tab-expense" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-receipt text-red-600"></i> দৈনিক ব্যয়
+            </button>
+            <button onclick="switchTab('receivable')" id="tab-receivable" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i> পাওনা
+            </button>
+            <button onclick="switchTab('payable')" id="tab-payable" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-file-invoice-dollar text-orange-600"></i> দেনা
+            </button>
+            <button onclick="switchTab('wifi')" id="tab-wifi" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-wifi text-indigo-600"></i> ওয়াইফাই গ্রাহক ও বিল
+            </button>
+            <button onclick="switchTab('savings')" id="tab-savings" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-piggy-bank text-amber-600"></i> সঞ্চয়
+            </button>
+            <button onclick="switchTab('reminders')" id="tab-reminders" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-bell text-purple-600"></i> রিমাইন্ডার
+            </button>
+            <button onclick="switchTab('reports')" id="tab-reports" class="tab-btn px-3 py-2 rounded-md whitespace-nowrap flex items-center gap-1.5 hover:bg-gray-100">
+                <i class="fa-solid fa-chart-line text-teal-600"></i> রিপোর্টস
+            </button>
+        </nav>
+
+        <!-- SECTION 1: DASHBOARD -->
+        <section id="sec-dashboard" class="space-y-4">
+            <!-- Dynamic KPI Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-600">
+                    <p class="text-xs text-gray-500 font-semibold">বর্তমান ব্যালেন্স</p>
+                    <h3 id="dash-balance" class="text-xl sm:text-2xl font-bold text-gray-800 mt-1">৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <p class="text-xs text-gray-500 font-semibold">মোট আয়</p>
+                    <h3 id="dash-income" class="text-xl sm:text-2xl font-bold text-green-600 mt-1">৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-red-500">
+                    <p class="text-xs text-gray-500 font-semibold">মোট খরচ</p>
+                    <h3 id="dash-expense" class="text-xl sm:text-2xl font-bold text-red-600 mt-1">৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-amber-500">
+                    <p class="text-xs text-gray-500 font-semibold">মোট সঞ্চয়</p>
+                    <h3 id="dash-savings" class="text-xl sm:text-2xl font-bold text-amber-600 mt-1">৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
+                    <p class="text-xs text-gray-500 font-semibold">মোট পাওনা</p>
+                    <h3 id="dash-receivable" class="text-xl font-bold text-emerald-700 mt-1">৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-orange-500">
+                    <p class="text-xs text-gray-500 font-semibold">মোট দেনা</p>
+                    <h3 id="dash-payable" class="text-xl font-bold text-orange-700 mt-1">৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-indigo-500">
+                    <p class="text-xs text-gray-500 font-semibold">আজকের আয় / খরচ</p>
+                    <h3 id="dash-today" class="text-sm font-bold text-indigo-700 mt-1">৳ 0 / ৳ 0</h3>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-500">
+                    <p class="text-xs text-gray-500 font-semibold">বকেয়া WiFi গ্রাহক</p>
+                    <h3 id="dash-wifi-due" class="text-xl font-bold text-purple-700 mt-1">0 জন</h3>
+                </div>
+            </div>
+
+            <!-- Dashboard Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-white p-4 rounded-xl shadow-sm border">
+                    <h4 class="font-bold text-gray-700 mb-2">আয় বনাম ব্যয়ের সামারি</h4>
+                    <canvas id="incomeExpenseChart" class="max-h-60"></canvas>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-sm border">
+                    <h4 class="font-bold text-gray-700 mb-2">সাম্প্রতিক লেনদেন</h4>
+                    <div id="recent-transactions" class="space-y-2 text-sm max-h-60 overflow-y-auto">
+                        <!-- Dynamic Recent List -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DAILY INCOME -->
+        <section id="sec-income" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-green-700 mb-3"><i class="fa-solid fa-plus-circle"></i> নতুন আয়ের এন্ট্রি</h3>
+                <form id="form-income" onsubmit="addIncome(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                    <input type="date" id="inc-date" required class="p-2 border rounded focus:ring-2 focus:ring-green-400 outline-none">
+                    <select id="inc-category" required class="p-2 border rounded focus:ring-2 focus:ring-green-400 outline-none">
+                        <option value="WiFi">WiFi</option>
+                        <option value="Tuition">Tuition</option>
+                        <option value="Business">Business</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="number" id="inc-amount" placeholder="পরিমাণ (৳)" required class="p-2 border rounded focus:ring-2 focus:ring-green-400 outline-none">
+                    <input type="text" id="inc-source" placeholder="আয়ের উৎস/বিবরণ" required class="p-2 border rounded focus:ring-2 focus:ring-green-400 outline-none">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold p-2 rounded shadow">যোগ করুন</button>
+                </form>
+            </div>
+
+            <!-- List & Filter -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+                    <h3 class="font-bold text-gray-700">আয়ের রেকর্ডসমূহ</h3>
+                    <div class="flex gap-2">
+                        <input type="date" id="filter-inc-date" onchange="renderIncome()" class="text-sm p-1.5 border rounded">
+                        <input type="text" id="filter-inc-search" oninput="renderIncome()" placeholder="খুঁজুন..." class="text-sm p-1.5 border rounded">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="p-2">তারিখ</th>
+                                <th class="p-2">ক্যাটাগরি</th>
+                                <th class="p-2">উৎস</th>
+                                <th class="p-2">পরিমাণ</th>
+                                <th class="p-2 text-center">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-income"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: DAILY EXPENSE -->
+        <section id="sec-expense" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-red-700 mb-3"><i class="fa-solid fa-minus-circle"></i> নতুন খরচের এন্ট্রি</h3>
+                <form id="form-expense" onsubmit="addExpense(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                    <input type="date" id="exp-date" required class="p-2 border rounded focus:ring-2 focus:ring-red-400 outline-none">
+                    <select id="exp-category" required class="p-2 border rounded focus:ring-2 focus:ring-red-400 outline-none">
+                        <option value="Food">Food</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Internet">Internet</option>
+                        <option value="Business">Business</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="number" id="exp-amount" placeholder="পরিমাণ (৳)" required class="p-2 border rounded focus:ring-2 focus:ring-red-400 outline-none">
+                    <input type="text" id="exp-note" placeholder="খরচের বিবরণ" class="p-2 border rounded focus:ring-2 focus:ring-red-400 outline-none">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded shadow">যোগ করুন</button>
+                </form>
+            </div>
+
+            <!-- Expense List -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-3 gap-2">
+                    <h3 class="font-bold text-gray-700">খরচের রেকর্ডসমূহ</h3>
+                    <div class="flex gap-2">
+                        <input type="date" id="filter-exp-date" onchange="renderExpense()" class="text-sm p-1.5 border rounded">
+                        <input type="text" id="filter-exp-search" oninput="renderExpense()" placeholder="খুঁজুন..." class="text-sm p-1.5 border rounded">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="p-2">তারিখ</th>
+                                <th class="p-2">ক্যাটাগরি</th>
+                                <th class="p-2">বিবরণ</th>
+                                <th class="p-2">পরিমাণ</th>
+                                <th class="p-2 text-center">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-expense"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: RECEIVABLE (পাওনা) -->
+        <section id="sec-receivable" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-emerald-700 mb-3"><i class="fa-solid fa-hand-holding-dollar"></i> পাওনার নতুন এন্ট্রি</h3>
+                <form id="form-receivable" onsubmit="addReceivable(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="text" id="rec-name" placeholder="ব্যক্তির নাম" required class="p-2 border rounded">
+                    <input type="tel" id="rec-phone" placeholder="মোবাইল নম্বর" class="p-2 border rounded">
+                    <input type="number" id="rec-amount" placeholder="পরিমাণ (৳)" required class="p-2 border rounded">
+                    <input type="date" id="rec-date" required class="p-2 border rounded">
+                    <input type="date" id="rec-due" title="শেষ পরিশোধের তারিখ" class="p-2 border rounded">
+                    <input type="text" id="rec-note" placeholder="নোট" class="p-2 border rounded sm:col-span-2">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold p-2 rounded shadow">সেভ করুন</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+                <h3 class="font-bold text-gray-700 mb-3">পাওনার তালিকা</h3>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="p-2">নাম ও মোবাইল</th>
+                            <th class="p-2">পরিমাণ</th>
+                            <th class="p-2">তারিখ / মেয়ার</th>
+                            <th class="p-2">স্ট্যাটাস</th>
+                            <th class="p-2 text-center">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-receivable"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 5: PAYABLE (দেনা) -->
+        <section id="sec-payable" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-orange-700 mb-3"><i class="fa-solid fa-file-invoice-dollar"></i> দেনার নতুন এন্ট্রি</h3>
+                <form id="form-payable" onsubmit="addPayable(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="text" id="pay-name" placeholder="ব্যক্তির নাম" required class="p-2 border rounded">
+                    <input type="tel" id="pay-phone" placeholder="মোবাইল নম্বর" class="p-2 border rounded">
+                    <input type="number" id="pay-amount" placeholder="পরিমাণ (৳)" required class="p-2 border rounded">
+                    <input type="date" id="pay-date" required class="p-2 border rounded">
+                    <input type="date" id="pay-due" title="পরিশোধের নির্ধারিত তারিখ" class="p-2 border rounded">
+                    <input type="text" id="pay-note" placeholder="নোট" class="p-2 border rounded sm:col-span-2">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white font-bold p-2 rounded shadow">সেভ করুন</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+                <h3 class="font-bold text-gray-700 mb-3">দেনার তালিকা</h3>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="p-2">নাম ও মোবাইল</th>
+                            <th class="p-2">পরিমাণ</th>
+                            <th class="p-2">তারিখ / মেয়ার</th>
+                            <th class="p-2">স্ট্যাটাস</th>
+                            <th class="p-2 text-center">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-payable"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 6: WIFI MANAGEMENT & BILLING -->
+        <section id="sec-wifi" class="hidden space-y-4">
+            <!-- Add WiFi Customer Form -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-indigo-700 mb-3"><i class="fa-solid fa-user-plus"></i> নতুন WiFi গ্রাহক যোগ করুন</h3>
+                <form id="form-wifi-user" onsubmit="addWifiUser(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                    <input type="text" id="wifi-name" placeholder="গ্রাহকের নাম" required class="p-2 border rounded">
+                    <input type="tel" id="wifi-phone" placeholder="মোবাইল নম্বর" required class="p-2 border rounded">
+                    <input type="text" id="wifi-address" placeholder="ঠিকানা" class="p-2 border rounded">
+                    <input type="number" id="wifi-bill" placeholder="মাসিক বিল (৳)" required class="p-2 border rounded">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-2 rounded shadow">গ্রাহক সেভ করুন</button>
+                </form>
+            </div>
+
+            <!-- WiFi Customers List & Billing Collection -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="font-bold text-gray-700 mb-3">WiFi গ্রাহকদের বিল ম্যানেজমেন্ট</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-100 border-b">
+                            <tr>
+                                <th class="p-2">গ্রাহকের নাম</th>
+                                <th class="p-2">ফোন ও ঠিকানা</th>
+                                <th class="p-2">মাসিক বিল</th>
+                                <th class="p-2">বর্তমান বিলের অবস্থা</th>
+                                <th class="p-2 text-center">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="list-wifi-users"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: SAVINGS -->
+        <section id="sec-savings" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-amber-700 mb-3"><i class="fa-solid fa-piggy-bank"></i> নতুন সঞ্চয় যোগ করুন</h3>
+                <form id="form-savings" onsubmit="addSavings(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="date" id="sav-date" required class="p-2 border rounded">
+                    <input type="number" id="sav-amount" placeholder="পরিমাণ (৳)" required class="p-2 border rounded">
+                    <input type="text" id="sav-source" placeholder="উৎস / খাত" required class="p-2 border rounded">
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white font-bold p-2 rounded shadow">সঞ্চয় সেভ করুন</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
+                <h3 class="font-bold text-gray-700 mb-3">সঞ্চয়ের ইতিহাস</h3>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="p-2">তারিখ</th>
+                            <th class="p-2">উৎস</th>
+                            <th class="p-2">পরিমাণ</th>
+                            <th class="p-2 text-center">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-savings"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SECTION 8: REMINDERS -->
+        <section id="sec-reminders" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-purple-700 mb-3"><i class="fa-solid fa-bell"></i> নতুন রিমাইন্ডার সেট করুন</h3>
+                <form id="form-reminder" onsubmit="addReminder(event)" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <input type="text" id="rem-title" placeholder="রিমাইন্ডার বিষয়" required class="p-2 border rounded">
+                    <input type="date" id="rem-date" required class="p-2 border rounded">
+                    <select id="rem-type" class="p-2 border rounded">
+                        <option value="General">কাস্টম রিমাইন্ডার</option>
+                        <option value="WiFi">WiFi বিল রিমাইন্ডার</option>
+                        <option value="Payable">দেনা পরিশোধ</option>
+                        <option value="Receivable">পাওনা আদায়</option>
+                    </select>
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold p-2 rounded shadow">রিমাইন্ডার যোগ করুন</button>
+                </form>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="font-bold text-gray-700 mb-3">সকল রিমাইন্ডার</h3>
+                <div id="list-reminders" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 9: REPORTS & ANALYTICS -->
+        <section id="sec-reports" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-xl shadow-sm border">
+                <h3 class="text-lg font-bold text-teal-700 mb-3"><i class="fa-solid fa-chart-bar"></i> তারিখভিত্তিক রিপোর্ট ফিল্টার</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold">শুরুর তারিখ</label>
+                        <input type="date" id="rep-start-date" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500 font-semibold">শেষের তারিখ</label>
+                        <input type="date" id="rep-end-date" class="w-full p-2 border rounded">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="generateReport()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold p-2 rounded shadow">রিপোর্ট জেনারেট করুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Summary Cards -->
+            <div id="report-results" class="space-y-4">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border">
+                        <p class="text-xs text-gray-500">মোট আয়</p>
+                        <p id="rep-inc" class="text-xl font-bold text-green-600">৳ 0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border">
+                        <p class="text-xs text-gray-500">মোট ব্যয়</p>
+                        <p id="rep-exp" class="text-xl font-bold text-red-600">৳ 0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border">
+                        <p class="text-xs text-gray-500">লাভ / ক্ষতি</p>
+                        <p id="rep-profit" class="text-xl font-bold text-blue-600">৳ 0</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm border">
+                        <p class="text-xs text-gray-500">WiFi কালেকশন</p>
+                        <p id="rep-wifi" class="text-xl font-bold text-indigo-600">৳ 0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
-  </header>
 
-  <div class="container">
-    
-    <!-- CATEGORIES SECTION WITH EMBEDDED SVG ICONS -->
-    <div class="section-title"><i class="fas fa-th-large"></i> ক্যাটাগরি সমূহ</div>
-    <div class="categories-grid" id="categoryContainer">
-      <!-- 1. Leather -->
-      <div class="category-card" onclick="filterByCategory('Leather')">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-        <span>Leather</span>
-      </div>
-      <!-- 2. Shoes -->
-      <div class="category-card" onclick="filterByCategory('Shoes')">
-        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L2 11v2l5-.8v8.8h2v-6h2v6h2v-10l-3.2-1.9z"/></svg>
-        <span>Shoes</span>
-      </div>
-      <!-- 3. Wallet -->
-      <div class="category-card" onclick="filterByCategory('Wallet')">
-        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-        <span>Wallet</span>
-      </div>
-      <!-- 4. Belt -->
-      <div class="category-card" onclick="filterByCategory('Belt')">
-        <svg viewBox="0 0 24 24"><path d="M21 10H3c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-2c0-.55-.45-1-1-1zm-10 3H5v-2h6v2z"/></svg>
-        <span>Belt</span>
-      </div>
-      <!-- 5. Bag -->
-      <div class="category-card" onclick="filterByCategory('Bag')">
-        <svg viewBox="0 0 24 24"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z"/></svg>
-        <span>Bag</span>
-      </div>
-      <!-- 6. Fashion -->
-      <div class="category-card" onclick="filterByCategory('Fashion')">
-        <svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11zM12 22c4.97 0 9-4.03 9-9h-18c0 4.97 4.03 9 9 9z"/></svg>
-        <span>Fashion</span>
-      </div>
-      <!-- 7. T-Shirt -->
-      <div class="category-card" onclick="filterByCategory('T-Shirt')">
-        <svg viewBox="0 0 24 24"><path d="M16 2l-4 3-4-3-6 4 2 4 3-1v11h10V9l3 1 2-4z"/></svg>
-        <span>T-Shirt</span>
-      </div>
-      <!-- 8. Panjabi -->
-      <div class="category-card" onclick="filterByCategory('Panjabi')">
-        <svg viewBox="0 0 24 24"><path d="M12 2L4 5v17h16V5l-8-3zm0 4c.55 0 1 .45 1 1v4h-2V7c0-.55.45-1 1-1z"/></svg>
-        <span>Panjabi</span>
-      </div>
-      <!-- 9. Baby & Kids -->
-      <div class="category-card" onclick="filterByCategory('Baby & Kids')">
-        <svg viewBox="0 0 24 24"><path d="M12 2c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 21l4.28-1.42c1.03.38 2.14.58 3.37.58 4.97 0 9-4.03 9-9s-4.03-9-9-9zm-3 8c.83 0 1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5S8.17 10 9 10zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/></svg>
-        <span>Baby & Kids</span>
-      </div>
-      <!-- 10. Electronics -->
-      <div class="category-card" onclick="filterByCategory('Electronics')">
-        <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
-        <span>Electronics</span>
-      </div>
-      <!-- 11. Home & Living -->
-      <div class="category-card" onclick="filterByCategory('Home & Living')">
-        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-        <span>Home & Living</span>
-      </div>
-      <!-- 12. Food & Grocery -->
-      <div class="category-card" onclick="filterByCategory('Food & Grocery')">
-        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25z"/></svg>
-        <span>Food & Grocery</span>
-      </div>
-      <!-- 13. Beauty -->
-      <div class="category-card" onclick="filterByCategory('Beauty')">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-        <span>Beauty</span>
-      </div>
-      <!-- 14. Sports -->
-      <div class="category-card" onclick="filterByCategory('Sports')">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 3.07c1.86.25 3.48 1.15 4.67 2.47L13 11.2V5.07zM5.07 11C5.32 9.14 6.22 7.52 7.54 6.33L11.2 11H5.07z"/></svg>
-        <span>Sports</span>
-      </div>
-    </div>
+    <!-- JavaScript Logic & Data Persistence -->
+    <script>
+        // Data Structure & Initial Load
+        let db = {
+            incomes: JSON.parse(localStorage.getItem('incomes')) || [],
+            expenses: JSON.parse(localStorage.getItem('expenses')) || [],
+            receivables: JSON.parse(localStorage.getItem('receivables')) || [],
+            payables: JSON.parse(localStorage.getItem('payables')) || [],
+            wifiUsers: JSON.parse(localStorage.getItem('wifiUsers')) || [],
+            savings: JSON.parse(localStorage.getItem('savings')) || [],
+            reminders: JSON.parse(localStorage.getItem('reminders')) || []
+        };
 
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-      <select id="sortFilter" onchange="filterProducts()">
-        <option value="newest">সর্বশেষ প্রোডাক্ট (Newest)</option>
-        <option value="price-low">দাম: কম থেকে বেশি</option>
-        <option value="price-high">দাম: বেশি থেকে কম</option>
-      </select>
-    </div>
+        function saveData() {
+            Object.keys(db).forEach(key => {
+                localStorage.setItem(key, JSON.stringify(db[key]));
+            });
+            updateDashboard();
+        }
 
-    <!-- PRODUCTS GRID -->
-    <div class="section-title"><i class="fas fa-fire"></i> সব প্রোডাক্ট</div>
-    <div class="products-grid" id="productsContainer">
-      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--gray);">প্রোডাক্ট লোড হচ্ছে...</div>
-    </div>
-  </div>
+        // Tab Navigation System
+        function switchTab(tabName) {
+            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
+            
+            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('tab-active');
 
-  <!-- CHECKOUT & CART MODAL -->
-  <div class="modal" id="cartModal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeCartModal()">&times;</span>
-      <h3 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-shopping-bag"></i> শপিং কার্ট ও চেকআউট</h3>
-      
-      <div id="cartItemsContainer"></div>
+            if(tabName === 'income') renderIncome();
+            if(tabName === 'expense') renderExpense();
+            if(tabName === 'receivable') renderReceivable();
+            if(tabName === 'payable') renderPayable();
+            if(tabName === 'wifi') renderWifi();
+            if(tabName === 'savings') renderSavings();
+            if(tabName === 'reminders') renderReminders();
+            if(tabName === 'dashboard') updateDashboard();
+        }
 
-      <hr style="border-color:#2d3748; margin: 15px 0;">
+        // --- DASHBOARD LOGIC ---
+        let chartInstance = null;
+        function updateDashboard() {
+            const totalIncome = db.incomes.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const totalExpense = db.expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const totalSavings = db.savings.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const totalReceivable = db.receivables.filter(r => r.status === 'Pending').reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const totalPayable = db.payables.filter(p => p.status === 'Pending').reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayInc = db.incomes.filter(i => i.date === todayStr).reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const todayExp = db.expenses.filter(e => e.date === todayStr).reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const wifiDueCount = db.wifiUsers.filter(u => u.status === 'Due').length;
 
-      <!-- ORDER FORM -->
-      <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
-        <h4 style="margin-bottom:10px; color:#fff;">শিপিং তথ্য (Customer Order Form)</h4>
-        
-        <div class="form-group">
-          <label>গ্রাহকের নাম *</label>
-          <input type="text" id="custName" required placeholder="আপনার নাম লিখুন">
-        </div>
+            document.getElementById('dash-balance').innerText = `৳ ${(totalIncome - totalExpense - totalSavings).toLocaleString()}`;
+            document.getElementById('dash-income').innerText = `৳ ${totalIncome.toLocaleString()}`;
+            document.getElementById('dash-expense').innerText = `৳ ${totalExpense.toLocaleString()}`;
+            document.getElementById('dash-savings').innerText = `৳ ${totalSavings.toLocaleString()}`;
+            document.getElementById('dash-receivable').innerText = `৳ ${totalReceivable.toLocaleString()}`;
+            document.getElementById('dash-payable').innerText = `৳ ${totalPayable.toLocaleString()}`;
+            document.getElementById('dash-today').innerText = `৳ ${todayInc} / ৳ ${todayExp}`;
+            document.getElementById('dash-wifi-due').innerText = `${wifiDueCount} জন`;
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label>মোবাইল নম্বর *</label>
-            <input type="tel" id="custPhone" required placeholder="017XXXXXXXX">
-          </div>
-          <div class="form-group">
-            <label>বিকল্প নম্বর (Optional)</label>
-            <input type="tel" id="custAltPhone" placeholder="018XXXXXXXX">
-          </div>
-        </div>
+            // Render Recent Transactions
+            const recentDiv = document.getElementById('recent-transactions');
+            recentDiv.innerHTML = '';
+            const allTrans = [
+                ...db.incomes.map(i => ({...i, type: 'আয়', color: 'text-green-600'})),
+                ...db.expenses.map(e => ({...e, type: 'ব্যয়', color: 'text-red-600'}))
+            ].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label>বিভাগ *</label>
-            <input type="text" id="custDivision" required placeholder="যেমন: ঢাকা">
-          </div>
-          <div class="form-group">
-            <label>জেলা *</label>
-            <input type="text" id="custDistrict" required placeholder="যেমন: ফেনী">
-          </div>
-          <div class="form-group">
-            <label>উপজেলা *</label>
-            <input type="text" id="custUpazila" required placeholder="যেমন: পরশুরাম">
-          </div>
-        </div>
+            allTrans.forEach(t => {
+                recentDiv.innerHTML += `
+                    <div class="flex justify-between items-center p-2 border-b">
+                        <div>
+                            <p class="font-semibold">${t.source || t.note || t.category}</p>
+                            <p class="text-xs text-gray-400">${t.date}</p>
+                        </div>
+                        <span class="font-bold ${t.color}">${t.type === 'আয়' ? '+' : '-'}৳ ${t.amount}</span>
+                    </div>
+                `;
+            });
 
-        <div class="form-group">
-          <label>সম্পূর্ণ ঠিকানা *</label>
-          <textarea id="custAddress" rows="2" required placeholder="গ্রাম/হাউস নম্বর, রোড নম্বর..."></textarea>
-        </div>
+            // Chart Render
+            const ctx = document.getElementById('incomeExpenseChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['মোট আয়', 'মোট খরচ', 'মোট সঞ্চয়'],
+                    datasets: [{
+                        data: [totalIncome, totalExpense, totalSavings],
+                        backgroundColor: ['#22c55e', '#ef4444', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
 
-        <div class="form-group">
-          <label>পেমেন্ট মেথড *</label>
-          <select id="payMethod">
-            <option value="COD">Cash on Delivery (ক্যাশ অন ডেলিভারি)</option>
-            <option value="bKash">bKash (বিকাশ)</option>
-            <option value="Nagad">Nagad (নগদ)</option>
-            <option value="Rocket">Rocket (রকেট)</option>
-          </select>
-        </div>
+        // --- INCOME FUNCTIONS ---
+        function addIncome(e) {
+            e.preventDefault();
+            const income = {
+                id: Date.now(),
+                date: document.getElementById('inc-date').value,
+                category: document.getElementById('inc-category').value,
+                amount: parseFloat(document.getElementById('inc-amount').value),
+                source: document.getElementById('inc-source').value
+            };
+            db.incomes.push(income);
+            saveData();
+            document.getElementById('form-income').reset();
+            renderIncome();
+        }
 
-        <div style="background:#0b132b; padding:12px; border-radius:8px; margin-top:15px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>সাবটোটাল:</span><span id="summarySubtotal">৳ 0</span></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>ডেলিভারি চার্জ:</span><span id="summaryDelivery">৳ 60</span></div>
-          <hr style="border-color:#2d3748; margin: 5px 0;">
-          <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px; color:var(--primary);"><span>সর্বমোট:</span><span id="summaryTotal">৳ 60</span></div>
-        </div>
+        function renderIncome() {
+            const list = document.getElementById('list-income');
+            const dateFilter = document.getElementById('filter-inc-date').value;
+            const searchFilter = document.getElementById('filter-inc-search').value.toLowerCase();
+            
+            list.innerHTML = '';
+            db.incomes
+                .filter(item => !dateFilter || item.date === dateFilter)
+                .filter(item => !searchFilter || item.source.toLowerCase().includes(searchFilter) || item.category.toLowerCase().includes(searchFilter))
+                .forEach(item => {
+                    list.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-2">${item.date}</td>
+                            <td class="p-2"><span class="bg-green-100 text-green-800 text-xs font-semibold px-2 py-0.5 rounded">${item.category}</span></td>
+                            <td class="p-2">${item.source}</td>
+                            <td class="p-2 font-bold text-green-600">৳ ${item.amount}</td>
+                            <td class="p-2 text-center">
+                                <button onclick="deleteEntry('incomes', ${item.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
 
-        <button type="submit" class="btn-add-cart" style="padding:12px; font-size:16px; margin-top:15px;">অর্ডার নিশ্চিত করুন</button>
-      </form>
-    </div>
-  </div>
+        // --- EXPENSE FUNCTIONS ---
+        function addExpense(e) {
+            e.preventDefault();
+            const expense = {
+                id: Date.now(),
+                date: document.getElementById('exp-date').value,
+                category: document.getElementById('exp-category').value,
+                amount: parseFloat(document.getElementById('exp-amount').value),
+                note: document.getElementById('exp-note').value
+            };
+            db.expenses.push(expense);
+            saveData();
+            document.getElementById('form-expense').reset();
+            renderExpense();
+        }
 
-  <!-- ORDER TRACKING MODAL -->
-  <div class="modal" id="trackModal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeTrackModal()">&times;</span>
-      <h3 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-truck"></i> অর্ডার ট্র্যাকিং</h3>
-      <div class="form-group">
-        <label>অর্ডার আইডি / মোবাইল নম্বর দিন</label>
-        <input type="text" id="trackInput" placeholder="যেমন: 1001 অথবা 017XXXXXXXX">
-      </div>
-      <button class="btn-add-cart" onclick="trackOrder()">ট্র্যাক করুন</button>
-      <div id="trackResult" style="margin-top:15px;"></div>
-    </div>
-  </div>
+        function renderExpense() {
+            const list = document.getElementById('list-expense');
+            const dateFilter = document.getElementById('filter-exp-date').value;
+            const searchFilter = document.getElementById('filter-exp-search').value.toLowerCase();
 
-  <!-- PWA INSTALL BANNER -->
-  <div id="pwa-banner">
-    <div><b>BAZARO App</b> ইনস্টল করুন দ্রুত কেনাকাটার জন্য</div>
-    <button onclick="installPWA()" style="background:#0b132b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">ইনস্টল</button>
-  </div>
+            list.innerHTML = '';
+            db.expenses
+                .filter(item => !dateFilter || item.date === dateFilter)
+                .filter(item => !searchFilter || item.note.toLowerCase().includes(searchFilter) || item.category.toLowerCase().includes(searchFilter))
+                .forEach(item => {
+                    list.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-2">${item.date}</td>
+                            <td class="p-2"><span class="bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded">${item.category}</span></td>
+                            <td class="p-2">${item.note || '-'}</td>
+                            <td class="p-2 font-bold text-red-600">৳ ${item.amount}</td>
+                            <td class="p-2 text-center">
+                                <button onclick="deleteEntry('expenses', ${item.id})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
 
-<script>
-  // SUPABASE CONFIGURATION
-  const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // --- RECEIVABLE (পাওনা) FUNCTIONS ---
+        function addReceivable(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                name: document.getElementById('rec-name').value,
+                phone: document.getElementById('rec-phone').value,
+                amount: parseFloat(document.getElementById('rec-amount').value),
+                date: document.getElementById('rec-date').value,
+                dueDate: document.getElementById('rec-due').value,
+                note: document.getElementById('rec-note').value,
+                status: 'Pending'
+            };
+            db.receivables.push(item);
+            saveData();
+            document.getElementById('form-receivable').reset();
+            renderReceivable();
+        }
 
-  let cart = [];
-  let wishlist = [];
-  let allProducts = [];
+        function renderReceivable() {
+            const list = document.getElementById('list-receivable');
+            list.innerHTML = '';
+            db.receivables.forEach(item => {
+                list.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2">
+                            <div class="font-bold">${item.name}</div>
+                            <div class="text-xs text-gray-500">${item.phone || '-'}</div>
+                        </td>
+                        <td class="p-2 font-bold text-emerald-600">৳ ${item.amount}</td>
+                        <td class="p-2 text-xs">${item.date} <br> <span class="text-red-500">মেয়াদ: ${item.dueDate || 'N/A'}</span></td>
+                        <td class="p-2">
+                            <span class="px-2 py-1 text-xs font-semibold rounded ${item.status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="p-2 text-center space-x-1">
+                            ${item.status === 'Pending' ? `<button onclick="toggleStatus('receivables', ${item.id}, 'Paid')" class="bg-green-600 text-white text-xs px-2 py-1 rounded">Paid</button>` : ''}
+                            <button onclick="deleteEntry('receivables', ${item.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
-  // Initialize
-  window.addEventListener('DOMContentLoaded', () => {
-    fetchProducts();
-    initPWA();
-  });
+        // --- PAYABLE (দেনা) FUNCTIONS ---
+        function addPayable(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                name: document.getElementById('pay-name').value,
+                phone: document.getElementById('pay-phone').value,
+                amount: parseFloat(document.getElementById('pay-amount').value),
+                date: document.getElementById('pay-date').value,
+                dueDate: document.getElementById('pay-due').value,
+                note: document.getElementById('pay-note').value,
+                status: 'Pending'
+            };
+            db.payables.push(item);
+            saveData();
+            document.getElementById('form-payable').reset();
+            renderPayable();
+        }
 
-  // Fetch Products
-  async function fetchProducts() {
-    const { data, error } = await db.from('products').select('*').order('id', { ascending: false });
-    if (!error && data) {
-      allProducts = data;
-      renderProducts(allProducts);
-    } else {
-      document.getElementById('productsContainer').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">প্রোডাক্ট লোড হতে সমস্যা হয়েছে</div>`;
-    }
-  }
+        function renderPayable() {
+            const list = document.getElementById('list-payable');
+            list.innerHTML = '';
+            db.payables.forEach(item => {
+                list.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2">
+                            <div class="font-bold">${item.name}</div>
+                            <div class="text-xs text-gray-500">${item.phone || '-'}</div>
+                        </td>
+                        <td class="p-2 font-bold text-orange-600">৳ ${item.amount}</td>
+                        <td class="p-2 text-xs">${item.date} <br> <span class="text-red-500">পরিশোধ: ${item.dueDate || 'N/A'}</span></td>
+                        <td class="p-2">
+                            <span class="px-2 py-1 text-xs font-semibold rounded ${item.status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${item.status}
+                            </span>
+                        </td>
+                        <td class="p-2 text-center space-x-1">
+                            ${item.status === 'Pending' ? `<button onclick="toggleStatus('payables', ${item.id}, 'Paid')" class="bg-green-600 text-white text-xs px-2 py-1 rounded">Paid</button>` : ''}
+                            <button onclick="deleteEntry('payables', ${item.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
-  // Render Products
-  function renderProducts(products) {
-    const container = document.getElementById('productsContainer');
-    if (products.length === 0) {
-      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--gray);">কোনো প্রোডাক্ট পাওয়া যায়নি</div>`;
-      return;
-    }
+        // --- WIFI MANAGEMENT ---
+        function addWifiUser(e) {
+            e.preventDefault();
+            const user = {
+                id: Date.now(),
+                name: document.getElementById('wifi-name').value,
+                phone: document.getElementById('wifi-phone').value,
+                address: document.getElementById('wifi-address').value,
+                bill: parseFloat(document.getElementById('wifi-bill').value),
+                status: 'Due'
+            };
+            db.wifiUsers.push(user);
+            saveData();
+            document.getElementById('form-wifi-user').reset();
+            renderWifi();
+        }
 
-    container.innerHTML = products.map(p => `
-      <div class="product-card">
-        <img src="${p.image_url}" class="product-img" alt="${p.name}">
-        <div class="product-info">
-          <div class="product-title">${p.name}</div>
-          <div class="price-box">
-            <span class="current-price">৳ ${p.discount_price || p.price}</span>
-            ${p.discount_price ? `<span class="old-price">৳ ${p.price}</span>` : ''}
-          </div>
-          <button class="btn-add-cart" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> কার্টে রাখুন</button>
-        </div>
-      </div>
-    `).join('');
-  }
+        function renderWifi() {
+            const list = document.getElementById('list-wifi-users');
+            list.innerHTML = '';
+            db.wifiUsers.forEach(user => {
+                list.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2 font-bold">${user.name}</td>
+                        <td class="p-2 text-xs">${user.phone}<br>${user.address || ''}</td>
+                        <td class="p-2 font-bold text-indigo-600">৳ ${user.bill}</td>
+                        <td class="p-2">
+                            <span class="px-2 py-0.5 text-xs font-semibold rounded ${user.status === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                ${user.status === 'Paid' ? 'পরিশোধিত' : 'বকেয়া'}
+                            </span>
+                        </td>
+                        <td class="p-2 text-center space-x-1">
+                            ${user.status === 'Due' ? `<button onclick="collectWifiBill(${user.id})" class="bg-indigo-600 text-white text-xs px-2 py-1 rounded">বিল সংগ্রহ</button>` : ''}
+                            <button onclick="deleteEntry('wifiUsers', ${user.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
-  // Search & Filter
-  function filterProducts() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const sort = document.getElementById('sortFilter').value;
+        function collectWifiBill(userId) {
+            const user = db.wifiUsers.find(u => u.id === userId);
+            if(user) {
+                user.status = 'Paid';
+                // Add automatically to income
+                db.incomes.push({
+                    id: Date.now(),
+                    date: new Date().toISOString().split('T')[0],
+                    category: 'WiFi',
+                    amount: user.bill,
+                    source: `WiFi Bill: ${user.name}`
+                });
+                saveData();
+                renderWifi();
+            }
+        }
 
-    let filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
+        // --- SAVINGS ---
+        function addSavings(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                date: document.getElementById('sav-date').value,
+                amount: parseFloat(document.getElementById('sav-amount').value),
+                source: document.getElementById('sav-source').value
+            };
+            db.savings.push(item);
+            saveData();
+            document.getElementById('form-savings').reset();
+            renderSavings();
+        }
 
-    if (sort === 'price-low') filtered.sort((a,b) => (a.discount_price||a.price) - (b.discount_price||b.price));
-    if (sort === 'price-high') filtered.sort((a,b) => (b.discount_price||b.price) - (a.discount_price||a.price));
+        function renderSavings() {
+            const list = document.getElementById('list-savings');
+            list.innerHTML = '';
+            db.savings.forEach(item => {
+                list.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2">${item.date}</td>
+                        <td class="p-2">${item.source}</td>
+                        <td class="p-2 font-bold text-amber-600">৳ ${item.amount}</td>
+                        <td class="p-2 text-center">
+                            <button onclick="deleteEntry('savings', ${item.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
-    renderProducts(filtered);
-  }
+        // --- REMINDERS ---
+        function addReminder(e) {
+            e.preventDefault();
+            const item = {
+                id: Date.now(),
+                title: document.getElementById('rem-title').value,
+                date: document.getElementById('rem-date').value,
+                type: document.getElementById('rem-type').value
+            };
+            db.reminders.push(item);
+            saveData();
+            document.getElementById('form-reminder').reset();
+            renderReminders();
+        }
 
-  function filterByCategory(catName) {
-    const filtered = allProducts.filter(p => p.category === catName);
-    renderProducts(filtered.length ? filtered : allProducts);
-  }
+        function renderReminders() {
+            const list = document.getElementById('list-reminders');
+            list.innerHTML = '';
+            db.reminders.forEach(r => {
+                list.innerHTML += `
+                    <div class="p-3 border rounded-lg flex justify-between items-center bg-gray-50">
+                        <div>
+                            <p class="font-bold text-gray-800">${r.title}</p>
+                            <p class="text-xs text-gray-500">তারিখ: ${r.date} | টাইপ: ${r.type}</p>
+                        </div>
+                        <button onclick="deleteEntry('reminders', ${r.id})" class="text-red-500"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+        }
 
-  // Cart Management
-  function addToCart(pId) {
-    const prod = allProducts.find(p => p.id === pId);
-    if (!prod) return;
-    
-    const existing = cart.find(item => item.id === pId);
-    if (existing) {
-      existing.qty++;
-    } else {
-      cart.push({ ...prod, qty: 1 });
-    }
-    updateCartUI();
-    alert('প্রোডাক্ট কার্টে যুক্ত হয়েছে!');
-  }
+        // --- REPORTS & ANALYTICS ---
+        function generateReport() {
+            const start = document.getElementById('rep-start-date').value;
+            const end = document.getElementById('rep-end-date').value;
 
-  function updateCartUI() {
-    document.getElementById('cart-count').innerText = cart.reduce((acc, i) => acc + i.qty, 0);
-    
-    const container = document.getElementById('cartItemsContainer');
-    let subtotal = 0;
+            if(!start || !end) {
+                alert('দয়া করে শুরুর এবং শেষের তারিখ সিলেক্ট করুন।');
+                return;
+            }
 
-    container.innerHTML = cart.map(item => {
-      const itemPrice = item.discount_price || item.price;
-      subtotal += itemPrice * item.qty;
-      return `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#0b132b; padding:8px; border-radius:6px;">
-          <div>
-            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-            <div style="color:var(--primary); font-size:12px;">৳ ${itemPrice} x ${item.qty}</div>
-          </div>
-          <button onclick="removeFromCart(${item.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">&times;</button>
-        </div>
-      `;
-    }).join('');
+            const inc = db.incomes.filter(i => i.date >= start && i.date <= end).reduce((s, i) => s + i.amount, 0);
+            const exp = db.expenses.filter(e => e.date >= start && e.date <= end).reduce((s, e) => s + e.amount, 0);
+            const wifi = db.incomes.filter(i => i.category === 'WiFi' && i.date >= start && i.date <= end).reduce((s, i) => s + i.amount, 0);
 
-    const delivery = 60;
-    document.getElementById('summarySubtotal').innerText = '৳ ' + subtotal;
-    document.getElementById('summaryDelivery').innerText = '৳ ' + delivery;
-    document.getElementById('summaryTotal').innerText = '৳ ' + (subtotal + delivery);
-  }
+            document.getElementById('rep-inc').innerText = `৳ ${inc.toLocaleString()}`;
+            document.getElementById('rep-exp').innerText = `৳ ${exp.toLocaleString()}`;
+            document.getElementById('rep-profit').innerText = `৳ ${(inc - exp).toLocaleString()}`;
+            document.getElementById('rep-wifi').innerText = `৳ ${wifi.toLocaleString()}`;
+        }
 
-  function removeFromCart(id) {
-    cart = cart.filter(i => i.id !== id);
-    updateCartUI();
-  }
+        // --- GLOBAL HELPER FUNCTIONS ---
+        function deleteEntry(module, id) {
+            if(confirm('আপনি কি এই ডাটাটি মুছে ফেলতে চান?')) {
+                db[module] = db[module].filter(item => item.id !== id);
+                saveData();
+                switchTab(document.querySelector('.tab-active').id.replace('tab-', ''));
+            }
+        }
 
-  // Checkout Handle
-  async function handlePlaceOrder(e) {
-    e.preventDefault();
-    if (cart.length === 0) return alert('আপনার কার্ট খালি!');
+        function toggleStatus(module, id, newStatus) {
+            const item = db[module].find(i => i.id === id);
+            if(item) {
+                item.status = newStatus;
+                saveData();
+                switchTab(document.querySelector('.tab-active').id.replace('tab-', ''));
+            }
+        }
 
-    const orderPayload = {
-      customer_name: document.getElementById('custName').value,
-      phone: document.getElementById('custPhone').value,
-      alt_phone: document.getElementById('custAltPhone').value,
-      division: document.getElementById('custDivision').value,
-      district: document.getElementById('custDistrict').value,
-      upazila: document.getElementById('custUpazila').value,
-      full_address: document.getElementById('custAddress').value,
-      payment_method: document.getElementById('payMethod').value,
-      total_amount: parseFloat(document.getElementById('summaryTotal').innerText.replace('৳ ', '')),
-      status: 'Order Placed'
-    };
+        // --- BACKUP & RESTORE DATA ---
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Finance_WiFi_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
 
-    const { data, error } = await db.from('orders').insert([orderPayload]).select();
-    
-    if (!error && data) {
-      alert(`🎉 অর্ডার সফল হয়েছে! আপনার অর্ডার ID: #${data[0].id}`);
-      cart = [];
-      updateCartUI();
-      closeCartModal();
-    } else {
-      alert('অর্ডার সাবমিট করতে সমস্যা হয়েছে: ' + error.message);
-    }
-  }
+        function importData(event) {
+            const fileReader = new FileReader();
+            fileReader.onload = function (e) {
+                try {
+                    const importedDb = JSON.parse(e.target.result);
+                    db = { ...db, ...importedDb };
+                    saveData();
+                    alert('ডাটা সফলভাবে রিস্টোর হয়েছে!');
+                    location.reload();
+                } catch (err) {
+                    alert('ভুল ফাইল ফরম্যাট।JSON ফাইল সিলেক্ট করুন।');
+                }
+            };
+            fileReader.readAsText(event.target.files[0]);
+        }
 
-  // Modals
-  function openCartModal() { document.getElementById('cartModal').style.display = 'flex'; }
-  function closeCartModal() { document.getElementById('cartModal').style.display = 'none'; }
-  function openOrderTrackModal() { document.getElementById('trackModal').style.display = 'flex'; }
-  function closeTrackModal() { document.getElementById('trackModal').style.display = 'none'; }
-
-  // Track Order
-  async function trackOrder() {
-    const val = document.getElementById('trackInput').value.trim();
-    if (!val) return;
-
-    const { data } = await db.from('orders').select('*').or(`id.eq.${val},phone.eq.${val}`);
-    const res = document.getElementById('trackResult');
-
-    if (data && data.length > 0) {
-      res.innerHTML = data.map(o => `
-        <div style="background:#0b132b; padding:10px; border-radius:6px; margin-top:8px;">
-          <div><b>Order #${o.id}</b> - <span style="color:var(--primary);">${o.status}</span></div>
-          <div style="font-size:12px; color:var(--gray);">মোট টাকা: ৳${o.total_amount} | পেমেন্ট: ${o.payment_method}</div>
-        </div>
-      `).join('');
-    } else {
-      res.innerHTML = `<div style="color:red; font-size:13px; margin-top:10px;">কোনো অর্ডার পাওয়া যায়নি।</div>`;
-    }
-  }
-
-  // PWA Prompt
-  let deferredPrompt;
-  function initPWA() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js');
-    }
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwa-banner').style.display = 'flex';
-    });
-  }
-
-  function installPWA() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt = null;
-      document.getElementById('pwa-banner').style.display = 'none';
-    }
-  }
-</script>
+        // Set default dates on load
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                if(!input.value) input.value = today;
+            });
+            updateDashboard();
+        };
+    </script>
 </body>
 </html>
+```
