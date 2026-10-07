@@ -3,423 +3,381 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BAZARO - Complete Online Marketplace</title>
-  
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#f77f00">
-  <!-- FontAwesome, Google Fonts & Supabase -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>BAZARO - Pro Admin Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root {
-      --primary: #f77f00;
-      --secondary: #0b132b;
-      --card-bg: #161f38;
-      --text: #ffffff;
-      --gray: #94a3b8;
-    }
-    * { margin:0; padding:0; box-sizing:border-box; font-family: 'Hind Siliguri', sans-serif; }
-    body { background: var(--secondary); color: var(--text); padding-bottom: 70px; }
-    /* Header & Navigation */
-    header { background: #1c2541; padding: 12px 20px; position: sticky; top:0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .header-container { max-width: 1200px; margin: auto; display: flex; justify-content: space-between; align-items: center; gap: 15px; }
-    .logo { font-size: 24px; font-weight: bold; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #f4f6f9; color: #333; padding-bottom: 50px; }
+    header { background: #0b132b; color: #fff; padding: 15px 20px; text-align: center; }
+    .container { max-width: 1000px; margin: 20px auto; padding: 0 15px; }
     
-    .search-box { flex: 1; max-width: 500px; display: flex; background: #0b132b; border-radius: 8px; border: 1px solid #2d3748; overflow: hidden; }
-    .search-box input { width: 100%; border: none; padding: 10px 15px; background: transparent; color: white; outline: none; }
-    .search-box button { background: var(--primary); border: none; padding: 0 18px; color: white; cursor: pointer; }
-    .nav-icons { display: flex; gap: 15px; align-items: center; }
-    .icon-btn { position: relative; cursor: pointer; font-size: 18px; color: white; }
-    .icon-btn .badge { position: absolute; top: -8px; right: -8px; background: var(--primary); font-size: 10px; border-radius: 50%; padding: 2px 6px; font-weight: bold; }
-    .container { max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-    /* Categories Grid */
-    .section-title { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-    .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-bottom: 30px; }
-    .category-card { background: var(--card-bg); border-radius: 10px; padding: 15px 10px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
-    .category-card:hover { border-color: var(--primary); transform: translateY(-3px); }
-    .category-card svg { width: 36px; height: 36px; fill: var(--primary); margin-bottom: 8px; }
-    .category-card span { display: block; font-size: 12px; font-weight: 600; }
-    /* Filters Section */
-    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #1c2541; padding: 10px; border-radius: 8px; }
-    .filter-bar select { background: var(--secondary); color: white; border: 1px solid #2d3748; padding: 8px; border-radius: 6px; outline: none; }
-    /* Product Grid */
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
-    .product-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-    .product-img { width: 100%; height: 200px; object-fit: cover; }
-    .product-info { padding: 12px; }
-    .product-title { font-size: 14px; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .price-box { display: flex; gap: 8px; align-items: center; margin-top: 5px; }
-    .current-price { color: var(--primary); font-weight: bold; font-size: 16px; }
-    .old-price { color: var(--gray); text-decoration: line-through; font-size: 12px; }
-    .btn-add-cart { width: 100%; background: var(--primary); border: none; color: white; padding: 8px; border-radius: 6px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn { padding: 10px 18px; border: none; background: #e0e0e0; cursor: pointer; border-radius: 5px; font-weight: bold; }
+    .tab-btn.active { background: #f77f00; color: white; }
+    .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .card-title { font-size: 18px; font-weight: bold; border-bottom: 2px solid #f77f00; padding-bottom: 8px; margin-bottom: 15px; color: #0b132b; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin-top: 10px; color: #444; }
+    input, select, textarea { width: 100%; padding: 9px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+    textarea { resize: vertical; }
+    .checkbox-group { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .checkbox-group label { font-size: 13px; font-weight: normal; margin-top: 0; cursor: pointer; }
+    .submit-btn { background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 15px; margin-top: 20px; width: 100%; }
+    .submit-btn:hover { background: #218838; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+    th, td { border: 1px solid #ddd; padding: 10px; font-size: 12px; text-align: left; }
+    th { background: #0b132b; color: white; }
     
-    /* Modal / Drawer */
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; padding: 15px; }
-    .modal-content { background: #161f38; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 20px; position: relative; }
-    .close-modal { position: absolute; top: 15px; right: 15px; font-size: 20px; cursor: pointer; color: var(--gray); }
-    /* Checkout & Form */
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 12px; margin-bottom: 4px; color: var(--gray); }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; background: #0b132b; border: 1px solid #2d3748; padding: 10px; border-radius: 6px; color: white; outline: none; }
-    /* Bottom App Banner */
-    #pwa-banner { display: none; position: fixed; bottom: 0; left:0; right:0; background: var(--primary); color: white; padding: 10px 20px; justify-content: space-between; align-items: center; z-index: 999; }
+    .badge { padding: 3px 8px; border-radius: 4px; color: white; font-size: 10px; font-weight: bold; }
+    .bg-pending { background: #ffc107; color: #000; }
+    .bg-delivered { background: #28a745; }
+    .bg-cancelled { background: #dc3545; }
   </style>
 </head>
 <body>
-  <!-- HEADER -->
   <header>
-    <div class="header-container">
-      <a href="#" class="logo"><i class="fas fa-shopping-bag"></i> BAZARO</a>
-      
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="প্রোডাক্ট খুঁজুন (যেমন: T-Shirt, Belt)..." onkeyup="filterProducts()">
-        <button><i class="fas fa-search"></i></button>
-      </div>
-      <div class="nav-icons">
-        <div class="icon-btn" onclick="openOrderTrackModal()"><i class="fas fa-truck"></i></div>
-        <div class="icon-btn" onclick="openWishlistModal()"><i class="fas fa-heart"></i><span class="badge" id="wishlist-count">0</span></div>
-        <div class="icon-btn" onclick="openCartModal()"><i class="fas fa-shopping-cart"></i><span class="badge" id="cart-count">0</span></div>
-      </div>
-    </div>
+    <h2>BAZARO - Pro Admin Dashboard</h2>
   </header>
   <div class="container">
-    
-    <!-- CATEGORIES SECTION WITH EMBEDDED SVG ICONS -->
-    <div class="section-title"><i class="fas fa-th-large"></i> ক্যাটাগরি সমূহ</div>
-    <div class="categories-grid" id="categoryContainer">
-      <!-- 1. Leather -->
-      <div class="category-card" onclick="filterByCategory('Leather')">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-        <span>Leather</span>
-      </div>
-      <!-- 2. Shoes -->
-      <div class="category-card" onclick="filterByCategory('Shoes')">
-        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L2 11v2l5-.8v8.8h2v-6h2v6h2v-10l-3.2-1.9z"/></svg>
-        <span>Shoes</span>
-      </div>
-      <!-- 3. Wallet -->
-      <div class="category-card" onclick="filterByCategory('Wallet')">
-        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-        <span>Wallet</span>
-      </div>
-      <!-- 4. Belt -->
-      <div class="category-card" onclick="filterByCategory('Belt')">
-        <svg viewBox="0 0 24 24"><path d="M21 10H3c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-2c0-.55-.45-1-1-1zm-10 3H5v-2h6v2z"/></svg>
-        <span>Belt</span>
-      </div>
-      <!-- 5. Bag -->
-      <div class="category-card" onclick="filterByCategory('Bag')">
-        <svg viewBox="0 0 24 24"><path d="M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z"/></svg>
-        <span>Bag</span>
-      </div>
-      <!-- 6. Fashion -->
-      <div class="category-card" onclick="filterByCategory('Fashion')">
-        <svg viewBox="0 0 24 24"><path d="M12 2l-5.5 9h11zM12 22c4.97 0 9-4.03 9-9h-18c0 4.97 4.03 9 9 9z"/></svg>
-        <span>Fashion</span>
-      </div>
-      <!-- 7. T-Shirt -->
-      <div class="category-card" onclick="filterByCategory('T-Shirt')">
-        <svg viewBox="0 0 24 24"><path d="M16 2l-4 3-4-3-6 4 2 4 3-1v11h10V9l3 1 2-4z"/></svg>
-        <span>T-Shirt</span>
-      </div>
-      <!-- 8. Panjabi -->
-      <div class="category-card" onclick="filterByCategory('Panjabi')">
-        <svg viewBox="0 0 24 24"><path d="M12 2L4 5v17h16V5l-8-3zm0 4c.55 0 1 .45 1 1v4h-2V7c0-.55.45-1 1-1z"/></svg>
-        <span>Panjabi</span>
-      </div>
-      <!-- 9. Baby & Kids -->
-      <div class="category-card" onclick="filterByCategory('Baby & Kids')">
-        <svg viewBox="0 0 24 24"><path d="M12 2c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 21l4.28-1.42c1.03.38 2.14.58 3.37.58 4.97 0 9-4.03 9-9s-4.03-9-9-9zm-3 8c.83 0 1.5.67 1.5 1.5S9.83 13 9 13s-1.5-.67-1.5-1.5S8.17 10 9 10zm6 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5z"/></svg>
-        <span>Baby & Kids</span>
-      </div>
-      <!-- 10. Electronics -->
-      <div class="category-card" onclick="filterByCategory('Electronics')">
-        <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
-        <span>Electronics</span>
-      </div>
-      <!-- 11. Home & Living -->
-      <div class="category-card" onclick="filterByCategory('Home & Living')">
-        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-        <span>Home & Living</span>
-      </div>
-      <!-- 12. Food & Grocery -->
-      <div class="category-card" onclick="filterByCategory('Food & Grocery')">
-        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-9.83-3.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25z"/></svg>
-        <span>Food & Grocery</span>
-      </div>
-      <!-- 13. Beauty -->
-      <div class="category-card" onclick="filterByCategory('Beauty')">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-        <span>Beauty</span>
-      </div>
-      <!-- 14. Sports -->
-      <div class="category-card" onclick="filterByCategory('Sports')">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 3.07c1.86.25 3.48 1.15 4.67 2.47L13 11.2V5.07zM5.07 11C5.32 9.14 6.22 7.52 7.54 6.33L11.2 11H5.07z"/></svg>
-        <span>Sports</span>
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-orders')"><i class="fas fa-shopping-bag"></i> অর্ডারসমূহ</button>
+      <button class="tab-btn" onclick="switchTab('tab-add-product')"><i class="fas fa-plus-circle"></i> নতুন প্রোডাক্ট যোগ</button>
+      <button class="tab-btn" onclick="switchTab('tab-category')"><i class="fas fa-list"></i> ক্যাটাগরি ম্যানেজ</button>
+    </div>
+    <!-- ORDERS TAB -->
+    <div id="tab-orders" class="tab-content card">
+      <div class="card-title">গ্রাহকদের অর্ডার তালিকা</div>
+      <button onclick="loadOrders()" style="padding: 6px 12px; cursor:pointer;"><i class="fas fa-sync"></i> রিফ্রেশ</button>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>গ্রাহক</th>
+              <th>মোবাইল</th>
+              <th>ঠিকানা</th>
+              <th>মোট টাকা</th>
+              <th>পেমেন্ট</th>
+              <th>স্ট্যাটাস</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="orders-list">
+            <tr><td colspan="8" style="text-align:center;">লোড হচ্ছে...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-      <select id="sortFilter" onchange="filterProducts()">
-        <option value="newest">সর্বশেষ প্রোডাক্ট (Newest)</option>
-        <option value="price-low">দাম: কম থেকে বেশি</option>
-        <option value="price-high">দাম: বেশি থেকে কম</option>
-      </select>
-    </div>
-    <!-- PRODUCTS GRID -->
-    <div class="section-title"><i class="fas fa-fire"></i> সব প্রোডাক্ট</div>
-    <div class="products-grid" id="productsContainer">
-      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--gray);">প্রোডাক্ট লোড হচ্ছে...</div>
-    </div>
-  </div>
-  <!-- CHECKOUT & CART MODAL -->
-  <div class="modal" id="cartModal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeCartModal()">&times;</span>
-      <h3 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-shopping-bag"></i> শপিং কার্ট ও চেকআউট</h3>
-      
-      <div id="cartItemsContainer"></div>
-      <hr style="border-color:#2d3748; margin: 15px 0;">
-      <!-- ORDER FORM -->
-      <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
-        <h4 style="margin-bottom:10px; color:#fff;">শিপিং তথ্য (Customer Order Form)</h4>
+    <!-- ADD PRODUCT TAB -->
+    <div id="tab-add-product" class="tab-content card" style="display: none;">
+      <form id="product-form" onsubmit="saveProduct(event)">
         
-        <div class="form-group">
-          <label>গ্রাহকের নাম *</label>
-          <input type="text" id="custName" required placeholder="আপনার নাম লিখুন">
-        </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label>মোবাইল নম্বর *</label>
-            <input type="tel" id="custPhone" required placeholder="017XXXXXXXX">
+        <!-- Product Info -->
+        <div class="card-title">১. Product Information</div>
+        <div class="grid-2">
+          <div>
+            <label>Product Name *</label>
+            <input type="text" id="p_name" oninput="generateSlug()" required placeholder="যেমন: JS Leather Brown Sandal">
           </div>
-          <div class="form-group">
-            <label>বিকল্প নম্বর (Optional)</label>
-            <input type="tel" id="custAltPhone" placeholder="018XXXXXXXX">
+          <div>
+            <label>Product Slug (Auto)</label>
+            <input type="text" id="p_slug" readonly style="background: #eee;">
           </div>
         </div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-          <div class="form-group">
-            <label>বিভাগ *</label>
-            <input type="text" id="custDivision" required placeholder="যেমন: ঢাকা">
+        <div class="grid-3">
+          <div>
+            <label>SKU Code</label>
+            <input type="text" id="p_sku" placeholder="SKU-1001">
           </div>
-          <div class="form-group">
-            <label>জেলা *</label>
-            <input type="text" id="custDistrict" required placeholder="যেমন: ফেনী">
+          <div>
+            <label>Brand Name</label>
+            <input type="text" id="p_brand" placeholder="JS Leather">
           </div>
-          <div class="form-group">
-            <label>উপজেলা *</label>
-            <input type="text" id="custUpazila" required placeholder="যেমন: পরশুরাম">
+          <div>
+            <label>Product Type</label>
+            <input type="text" id="p_type" placeholder="Sandal / Watch / Shirt">
           </div>
         </div>
-        <div class="form-group">
-          <label>সম্পূর্ণ ঠিকানা *</label>
-          <textarea id="custAddress" rows="2" required placeholder="গ্রাম/হাউস নম্বর, রোড নম্বর..."></textarea>
+        <div class="grid-2">
+          <div>
+            <label>Category *</label>
+            <select id="p_category" required>
+              <option value="">ক্যাটাগরি সিলেক্ট করুন</option>
+            </select>
+          </div>
+          <div>
+            <label>Subcategory</label>
+            <input type="text" id="p_subcategory" placeholder="Men Footwear">
+          </div>
         </div>
-        <div class="form-group">
-          <label>পেমেন্ট মেথড *</label>
-          <select id="payMethod">
-            <option value="COD">Cash on Delivery (ক্যাশ অন ডেলিভারি)</option>
-            <option value="bKash">bKash (বিকাশ)</option>
-            <option value="Nagad">Nagad (নগদ)</option>
-            <option value="Rocket">Rocket (রকেট)</option>
-          </select>
+        <!-- Pricing -->
+        <div class="card-title" style="margin-top:25px;">২. Pricing & Profit</div>
+        <div class="grid-3">
+          <div>
+            <label>Regular Price (৳) *</label>
+            <input type="number" id="p_price" oninput="calculateMargin()" required placeholder="1800">
+          </div>
+          <div>
+            <label>Discount Price (৳)</label>
+            <input type="number" id="p_discount_price" oninput="calculateMargin()" placeholder="1590">
+          </div>
+          <div>
+            <label>Discount % (Auto)</label>
+            <input type="text" id="p_disc_percent" readonly style="background: #eee;">
+          </div>
         </div>
-        <div style="background:#0b132b; padding:12px; border-radius:8px; margin-top:15px;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>সাবটোটাল:</span><span id="summarySubtotal">৳ 0</span></div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>ডেলিভারি চার্জ:</span><span id="summaryDelivery">৳ 60</span></div>
-          <hr style="border-color:#2d3748; margin: 5px 0;">
-          <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:16px; color:var(--primary);"><span>সর্বমোট:</span><span id="summaryTotal">৳ 60</span></div>
+        <div class="grid-2">
+          <div>
+            <label>Cost Price (Admin Only ৳)</label>
+            <input type="number" id="p_cost" oninput="calculateMargin()" placeholder="1000">
+          </div>
+          <div>
+            <label>Profit Margin (Auto ৳)</label>
+            <input type="text" id="p_profit" readonly style="background: #eee; font-weight:bold; color:green;">
+          </div>
         </div>
-        <button type="submit" class="btn-add-cart" style="padding:12px; font-size:16px; margin-top:15px;">অর্ডার নিশ্চিত করুন</button>
+        <!-- Inventory -->
+        <div class="card-title" style="margin-top:25px;">৩. Inventory & Stock</div>
+        <div class="grid-3">
+          <div>
+            <label>Stock Quantity *</label>
+            <input type="number" id="p_stock" value="10" required>
+          </div>
+          <div>
+            <label>Low Stock Alert</label>
+            <input type="number" id="p_low_stock" value="5">
+          </div>
+          <div>
+            <label>Stock Status</label>
+            <select id="p_stock_status">
+              <option value="In Stock">In Stock</option>
+              <option value="Out of Stock">Out of Stock</option>
+              <option value="Pre Order">Pre Order</option>
+            </select>
+          </div>
+        </div>
+        <!-- Product Variants -->
+        <div class="card-title" style="margin-top:25px;">৪. Product Variants</div>
+        <label>Available Sizes:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="sizes" value="38"> 38</label>
+          <label><input type="checkbox" name="sizes" value="39"> 39</label>
+          <label><input type="checkbox" name="sizes" value="40"> 40</label>
+          <label><input type="checkbox" name="sizes" value="41"> 41</label>
+          <label><input type="checkbox" name="sizes" value="42"> 42</label>
+          <label><input type="checkbox" name="sizes" value="43"> 43</label>
+          <label><input type="checkbox" name="sizes" value="44"> 44</label>
+        </div>
+        <label style="margin-top: 15px;">Available Colors:</label>
+        <div class="checkbox-group">
+          <label><input type="checkbox" name="colors" value="Black"> Black</label>
+          <label><input type="checkbox" name="colors" value="Brown"> Brown</label>
+          <label><input type="checkbox" name="colors" value="White"> White</label>
+          <label><input type="checkbox" name="colors" value="Tan"> Tan</label>
+          <label><input type="checkbox" name="colors" value="Coffee"> Coffee</label>
+        </div>
+        <!-- Images -->
+        <div class="card-title" style="margin-top:25px;">৫. Product Images (Direct Image URLs)</div>
+        <label>Main Image URL *</label>
+        <input type="url" id="p_image" required placeholder="https://i.ibb.co/.../main.jpg">
+        <div class="grid-2">
+          <div><label>Gallery Image 1</label><input type="url" id="p_g1" placeholder="URL 1"></div>
+          <div><label>Gallery Image 2</label><input type="url" id="p_g2" placeholder="URL 2"></div>
+          <div><label>Gallery Image 3</label><input type="url" id="p_g3" placeholder="URL 3"></div>
+          <div><label>Gallery Image 4</label><input type="url" id="p_g4" placeholder="URL 4"></div>
+        </div>
+        <!-- Descriptions -->
+        <div class="card-title" style="margin-top:25px;">৬. Descriptions & Features</div>
+        <label>Short Description</label>
+        <textarea id="p_short_desc" rows="2" placeholder="সংক্ষিপ্ত বিবরণ..."></textarea>
+        
+        <label>Full Description</label>
+        <textarea id="p_desc" rows="4" placeholder="বিস্তারিত বিবরণ..."></textarea>
+        
+        <label>Product Features (Comma Separated)</label>
+        <textarea id="p_features" rows="2" placeholder="100% Genuine Leather, Durable Rubber Sole, Soft Footbed"></textarea>
+        <!-- Specifications -->
+        <div class="card-title" style="margin-top:25px;">৭. Specifications</div>
+        <div class="grid-3">
+          <div><label>Material</label><input type="text" id="p_material" placeholder="Genuine Leather"></div>
+          <div><label>Weight</label><input type="text" id="p_weight" placeholder="500g"></div>
+          <div><label>Origin Country</label><input type="text" id="p_origin" value="Bangladesh"></div>
+          <div><label>Warranty</label><input type="text" id="p_warranty" placeholder="30 Days"></div>
+          <div><label>Gender Target</label>
+            <select id="p_gender">
+              <option value="Men">Men</option>
+              <option value="Women">Women</option>
+              <option value="Unisex">Unisex</option>
+              <option value="Kids">Kids</option>
+            </select>
+          </div>
+        </div>
+        <!-- Shipping & Labels -->
+        <div class="card-title" style="margin-top:25px;">৮. Shipping & Label</div>
+        <div class="grid-3">
+          <div><label>Inside City Delivery (৳)</label><input type="number" id="p_del_in" value="60"></div>
+          <div><label>Outside City Delivery (৳)</label><input type="number" id="p_del_out" value="120"></div>
+          <div><label>Delivery Time</label><input type="text" id="p_del_time" value="2-4 Days"></div>
+        </div>
+        <label>Product Label / Tag</label>
+        <select id="p_label">
+          <option value="">None</option>
+          <option value="New Arrival">New Arrival</option>
+          <option value="Best Seller">Best Seller</option>
+          <option value="Featured Product">Featured Product</option>
+          <option value="Hot Deal">Hot Deal</option>
+          <option value="Flash Sale">Flash Sale</option>
+        </select>
+        <!-- SEO -->
+        <div class="card-title" style="margin-top:25px;">৯. SEO</div>
+        <label>SEO Title</label>
+        <input type="text" id="p_seo_title" placeholder="Buy Genuine Leather Sandals in BD">
+        <label>SEO Description</label>
+        <textarea id="p_seo_desc" rows="2"></textarea>
+        <label>Tags (Comma Separated)</label>
+        <input type="text" id="p_tags" placeholder="sandal, leather, mens shoe">
+        <button type="submit" class="submit-btn"><i class="fas fa-save"></i> প্রোডাক্ট সেভ করুন</button>
+      </form>
+    </div>
+    <!-- CATEGORY TAB -->
+    <div id="tab-category" class="tab-content card" style="display: none;">
+      <div class="card-title">নতুন ক্যাটাগরি তৈরি করুন</div>
+      <form onsubmit="saveCategory(event)">
+        <label>ক্যাটাগরির নাম *</label>
+        <input type="text" id="cat_name" required placeholder="Electronics / Fashion">
+        <label>ছবি / আইকন URL</label>
+        <input type="url" id="cat_icon" placeholder="https://i.ibb.co/...">
+        <button type="submit" class="submit-btn" style="background:#f77f00;">ক্যাটাগরি সেভ করুন</button>
       </form>
     </div>
   </div>
-  <!-- ORDER TRACKING MODAL -->
-  <div class="modal" id="trackModal">
-    <div class="modal-content">
-      <span class="close-modal" onclick="closeTrackModal()">&times;</span>
-      <h3 style="color:var(--primary); margin-bottom:15px;"><i class="fas fa-truck"></i> অর্ডার ট্র্যাকিং</h3>
-      <div class="form-group">
-        <label>অর্ডার আইডি / মোবাইল নম্বর দিন</label>
-        <input type="text" id="trackInput" placeholder="যেমন: 1001 অথবা 017XXXXXXXX">
-      </div>
-      <button class="btn-add-cart" onclick="trackOrder()">ট্র্যাক করুন</button>
-      <div id="trackResult" style="margin-top:15px;"></div>
-    </div>
-  </div>
-  <!-- PWA INSTALL BANNER -->
-  <div id="pwa-banner">
-    <div><b>BAZARO App</b> ইনস্টল করুন দ্রুত কেনাকাটার জন্য</div>
-    <button onclick="installPWA()" style="background:#0b132b; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer;">ইনস্টল</button>
-  </div>
 <script>
-  // SUPABASE CONFIGURATION
   const SUPABASE_URL = "https://zwpoxufpeluqtdooeekr.supabase.co";
   const SUPABASE_KEY = "sb_publishable_TACq2hE6EHAx88w00X74XA_XQTMI1bW";
-  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  let cart = [];
-  let wishlist = [];
-  let allProducts = [];
-  // Initialize
-  window.addEventListener('DOMContentLoaded', () => {
-    fetchProducts();
-    initPWA();
-  });
-  // Fetch Products
-  async function fetchProducts() {
-    const { data, error } = await db.from('products').select('*').order('id', { ascending: false });
-    if (!error && data) {
-      allProducts = data;
-      renderProducts(allProducts);
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    event.currentTarget.classList.add('active');
+  }
+  function generateSlug() {
+    const name = document.getElementById('p_name').value;
+    document.getElementById('p_slug').value = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  }
+  function calculateMargin() {
+    const reg = parseFloat(document.getElementById('p_price').value) || 0;
+    const disc = parseFloat(document.getElementById('p_discount_price').value) || reg;
+    const cost = parseFloat(document.getElementById('p_cost').value) || 0;
+    if (reg > 0 && disc < reg) {
+      const perc = Math.round(((reg - disc) / reg) * 100);
+      document.getElementById('p_disc_percent').value = perc + '% OFF';
     } else {
-      document.getElementById('productsContainer').innerHTML = `<div style="grid-column:1/-1; text-align:center; color:red;">প্রোডাক্ট লোড হতে সমস্যা হয়েছে</div>`;
+      document.getElementById('p_disc_percent').value = '0%';
+    }
+    const profit = disc - cost;
+    document.getElementById('p_profit').value = '৳ ' + profit;
+  }
+  async function loadCategories() {
+    const { data } = await supabaseClient.from('categories').select('*');
+    if(data) {
+      document.getElementById('p_category').innerHTML = '<option value="">ক্যাটাগরি সিলেক্ট করুন</option>' + 
+        data.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
     }
   }
-  // Render Products
-  function renderProducts(products) {
-    const container = document.getElementById('productsContainer');
-    if (products.length === 0) {
-      container.innerHTML = `<div style="grid-column:1/-1; text-align:center; color:var(--gray);">কোনো প্রোডাক্ট পাওয়া যায়নি</div>`;
-      return;
-    }
-    container.innerHTML = products.map(p => `
-      <div class="product-card">
-        <img src="${p.image_url}" class="product-img" alt="${p.name}">
-        <div class="product-info">
-          <div class="product-title">${p.name}</div>
-          <div class="price-box">
-            <span class="current-price">৳ ${p.discount_price || p.price}</span>
-            ${p.discount_price ? `<span class="old-price">৳ ${p.price}</span>` : ''}
-          </div>
-          <button class="btn-add-cart" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> কার্টে রাখুন</button>
-        </div>
-      </div>
-    `).join('');
-  }
-  // Search & Filter
-  function filterProducts() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const sort = document.getElementById('sortFilter').value;
-    let filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
-    if (sort === 'price-low') filtered.sort((a,b) => (a.discount_price||a.price) - (b.discount_price||b.price));
-    if (sort === 'price-high') filtered.sort((a,b) => (b.discount_price||b.price) - (a.discount_price||a.price));
-    renderProducts(filtered);
-  }
-  function filterByCategory(catName) {
-    const filtered = allProducts.filter(p => p.category === catName);
-    renderProducts(filtered.length ? filtered : allProducts);
-  }
-  // Cart Management
-  function addToCart(pId) {
-    const prod = allProducts.find(p => p.id === pId);
-    if (!prod) return;
-    
-    const existing = cart.find(item => item.id === pId);
-    if (existing) {
-      existing.qty++;
-    } else {
-      cart.push({ ...prod, qty: 1 });
-    }
-    updateCartUI();
-    alert('প্রোডাক্ট কার্টে যুক্ত হয়েছে!');
-  }
-  function updateCartUI() {
-    document.getElementById('cart-count').innerText = cart.reduce((acc, i) => acc + i.qty, 0);
-    
-    const container = document.getElementById('cartItemsContainer');
-    let subtotal = 0;
-    container.innerHTML = cart.map(item => {
-      const itemPrice = item.discount_price || item.price;
-      subtotal += itemPrice * item.qty;
-      return `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#0b132b; padding:8px; border-radius:6px;">
-          <div>
-            <div style="font-weight:bold; font-size:13px;">${item.name}</div>
-            <div style="color:var(--primary); font-size:12px;">৳ ${itemPrice} x ${item.qty}</div>
-          </div>
-          <button onclick="removeFromCart(${item.id})" style="background:red; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">&times;</button>
-        </div>
-      `;
-    }).join('');
-    const delivery = 60;
-    document.getElementById('summarySubtotal').innerText = '৳ ' + subtotal;
-    document.getElementById('summaryDelivery').innerText = '৳ ' + delivery;
-    document.getElementById('summaryTotal').innerText = '৳ ' + (subtotal + delivery);
-  }
-  function removeFromCart(id) {
-    cart = cart.filter(i => i.id !== id);
-    updateCartUI();
-  }
-  // Checkout Handle
-  async function handlePlaceOrder(e) {
+  async function saveProduct(e) {
     e.preventDefault();
-    if (cart.length === 0) return alert('আপনার কার্ট খালি!');
-    const orderPayload = {
-      customer_name: document.getElementById('custName').value,
-      phone: document.getElementById('custPhone').value,
-      alt_phone: document.getElementById('custAltPhone').value,
-      division: document.getElementById('custDivision').value,
-      district: document.getElementById('custDistrict').value,
-      upazila: document.getElementById('custUpazila').value,
-      full_address: document.getElementById('custAddress').value,
-      payment_method: document.getElementById('payMethod').value,
-      total_amount: parseFloat(document.getElementById('summaryTotal').innerText.replace('৳ ', '')),
-      status: 'Order Placed'
+    const sizes = Array.from(document.querySelectorAll('input[name="sizes"]:checked')).map(cb => cb.value);
+    const colors = Array.from(document.querySelectorAll('input[name="colors"]:checked')).map(cb => cb.value);
+    const productData = {
+      name: document.getElementById('p_name').value,
+      slug: document.getElementById('p_slug').value,
+      sku: document.getElementById('p_sku').value,
+      brand: document.getElementById('p_brand').value,
+      category: document.getElementById('p_category').value,
+      subcategory: document.getElementById('p_subcategory').value,
+      product_type: document.getElementById('p_type').value,
+      price: parseFloat(document.getElementById('p_price').value),
+      discount_price: parseFloat(document.getElementById('p_discount_price').value) || null,
+      cost_price: parseFloat(document.getElementById('p_cost').value) || null,
+      stock: parseInt(document.getElementById('p_stock').value),
+      low_stock_alert: parseInt(document.getElementById('p_low_stock').value),
+      stock_status: document.getElementById('p_stock_status').value,
+      sizes: sizes,
+      colors: colors,
+      image_url: document.getElementById('p_image').value,
+      gallery_1: document.getElementById('p_g1').value || null,
+      gallery_2: document.getElementById('p_g2').value || null,
+      gallery_3: document.getElementById('p_g3').value || null,
+      gallery_4: document.getElementById('p_g4').value || null,
+      short_description: document.getElementById('p_short_desc').value,
+      description: document.getElementById('p_desc').value,
+      features: document.getElementById('p_features').value,
+      material: document.getElementById('p_material').value,
+      weight: document.getElementById('p_weight').value,
+      origin_country: document.getElementById('p_origin').value,
+      warranty: document.getElementById('p_warranty').value,
+      gender: document.getElementById('p_gender').value,
+      delivery_inside: parseFloat(document.getElementById('p_del_in').value),
+      delivery_outside: parseFloat(document.getElementById('p_del_out').value),
+      delivery_time: document.getElementById('p_del_time').value,
+      product_label: document.getElementById('p_label').value || null,
+      seo_title: document.getElementById('p_seo_title').value,
+      seo_description: document.getElementById('p_seo_desc').value,
+      tags: document.getElementById('p_tags').value
     };
-    const { data, error } = await db.from('orders').insert([orderPayload]).select();
-    
-    if (!error && data) {
-      alert(`🎉 অর্ডার সফল হয়েছে! আপনার অর্ডার ID: #${data[0].id}`);
-      cart = [];
-      updateCartUI();
-      closeCartModal();
+    const { error } = await supabaseClient.from('products').insert([productData]);
+    if (error) {
+      alert('Error saving product: ' + error.message);
     } else {
-      alert('অর্ডার সাবমিট করতে সমস্যা হয়েছে: ' + error.message);
+      alert('🎉 সফলভাবে প্রোডাক্ট যোগ হয়েছে!');
+      document.getElementById('product-form').reset();
     }
   }
-  // Modals
-  function openCartModal() { document.getElementById('cartModal').style.display = 'flex'; }
-  function closeCartModal() { document.getElementById('cartModal').style.display = 'none'; }
-  function openOrderTrackModal() { document.getElementById('trackModal').style.display = 'flex'; }
-  function closeTrackModal() { document.getElementById('trackModal').style.display = 'none'; }
-  // Track Order
-  async function trackOrder() {
-    const val = document.getElementById('trackInput').value.trim();
-    if (!val) return;
-    const { data } = await db.from('orders').select('*').or(`id.eq.${val},phone.eq.${val}`);
-    const res = document.getElementById('trackResult');
-    if (data && data.length > 0) {
-      res.innerHTML = data.map(o => `
-        <div style="background:#0b132b; padding:10px; border-radius:6px; margin-top:8px;">
-          <div><b>Order #${o.id}</b> - <span style="color:var(--primary);">${o.status}</span></div>
-          <div style="font-size:12px; color:var(--gray);">মোট টাকা: ৳${o.total_amount} | পেমেন্ট: ${o.payment_method}</div>
-        </div>
+  async function saveCategory(e) {
+    e.preventDefault();
+    const name = document.getElementById('cat_name').value;
+    const image_url = document.getElementById('cat_icon').value;
+    const { error } = await supabaseClient.from('categories').insert([{ name, image_url }]);
+    if (error) alert(error.message);
+    else { alert('ক্যাটাগরি যুক্ত হয়েছে!'); location.reload(); }
+  }
+  async function loadOrders() {
+    const { data: orders } = await supabaseClient.from('orders').select('*').order('id', { ascending: false });
+    const tbody = document.getElementById('orders-list');
+    if (orders && orders.length > 0) {
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td>#${o.id}</td>
+          <td><b>${o.customer_name}</b></td>
+          <td>${o.phone}</td>
+          <td>${o.address}, ${o.district}</td>
+          <td>৳ ${o.total_amount}</td>
+          <td>${o.payment_method}</td>
+          <td><span class="badge bg-pending">${o.status}</span></td>
+          <td>
+            <select onchange="updateStatus(${o.id}, this.value)">
+              <option value="Pending" ${o.status==='Pending'?'selected':''}>Pending</option>
+              <option value="Confirmed" ${o.status==='Confirmed'?'selected':''}>Confirmed</option>
+              <option value="Delivered" ${o.status==='Delivered'?'selected':''}>Delivered</option>
+              <option value="Cancelled" ${o.status==='Cancelled'?'selected':''}>Cancelled</option>
+            </select>
+          </td>
+        </tr>
       `).join('');
     } else {
-      res.innerHTML = `<div style="color:red; font-size:13px; margin-top:10px;">কোনো অর্ডার পাওয়া যায়নি।</div>`;
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">কোনো অর্ডার পাওয়া যায়নি</td></tr>';
     }
   }
-  // PWA Prompt
-  let deferredPrompt;
-  function initPWA() {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js');
-    }
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      document.getElementById('pwa-banner').style.display = 'flex';
-    });
+  async function updateStatus(id, status) {
+    await supabaseClient.from('orders').update({ status }).eq('id', id);
+    alert('অর্ডার স্ট্যাটাস আপডেট হয়েছে!');
   }
-  function installPWA() {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt = null;
-      document.getElementById('pwa-banner').style.display = 'none';
-    }
-  }
+  loadCategories();
+  loadOrders();
 </script>
 </body>
 </html>
+
