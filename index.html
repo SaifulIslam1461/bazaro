@@ -1,976 +1,1260 @@
+```html
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="bn" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Super Shop - WiFi & Business Management System</title>
-    <!-- Tailwind CSS & Font Awesome -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HAYAT OS - আপনার জীবন। আপনার সময়। আপনার বিকাশ।</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" id="manifest-placeholder">
+    <meta name="theme-color" content="#0B132B">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://placehold.co/192x192/0B132B/D4AF37?text=HAYAT">
+
+    <!-- Google Font: Hind Siliguri for Clean Bengali Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            900: '#070B19',
+                            800: '#0B132B',
+                            700: '#1C2541',
+                            600: '#2A385B',
+                            500: '#3A4B7C'
+                        },
+                        gold: {
+                            400: '#F5D77F',
+                            500: '#D4AF37',
+                            600: '#AA8823',
+                            100: '#FDF6E2'
+                        },
+                        softwhite: '#F8F9FA'
+                    },
+                    fontFamily: {
+                        sans: ['"Hind Siliguri"', 'Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jSPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .active-tab { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: bold; }
-        @media print {
-            body * { visibility: hidden; }
-            #printable-area, #printable-area * { visibility: visible; }
-            #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+        /* Custom scrollbars and styling */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 4px;
+        }
+        
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #FFF0B3 0%, #D4AF37 50%, #AA8823 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gold-border-glow {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+        .glass-card {
+            background: rgba(28, 37, 65, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+        }
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+        }
+        
+        /* Flip card animation */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Nav active bar indicator */
+        .nav-item.active {
+            color: #D4AF37;
+            font-weight: 600;
+        }
+        .nav-item.active i {
+            transform: translateY(-2px);
+            color: #D4AF37;
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 pb-24">
+<body class="bg-navy-900 text-slate-100 dark:bg-navy-900 dark:text-slate-100 light:bg-softwhite light:text-slate-800 font-sans transition-colors duration-300 min-h-screen pb-24 selection:bg-gold-500 selection:text-navy-900">
 
-    <!-- Security PIN Modal Lock Screen -->
-    <div id="pin-lock-screen" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[100] flex items-center justify-center p-4">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm text-center space-y-4">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto text-2xl">
-                <i class="fa-solid fa-lock"></i>
+    <!-- APP HEADER -->
+    <header class="sticky top-0 z-40 bg-navy-800/90 dark:bg-navy-800/90 light:bg-white/90 backdrop-blur-md border-b border-gold-500/20 px-4 py-3 flex items-center justify-between shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-900 font-bold text-xl shadow-lg">
+                H
             </div>
-            <h2 class="text-xl font-bold text-gray-800">পিন কোড লিখুন</h2>
-            <p class="text-xs text-gray-500">অ্যাপলিকেশনে প্রবেশ করতে ৪ ডিজিটের পিন দিন (ডিফল্ট: 1234)</p>
-            <input type="password" id="pin-input" maxlength="4" placeholder="••••" class="w-full text-center text-2xl tracking-widest border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="unlockApp()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition">আনলক করুন</button>
+            <div>
+                <h1 class="text-lg font-bold tracking-tight gold-gradient-text flex items-center gap-2">
+                    HAYAT OS
+                    <span class="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold-500/10 text-gold-500 border border-gold-500/30">প্রো</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 light:text-slate-500 font-medium tracking-wide">আপনার জীবন। আপনার সময়। আপনার বিকাশ।</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Header Navigation -->
-    <header class="bg-blue-600 text-white p-4 shadow-md sticky top-0 z-50 flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-bold"><i class="fa-solid fa-wifi mr-2"></i>মাই সুপার শপ</h1>
-            <p class="text-xs text-blue-200">ওয়াইফাই ও ব্যবসায়িক হিসাব ব্যবস্থাপনা</p>
-        </div>
-        <div class="flex items-center space-x-2">
-            <button onclick="toggleModal('trash-modal')" class="text-xs bg-gray-700 hover:bg-gray-800 px-2.5 py-1.5 rounded text-white flex items-center gap-1" title="ট্র্যাশ বিন">
-                <i class="fa-solid fa-trash-can"></i> ট্র্যাশ
+        <div class="flex items-center gap-2">
+            <!-- Quick Actions Button -->
+            <button onclick="toggleQuickModal()" class="w-9 h-9 rounded-lg bg-gold-500/10 text-gold-500 hover:bg-gold-500 hover:text-navy-900 transition-all flex items-center justify-center border border-gold-500/30" title="দ্রুত যোগ করুন">
+                <i class="fa-solid fa-plus"></i>
             </button>
-            <button onclick="exportBackupJSON()" class="text-xs bg-emerald-600 hover:bg-emerald-700 px-2.5 py-1.5 rounded text-white" title="ব্যাকআপ ডাউনলোড">
-                <i class="fa-solid fa-download"></i> ব্যাকআপ
+            <!-- Theme Toggle -->
+            <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-navy-700/50 light:bg-slate-100 text-gold-500 hover:bg-gold-500/20 transition-all flex items-center justify-center border border-gold-500/20" title="থিম পরিবর্তন">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
             </button>
-            <label class="text-xs bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1.5 rounded text-white cursor-pointer" title="ব্যাকআপ রিস্টোর">
-                <i class="fa-solid fa-upload"></i> রিস্টোর
-                <input type="file" id="restore-file" class="hidden" onchange="restoreBackupJSON(event)">
-            </label>
-            <button onclick="clearData()" class="text-xs bg-red-500 hover:bg-red-600 px-2.5 py-1.5 rounded text-white">রিসেট</button>
         </div>
     </header>
 
-    <!-- Main Content Area -->
-    <main class="p-4 max-w-4xl mx-auto space-y-4">
-
-        <!-- 1. DASHBOARD TAB -->
-        <section id="tab-dashboard" class="space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold text-gray-700">📊 ড্যাশবোর্ড ও ওভারভিউ</h2>
-                <span class="text-xs bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full font-semibold">রিয়েল-টাইম সিঙ্ক</span>
-            </div>
-
-            <!-- Financial Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div class="bg-white p-4 rounded-xl shadow border-l-4 border-green-500">
-                    <p class="text-xs text-gray-500">মোট আয় (Income)</p>
-                    <p class="text-xl font-bold text-green-600" id="dash-income">৳ 0</p>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow border-l-4 border-red-500">
-                    <p class="text-xs text-gray-500">মোট খরচ (Expense)</p>
-                    <p class="text-xl font-bold text-red-600" id="dash-expense">৳ 0</p>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow border-l-4 border-blue-500">
-                    <p class="text-xs text-gray-500">নেট ব্যালেন্স (Balance)</p>
-                    <p class="text-xl font-bold text-blue-600" id="dash-balance">৳ 0</p>
-                </div>
-                <div class="bg-white p-4 rounded-xl shadow border-l-4 border-orange-500">
-                    <p class="text-xs text-gray-500">WiFi মোট বকেয়া</p>
-                    <p class="text-xl font-bold text-orange-600" id="dash-wifi-due">৳ 0</p>
-                </div>
-            </div>
-
-            <!-- Business Stats Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
-                <div class="bg-white p-3 rounded-lg shadow text-center">
-                    <i class="fa-solid fa-users text-blue-500 text-xl mb-1"></i>
-                    <p class="text-xs text-gray-500">WiFi কাস্টমার</p>
-                    <p class="text-lg font-bold" id="dash-cust-count">0 (সক্রিয়: 0)</p>
-                </div>
-                <div class="bg-white p-3 rounded-lg shadow text-center">
-                    <i class="fa-solid fa-hand-holding-dollar text-green-500 text-xl mb-1"></i>
-                    <p class="text-xs text-gray-500">মোট পাওনা (Receivable)</p>
-                    <p class="text-lg font-bold text-green-600" id="dash-receivable">৳ 0</p>
-                </div>
-                <div class="bg-white p-3 rounded-lg shadow text-center">
-                    <i class="fa-solid fa-file-invoice-dollar text-red-500 text-xl mb-1"></i>
-                    <p class="text-xs text-gray-500">মোট দেনা (Payable)</p>
-                    <p class="text-lg font-bold text-red-600" id="dash-payable">৳ 0</p>
-                </div>
-                <div class="bg-white p-3 rounded-lg shadow text-center">
-                    <i class="fa-solid fa-chart-line text-purple-500 text-xl mb-1"></i>
-                    <p class="text-xs text-gray-500">WiFi নিট লাভ</p>
-                    <p class="text-lg font-bold text-purple-600" id="dash-wifi-profit">৳ 0</p>
-                </div>
-            </div>
-
-            <!-- Global Search & Filters -->
-            <div class="bg-white p-3 rounded-xl shadow flex flex-wrap gap-2 items-center">
-                <i class="fa-solid fa-magnifying-glass text-gray-400 pl-2"></i>
-                <input type="text" id="global-search" oninput="renderAll()" placeholder="নাম, মোবাইল, রুম নম্বর দিয়ে খুঁজুন..." class="border p-2 rounded text-sm flex-1 focus:outline-none">
-                <select id="filter-status" onchange="renderAll()" class="border p-2 rounded text-sm bg-gray-50">
-                    <option value="All">সকল স্টেটাস</option>
-                    <option value="Active">সক্রিয় (Active)</option>
-                    <option value="Due">বকেয়া আছে (Due)</option>
-                    <option value="Suspended">সাময়িক বন্ধ (Suspended)</option>
-                </select>
-            </div>
-        </section>
-
-        <!-- 2. WIFI CUSTOMERS TAB -->
-        <section id="tab-wifi" class="hidden space-y-4">
-            <div class="flex justify-between items-center flex-wrap gap-2">
-                <h2 class="text-lg font-bold text-gray-700">📶 ওয়াইফাই কাস্টমার ম্যানেজমেন্ট</h2>
-                <div class="flex space-x-1">
-                    <button onclick="toggleModal('recharge-modal')" class="bg-purple-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow hover:bg-purple-700">+ রিচার্জ</button>
-                    <button onclick="toggleModal('investment-modal')" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow hover:bg-indigo-700">+ ইনভেস্টমেন্ট</button>
-                    <button onclick="openAddCustomerModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow hover:bg-blue-700">+ নতুন কাস্টমার</button>
-                </div>
-            </div>
-
-            <!-- Customer Dynamic List -->
-            <div id="customer-list" class="space-y-3"></div>
-        </section>
-
-        <!-- 3. FINANCE TAB (Income/Expense) -->
-        <section id="tab-finance" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold text-gray-700">💰 আয় ও খরচের খাতা</h2>
-                <div class="space-x-1">
-                    <button onclick="openFinanceModal('Income')" class="bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow hover:bg-green-700">+ নতুন আয়</button>
-                    <button onclick="openFinanceModal('Expense')" class="bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow hover:bg-red-700">+ নতুন খরচ</button>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-100 border-b">
-                            <tr>
-                                <th class="p-3">তারিখ</th>
-                                <th class="p-3">টাইপ</th>
-                                <th class="p-3">ক্যাটাগরি ও নোট</th>
-                                <th class="p-3">পরিমাণ</th>
-                                <th class="p-3 text-right">অ্যাকশন</th>
-                            </tr>
-                        </thead>
-                        <tbody id="finance-table-body"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. DUES (Ledger) TAB -->
-        <section id="tab-dues" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold text-gray-700">🤝 পাওনা ও দেনা হিসাব (Ledger)</h2>
-                <button onclick="toggleModal('due-modal')" class="bg-purple-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow hover:bg-purple-700">+ এন্ট্রি যোগ করুন</button>
-            </div>
-
-            <div id="dues-list" class="space-y-3"></div>
-        </section>
-
-        <!-- 5. REPORTS TAB -->
-        <section id="tab-reports" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold text-gray-700">📈 প্রফেশনাল বিজনেস রিপোর্ট</h2>
-                <button onclick="printReport()" class="bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow"><i class="fa-solid fa-print"></i> প্রিন্ট রিপোর্ট</button>
-            </div>
-
-            <!-- Filter Controls for Reports -->
-            <div class="bg-white p-3 rounded-xl shadow flex flex-wrap gap-2 items-center text-xs">
-                <label class="font-bold">সময়সীমা:</label>
-                <select id="report-range" onchange="generateReport()" class="border p-1.5 rounded bg-gray-50">
-                    <option value="this-month">চলতি মাস</option>
-                    <option value="today">আজকের রিপোর্ট</option>
-                    <option value="all-time">সর্বমোট (All-Time)</option>
-                </select>
-                <button onclick="exportCSVReport()" class="bg-emerald-600 text-white px-3 py-1.5 rounded font-semibold ml-auto"><i class="fa-solid fa-file-excel"></i> Excel (CSV) এক্সপোর্ট</button>
-            </div>
-
-            <div id="report-render-area" class="space-y-4"></div>
-        </section>
-
+    <!-- MAIN VIEW CONTAINER -->
+    <main id="app-content" class="max-w-4xl mx-auto px-4 py-5 space-y-6">
+        <!-- Dynamic Modules will load here -->
     </main>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-2 text-xs text-gray-600 shadow-lg z-40">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center py-1 active-tab w-full">
-            <i class="fa-solid fa-chart-pie text-lg"></i>
-            <span>ড্যাশবোর্ড</span>
-        </button>
-        <button onclick="switchTab('wifi')" id="nav-wifi" class="flex flex-col items-center py-1 w-full">
-            <i class="fa-solid fa-wifi text-lg"></i>
-            <span>ওয়াইফাই</span>
-        </button>
-        <button onclick="switchTab('finance')" id="nav-finance" class="flex flex-col items-center py-1 w-full">
-            <i class="fa-solid fa-wallet text-lg"></i>
-            <span>আয়/ব্যয়</span>
-        </button>
-        <button onclick="switchTab('dues')" id="nav-dues" class="flex flex-col items-center py-1 w-full">
-            <i class="fa-solid fa-handshake text-lg"></i>
-            <span>পাওনা-দেনা</span>
-        </button>
-        <button onclick="switchTab('reports')" id="nav-reports" class="flex flex-col items-center py-1 w-full">
-            <i class="fa-solid fa-file-invoice text-lg"></i>
-            <span>রিপোর্ট</span>
-        </button>
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-navy-800/95 dark:bg-navy-800/95 light:bg-white/95 backdrop-blur-lg border-t border-gold-500/20 px-2 py-2 shadow-2xl">
+        <div class="max-w-4xl mx-auto flex justify-around items-center overflow-x-auto no-scrollbar py-1">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-house-laptop text-lg mb-0.5"></i>
+                <span class="text-[10px]">হোম</span>
+            </button>
+            <button onclick="switchTab('islamic')" id="nav-islamic" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-kaaba text-lg mb-0.5"></i>
+                <span class="text-[10px]">দীন</span>
+            </button>
+            <button onclick="switchTab('study')" id="nav-study" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-book-open text-lg mb-0.5"></i>
+                <span class="text-[10px]">পড়াশোনা</span>
+            </button>
+            <button onclick="switchTab('todo')" id="nav-todo" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-list-check text-lg mb-0.5"></i>
+                <span class="text-[10px]">কাজ</span>
+            </button>
+            <button onclick="switchTab('habits')" id="nav-habits" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
+                <span class="text-[10px]">অভ্যাস</span>
+            </button>
+            <button onclick="switchTab('health')" id="nav-health" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-heart-pulse text-lg mb-0.5"></i>
+                <span class="text-[10px]">স্বাস্থ্য</span>
+            </button>
+            <button onclick="switchTab('diary')" id="nav-diary" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-book-bookmark text-lg mb-0.5"></i>
+                <span class="text-[10px]">ডায়েরি</span>
+            </button>
+            <button onclick="switchTab('menu')" id="nav-menu" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+                <i class="fa-solid fa-grid-2 text-lg mb-0.5"></i>
+                <span class="text-[10px]">আরও</span>
+            </button>
+        </div>
     </nav>
 
-    <!-- MODALS SECTION -->
-
-    <!-- MODAL: ADD / EDIT CUSTOMER -->
-    <div id="customer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-3 max-h-[90vh] overflow-y-auto">
-            <h3 class="font-bold text-lg text-blue-600" id="cust-modal-title">স্থায়ী WiFi কাস্টমার যুক্ত করুন</h3>
-            <input id="c-id" type="hidden">
-            <input id="c-name" type="text" placeholder="কাস্টমারের নাম *" class="w-full border p-2 rounded text-sm">
-            <input id="c-phone" type="text" placeholder="মোবাইল নম্বর *" class="w-full border p-2 rounded text-sm">
-            <input id="c-whatsapp" type="text" placeholder="হোয়াটসঅ্যাপ নম্বর" class="w-full border p-2 rounded text-sm">
-            <input id="c-room" type="text" placeholder="রুম নম্বর *" class="w-full border p-2 rounded text-sm">
-            <div class="grid grid-cols-2 gap-2">
-                <input id="c-device" type="text" placeholder="ডিভাইসের নাম" class="border p-2 rounded text-sm">
-                <input id="c-dev-type" type="text" placeholder="টাইপ (মোবাইল/রাউটার)" class="border p-2 rounded text-sm">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <input id="c-bill" type="number" placeholder="মাসিক বিল (টাকা) *" class="border p-2 rounded text-sm">
-                <input id="c-conn-date" type="date" class="border p-2 rounded text-sm">
-            </div>
-            <textarea id="c-notes" placeholder="নোট / বিবরণ" class="w-full border p-2 rounded text-sm h-16"></textarea>
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="toggleModal('customer-modal')" class="px-4 py-2 border rounded text-sm">বাতিল</button>
-                <button onclick="saveCustomer()" class="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold">সংরক্ষণ করুন</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: CUSTOMER PROFILE & TIMELINE -->
-    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto" id="printable-area">
-            <div class="flex justify-between items-start border-b pb-2">
-                <div>
-                    <h3 class="font-bold text-xl text-gray-800" id="p-name">কাস্টমার প্রোফাইল</h3>
-                    <p class="text-xs text-gray-500" id="p-details">রুম: -- | মোবাইল: --</p>
-                </div>
-                <button onclick="toggleModal('profile-modal')" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-
-            <div class="grid grid-cols-3 gap-2 bg-blue-50 p-3 rounded-lg text-center text-xs">
-                <div>
-                    <p class="text-gray-500">মাসিক বিল</p>
-                    <p class="font-bold text-sm text-blue-600" id="p-monthly-bill">৳ 0</p>
-                </div>
-                <div>
-                    <p class="text-gray-500">মোট পরিশোধ</p>
-                    <p class="font-bold text-sm text-green-600" id="p-total-paid">৳ 0</p>
-                </div>
-                <div>
-                    <p class="text-gray-500">বর্তমান বকেয়া</p>
-                    <p class="font-bold text-sm text-red-600" id="p-total-due">৳ 0</p>
-                </div>
-            </div>
-
-            <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg text-xs">
-                <span>স্টেটাস: <strong id="p-status" class="text-blue-600">Active</strong></span>
-                <div class="space-x-1">
-                    <button onclick="changeCustStatus('Active')" class="bg-green-600 text-white px-2 py-1 rounded">সক্রিয়</button>
-                    <button onclick="changeCustStatus('Suspended')" class="bg-yellow-600 text-white px-2 py-1 rounded">বন্ধ করুন</button>
-                    <button onclick="window.print()" class="bg-gray-700 text-white px-2 py-1 rounded"><i class="fa-solid fa-print"></i> প্রিন্ট</button>
-                </div>
-            </div>
-
-            <div>
-                <h4 class="font-bold text-sm text-gray-700 mb-2"><i class="fa-solid fa-timeline text-blue-500 mr-1"></i> লাইফটাইম হিস্ট্রি টাইমলাইন</h4>
-                <div id="p-timeline" class="space-y-2 max-h-60 overflow-y-auto border p-2 rounded-lg bg-gray-50 text-xs"></div>
-            </div>
-
-            <div class="flex justify-end pt-2 border-t">
-                <button onclick="toggleModal('profile-modal')" class="px-4 py-1.5 bg-gray-600 text-white rounded text-xs">বন্ধ করুন</button>
+    <!-- QUICK ADD MODAL -->
+    <div id="quick-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-navy-800 dark:bg-navy-800 light:bg-white rounded-2xl border border-gold-500/30 w-full max-w-md p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            <button onclick="toggleQuickModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold gold-gradient-text mb-4">দ্রুত যোগ করুন</h3>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="toggleQuickModal(); switchTab('todo');" class="p-4 rounded-xl bg-navy-700/50 light:bg-slate-100 hover:border-gold-500/50 border border-transparent transition text-left flex flex-col gap-2">
+                    <i class="fa-solid fa-circle-check text-gold-500 text-2xl"></i>
+                    <span class="font-semibold text-sm">নতুন কাজ যোগ</span>
+                </button>
+                <button onclick="toggleQuickModal(); switchTab('diary');" class="p-4 rounded-xl bg-navy-700/50 light:bg-slate-100 hover:border-gold-500/50 border border-transparent transition text-left flex flex-col gap-2">
+                    <i class="fa-solid fa-book-pen text-gold-500 text-2xl"></i>
+                    <span class="font-semibold text-sm">ডায়েরি এন্ট্রি</span>
+                </button>
+                <button onclick="toggleQuickModal(); switchTab('health');" class="p-4 rounded-xl bg-navy-700/50 light:bg-slate-100 hover:border-gold-500/50 border border-transparent transition text-left flex flex-col gap-2">
+                    <i class="fa-solid fa-glass-water text-gold-500 text-2xl"></i>
+                    <span class="font-semibold text-sm">পানি গ্রহণ (+২৫০ মি.লি.)</span>
+                </button>
+                <button onclick="toggleQuickModal(); switchTab('study');" class="p-4 rounded-xl bg-navy-700/50 light:bg-slate-100 hover:border-gold-500/50 border border-transparent transition text-left flex flex-col gap-2">
+                    <i class="fa-solid fa-spell-check text-gold-500 text-2xl"></i>
+                    <span class="font-semibold text-sm">নতুন ভোকেবুলারি</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: PAYMENT RECEIVE -->
-    <div id="pay-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-sm space-y-3">
-            <h3 class="font-bold text-lg text-green-600">WiFi বিল গ্রহণ করুন</h3>
-            <input id="pay-cust-id" type="hidden">
-            <input id="pay-amount" type="number" placeholder="পরিশোধের পরিমাণ (টাকা) *" class="w-full border p-2 rounded text-sm">
-            <input id="pay-date" type="date" class="w-full border p-2 rounded text-sm">
-            <select id="pay-method" class="w-full border p-2 rounded text-sm bg-gray-50">
-                <option value="Cash">ক্যাশ (Cash)</option>
-                <option value="bKash">বিকাশ (bKash)</option>
-                <option value="Nagad">নগদ (Nagad)</option>
-                <option value="Rocket">রকেট (Rocket)</option>
-            </select>
-            <input id="pay-note" type="text" placeholder="ট্রানজেকশন আইডি / মেমো নম্বর" class="w-full border p-2 rounded text-sm">
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="toggleModal('pay-modal')" class="px-4 py-2 border rounded text-sm">বাতিল</button>
-                <button onclick="submitPayment()" class="px-4 py-2 bg-green-600 text-white rounded text-sm font-semibold">পেমেন্ট কনফার্ম করুন</button>
-            </div>
-        </div>
-    </div>
+    <!-- TOAST NOTIFICATION SYSTEM -->
+    <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 max-w-xs pointer-events-none"></div>
 
-    <!-- MODAL: ADD FINANCE -->
-    <div id="finance-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-3">
-            <h3 class="font-bold text-lg" id="finance-modal-title">আয় এন্ট্রি করুন</h3>
-            <input id="f-type" type="hidden" value="Income">
-            <input id="f-date" type="date" class="w-full border p-2 rounded text-sm">
-            <input id="f-category" type="text" placeholder="ক্যাটাগরি (যেমন: টিউশন, বেতন, অন্য ব্যবসা)" class="w-full border p-2 rounded text-sm">
-            <input id="f-amount" type="number" placeholder="পরিমাণ (টাকা) *" class="w-full border p-2 rounded text-sm">
-            <input id="f-note" type="text" placeholder="নোট / বিবরণ" class="w-full border p-2 rounded text-sm">
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="toggleModal('finance-modal')" class="px-4 py-2 border rounded text-sm">বাতিল</button>
-                <button onclick="saveFinance()" class="px-4 py-2 bg-green-600 text-white rounded text-sm font-semibold">সংরক্ষণ করুন</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: RECHARGE & INVESTMENT -->
-    <div id="recharge-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-3">
-            <h3 class="font-bold text-lg text-purple-600">WiFi ইন্টারনেট রিচার্জ এন্ট্রি</h3>
-            <input id="r-date" type="date" class="w-full border p-2 rounded text-sm">
-            <input id="r-provider" type="text" placeholder="প্রোভাইডার নাম (যেমন: Link3, AmberIT)" class="w-full border p-2 rounded text-sm">
-            <input id="r-package" type="text" placeholder="প্যাকেজ বিবরণ (যেমন: 50 Mbps)" class="w-full border p-2 rounded text-sm">
-            <input id="r-amount" type="number" placeholder="রিচার্জ খরচ (টাকা) *" class="w-full border p-2 rounded text-sm">
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="toggleModal('recharge-modal')" class="px-4 py-2 border rounded text-sm">বাতিল</button>
-                <button onclick="saveRecharge()" class="px-4 py-2 bg-purple-600 text-white rounded text-sm font-semibold">সেভ করুন</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="investment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-3">
-            <h3 class="font-bold text-lg text-indigo-600">WiFi মূলধন / ইনভেস্টমেন্ট এন্ট্রি</h3>
-            <input id="i-date" type="date" class="w-full border p-2 rounded text-sm">
-            <select id="i-category" class="w-full border p-2 rounded text-sm bg-gray-50">
-                <option value="Router Purchase">রাউটার ক্রয়</option>
-                <option value="Cable Cost">ক্যাবল ক্রয়</option>
-                <option value="Switch Cost">সুইচ ক্রয়</option>
-                <option value="Installation Cost">ইনস্টলেশন খরচ</option>
-                <option value="Maintenance Cost">রক্ষণাবেক্ষণ</option>
-            </select>
-            <input id="i-amount" type="number" placeholder="ইনভেস্টমেন্ট পরিমাণ (টাকা) *" class="w-full border p-2 rounded text-sm">
-            <input id="i-note" type="text" placeholder="বিবরণ / নোট" class="w-full border p-2 rounded text-sm">
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="toggleModal('investment-modal')" class="px-4 py-2 border rounded text-sm">বাতিল</button>
-                <button onclick="saveInvestment()" class="px-4 py-2 bg-indigo-600 text-white rounded text-sm font-semibold">সেভ করুন</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: DUES / LEDGER -->
-    <div id="due-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-3">
-            <h3 class="font-bold text-lg text-purple-600">পাওনা-দেনা খাতা এন্ট্রি</h3>
-            <select id="d-type" class="w-full border p-2 rounded text-sm bg-gray-50">
-                <option value="Receivable">পাবো (Receivable)</option>
-                <option value="Payable">দেবো (Payable)</option>
-            </select>
-            <input id="d-name" type="text" placeholder="ব্যক্তির নাম *" class="w-full border p-2 rounded text-sm">
-            <input id="d-phone" type="text" placeholder="মোবাইল / হোয়াটসঅ্যাপ" class="w-full border p-2 rounded text-sm">
-            <input id="d-amount" type="number" placeholder="টাকার পরিমাণ *" class="w-full border p-2 rounded text-sm">
-            <textarea id="d-desc" placeholder="ঠিকানা / বিবরণ" class="w-full border p-2 rounded text-sm h-16"></textarea>
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="toggleModal('due-modal')" class="px-4 py-2 border rounded text-sm">বাতিল</button>
-                <button onclick="saveDue()" class="px-4 py-2 bg-purple-600 text-white rounded text-sm font-semibold">সেভ লেজার</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: TRASH BIN RECOVERY -->
-    <div id="trash-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl p-5 w-full max-w-md space-y-3 max-h-[80vh] overflow-y-auto">
-            <h3 class="font-bold text-lg text-gray-700"><i class="fa-solid fa-trash-can text-red-500 mr-2"></i>ট্র্যাশ বিন (ডিলিট করা ডাটা রিস্টোর)</h3>
-            <div id="trash-list" class="space-y-2 text-xs"></div>
-            <div class="flex justify-end pt-2 border-t">
-                <button onclick="toggleModal('trash-modal')" class="px-4 py-1.5 border rounded text-xs">বন্ধ করুন</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVA SCRIPT ENGINE -->
+    <!-- APP CORE LOGIC & MODULES -->
     <script>
-        // Security PIN System
-        const SYSTEM_PIN = "1234";
-        function unlockApp() {
-            const input = document.getElementById('pin-input').value;
-            if (input === SYSTEM_PIN) {
-                document.getElementById('pin-lock-screen').classList.add('hidden');
-            } else {
-                alert("ভুল পিন কোড! পুনরায় চেষ্টা করুন।");
-            }
-        }
+        // --- 1. INDEXEDDB ENGINE ---
+        const DB_NAME = 'HayatOSDB';
+        const DB_VERSION = 1;
+        let db = null;
 
-        // Database Core Engine
-        let db = {
-            customers: JSON.parse(localStorage.getItem('db_customers')) || [],
-            finances: JSON.parse(localStorage.getItem('db_finances')) || [],
-            dues: JSON.parse(localStorage.getItem('db_dues')) || [],
-            recharges: JSON.parse(localStorage.getItem('db_recharges')) || [],
-            investments: JSON.parse(localStorage.getItem('db_investments')) || [],
-            history: JSON.parse(localStorage.getItem('db_history')) || [],
-            trash: JSON.parse(localStorage.getItem('db_trash')) || []
-        };
-
-        function saveData() {
-            localStorage.setItem('db_customers', JSON.stringify(db.customers));
-            localStorage.setItem('db_finances', JSON.stringify(db.finances));
-            localStorage.setItem('db_dues', JSON.stringify(db.dues));
-            localStorage.setItem('db_recharges', JSON.stringify(db.recharges));
-            localStorage.setItem('db_investments', JSON.stringify(db.investments));
-            localStorage.setItem('db_history', JSON.stringify(db.history));
-            localStorage.setItem('db_trash', JSON.stringify(db.trash));
-            renderAll();
-        }
-
-        function clearData() {
-            if(confirm("আপনি কি সমস্ত ডাটা রিসেট করতে চান? এতে পূর্বে সেভ করা সকল রেকর্ড মুছে যাবে!")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        function exportBackupJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `MySuperShop_Backup_${new Date().toISOString().slice(0,10)}.json`);
-            dlAnchorElem.click();
-        }
-
-        function restoreBackupJSON(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = function(e) {
-                try {
-                    const parsedData = JSON.parse(e.target.result);
-                    if (parsedData && parsedData.customers) {
-                        db = parsedData;
-                        saveData();
-                        alert("ব্যাকআপ সফলভাবে রিস্টোর করা হয়েছে!");
-                    } else {
-                        alert("অকার্যকর ব্যাকআপ ফাইল!");
-                    }
-                } catch (err) {
-                    alert("ফাইলটি পড়া সম্ভব হয়নি। সঠিক JSON ফাইল নির্বাচন করুন।");
-                }
-            };
-            fileReader.readAsText(event.target.files[0]);
-        }
-
-        function switchTab(tabName) {
-            ['dashboard', 'wifi', 'finance', 'dues', 'reports'].forEach(tab => {
-                document.getElementById('tab-' + tab).classList.add('hidden');
-                document.getElementById('nav-' + tab).classList.remove('active-tab');
-            });
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('nav-' + tabName).classList.add('active-tab');
-            if(tabName === 'reports') generateReport();
-        }
-
-        function toggleModal(modalId) {
-            document.getElementById(modalId).classList.toggle('hidden');
-        }
-
-        // Automatic Billing Engine
-        function processAutomaticBilling() {
-            const today = new Date();
-            const currentYearMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-
-            db.customers.forEach(c => {
-                if (c.status === 'Active') {
-                    if (!c.lastBilledMonth) {
-                        c.lastBilledMonth = c.connDate ? c.connDate.slice(0,7) : currentYearMonth;
-                    }
-                    if (c.lastBilledMonth < currentYearMonth) {
-                        // Calculate Months Difference
-                        let start = new Date(c.lastBilledMonth + "-01");
-                        let end = new Date(currentYearMonth + "-01");
-                        let monthsDiff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
-
-                        if (monthsDiff > 0) {
-                            let addedDue = monthsDiff * c.bill;
-                            c.due = (c.due || 0) + addedDue;
-                            c.lastBilledMonth = currentYearMonth;
-
-                            db.history.push({
-                                id: Date.now(),
-                                custId: c.id,
-                                date: new Date().toISOString().slice(0,10),
-                                action: 'অটো বিল জেনারেট',
-                                details: `${monthsDiff} মাসের বিল যুক্ত হয়েছে: ৳${addedDue}`
-                            });
-                        }
-                    }
-                }
-            });
-            localStorage.setItem('db_customers', JSON.stringify(db.customers));
-        }
-
-        // --- Customer Management ---
-        function openAddCustomerModal() {
-            document.getElementById('c-id').value = '';
-            document.getElementById('c-name').value = '';
-            document.getElementById('c-phone').value = '';
-            document.getElementById('c-whatsapp').value = '';
-            document.getElementById('c-room').value = '';
-            document.getElementById('c-device').value = '';
-            document.getElementById('c-dev-type').value = '';
-            document.getElementById('c-bill').value = '';
-            document.getElementById('c-conn-date').value = new Date().toISOString().slice(0,10);
-            document.getElementById('c-notes').value = '';
-            document.getElementById('cust-modal-title').innerText = "স্থায়ী WiFi কাস্টমার যুক্ত করুন";
-            toggleModal('customer-modal');
-        }
-
-        function saveCustomer() {
-            const id = document.getElementById('c-id').value;
-            const name = document.getElementById('c-name').value;
-            const phone = document.getElementById('c-phone').value;
-            const whatsapp = document.getElementById('c-whatsapp').value || phone;
-            const room = document.getElementById('c-room').value;
-            const device = document.getElementById('c-device').value;
-            const devType = document.getElementById('c-dev-type').value;
-            const bill = parseFloat(document.getElementById('c-bill').value) || 0;
-            const connDate = document.getElementById('c-conn-date').value || new Date().toISOString().slice(0,10);
-            const notes = document.getElementById('c-notes').value;
-
-            if(!name || !phone || !room || !bill) return alert("নাম, ফোন, রুম নম্বর এবং বিলের পরিমাণ আবশ্যক!");
-
-            if(id) {
-                let c = db.customers.find(item => item.id == id);
-                if(c) {
-                    c.name = name; c.phone = phone; c.whatsapp = whatsapp; c.room = room;
-                    c.device = device; c.devType = devType; c.bill = bill; c.connDate = connDate;
-                    c.notes = notes;
-                }
-            } else {
-                const newId = Date.now();
-                const newCust = {
-                    id: newId, name, phone, whatsapp, room, device, devType,
-                    bill, due: bill, totalPaid: 0, connDate, notes,
-                    status: 'Active', created: new Date().toISOString().slice(0,10),
-                    lastBilledMonth: connDate.slice(0,7)
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (e) => reject("ডেটাবেস ত্রুটি: " + e.target.errorCode);
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve(db);
                 };
-                db.customers.push(newCust);
-                db.history.push({
-                    id: Date.now(),
-                    custId: newId,
-                    date: connDate,
-                    action: 'সংযোগ শুরু',
-                    details: `মাসিক বিল ৳${bill} টাকায় কানেকশন সক্রিয় হয়েছে`
-                });
-            }
-
-            toggleModal('customer-modal');
-            saveData();
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('prayers')) db.createObjectStore('prayers', { keyPath: 'date' });
+                    if (!db.objectStoreNames.contains('dhikr')) db.createObjectStore('dhikr', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('todos')) db.createObjectStore('todos', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('habits')) db.createObjectStore('habits', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('vocab')) db.createObjectStore('vocab', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('diary')) db.createObjectStore('diary', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('goals')) db.createObjectStore('goals', { keyPath: 'id' });
+                    if (!db.objectStoreNames.contains('health')) db.createObjectStore('health', { keyPath: 'date' });
+                    if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
+                };
+            });
         }
 
-        function openEditCustomer(id) {
-            let c = db.customers.find(item => item.id == id);
-            if(!c) return;
-            document.getElementById('c-id').value = c.id;
-            document.getElementById('c-name').value = c.name;
-            document.getElementById('c-phone').value = c.phone;
-            document.getElementById('c-whatsapp').value = c.whatsapp || c.phone;
-            document.getElementById('c-room').value = c.room;
-            document.getElementById('c-device').value = c.device || '';
-            document.getElementById('c-dev-type').value = c.devType || '';
-            document.getElementById('c-bill').value = c.bill;
-            document.getElementById('c-conn-date').value = c.connDate || '';
-            document.getElementById('c-notes').value = c.notes || '';
-            document.getElementById('cust-modal-title').innerText = "কাস্টমার প্রোফাইল সম্পাদনা";
-            toggleModal('customer-modal');
+        // Generic DB Helpers
+        function dbPut(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.put(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
         }
 
-        let currentProfileCustId = null;
-        function openCustomerProfile(id) {
-            let c = db.customers.find(item => item.id == id);
-            if(!c) return;
-            currentProfileCustId = id;
+        function dbGetAll(storeName) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
 
-            document.getElementById('p-name').innerText = c.name;
-            document.getElementById('p-details').innerText = `রুম: ${c.room} | মোবাইল: ${c.phone} | সংযোগ: ${c.connDate}`;
-            document.getElementById('p-monthly-bill').innerText = '৳ ' + c.bill;
-            document.getElementById('p-total-paid').innerText = '৳ ' + (c.totalPaid || 0);
-            document.getElementById('p-total-due').innerText = '৳ ' + c.due;
-            document.getElementById('p-status').innerText = c.status;
+        function dbGet(storeName, key) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const req = store.get(key);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
 
-            const timelineBox = document.getElementById('p-timeline');
-            timelineBox.innerHTML = '';
-            let custHistory = db.history.filter(h => h.custId == id).sort((a,b) => b.id - a.id);
-            if(custHistory.length === 0) {
-                timelineBox.innerHTML = '<p class="text-gray-400">কোনো টাইমলাইন রেকর্ড নেই</p>';
+        function dbDelete(storeName, key) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.delete(key);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        // --- 2. GLOBAL STATE & UTILS ---
+        let currentTab = 'dashboard';
+        const getTodayDateStr = () => new Date().toISOString().split('T')[0];
+
+        // Format Date into Bengali
+        function getBengaliFormattedDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date().toLocaleDateString('bn-BD', options);
+        }
+
+        // Convert English numbers to Bengali digits
+        function toBengaliNumerals(num) {
+            if (num === null || num === undefined) return '';
+            const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+            return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
+        }
+
+        function showToast(message, type = 'gold') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 border transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto bg-navy-800 text-white border-gold-500/40`;
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-gold-500"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('hayat_theme', 'light');
             } else {
-                custHistory.forEach(h => {
-                    timelineBox.innerHTML += `
-                        <div class="border-b pb-1">
-                            <span class="font-bold text-blue-600">${h.date}</span> - <strong>${h.action}</strong>
-                            <p class="text-gray-500">${h.details}</p>
+                html.classList.remove('light');
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('hayat_theme', 'dark');
+            }
+        }
+
+        function loadThemePreference() {
+            const saved = localStorage.getItem('hayat_theme') || 'dark';
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (saved === 'light') {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                if(icon) icon.className = 'fa-solid fa-sun';
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                if(icon) icon.className = 'fa-solid fa-moon';
+            }
+        }
+
+        function toggleQuickModal() {
+            const modal = document.getElementById('quick-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        // --- 3. NAVIGATION CONTROLLER ---
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if(activeNav) activeNav.classList.add('active');
+
+            const content = document.getElementById('app-content');
+            content.innerHTML = ''; // Clear existing view
+
+            switch(tabId) {
+                case 'dashboard': renderDashboardView(); break;
+                case 'islamic': renderIslamicView(); break;
+                case 'study': renderStudyView(); break;
+                case 'todo': renderTodoView(); break;
+                case 'habits': renderHabitsView(); break;
+                case 'health': renderHealthView(); break;
+                case 'diary': renderDiaryView(); break;
+                case 'menu': renderMenuView(); break;
+                case 'calendar': renderCalendarView(); break;
+                case 'goals': renderGoalsView(); break;
+                case 'reports': renderReportsView(); break;
+                case 'backup': renderBackupView(); break;
+                case 'settings': renderSettingsView(); break;
+                default: renderDashboardView();
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 4. MODULE RENDERERS ---
+
+        // A. HOME DASHBOARD
+        async function renderDashboardView() {
+            const today = getTodayDateStr();
+            const prayerData = (await dbGet('prayers', today)) || { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
+            const healthData = (await dbGet('health', today)) || { water: 0, steps: 0, sleep: 0 };
+            const todos = await dbGetAll('todos');
+            const pendingTodos = todos.filter(t => !t.completed).length;
+            const habits = await dbGetAll('habits');
+
+            const completedPrayersCount = Object.values(prayerData).filter(v => v === true).length;
+            const prayerPercent = Math.round((completedPrayersCount / 5) * 100);
+
+            const userProfile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও ঈমানী জীবন' };
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <!-- WELCOME BANNER -->
+                <div class="glass-card rounded-2xl p-5 border-gold-500/30 relative overflow-hidden shadow-xl">
+                    <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl"></div>
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <span class="text-xs font-semibold text-gold-500 uppercase tracking-widest">আসসালামু আলাইকুম</span>
+                            <h2 class="text-2xl font-bold text-slate-100 light:text-slate-800">${userProfile.name}</h2>
                         </div>
-                    `;
-                });
-            }
-            toggleModal('profile-modal');
-        }
-
-        function openPayModal(custId) {
-            let c = db.customers.find(item => item.id == custId);
-            if(!c) return;
-            document.getElementById('pay-cust-id').value = custId;
-            document.getElementById('pay-amount').value = c.due;
-            document.getElementById('pay-date').value = new Date().toISOString().slice(0,10);
-            toggleModal('pay-modal');
-        }
-
-        function submitPayment() {
-            const custId = document.getElementById('pay-cust-id').value;
-            const amount = parseFloat(document.getElementById('pay-amount').value) || 0;
-            const date = document.getElementById('pay-date').value || new Date().toISOString().slice(0,10);
-            const method = document.getElementById('pay-method').value;
-            const note = document.getElementById('pay-note').value;
-
-            let c = db.customers.find(item => item.id == custId);
-            if(c && amount > 0) {
-                c.due = Math.max(0, c.due - amount);
-                c.totalPaid = (c.totalPaid || 0) + amount;
-
-                db.finances.push({
-                    id: Date.now(),
-                    date,
-                    type: 'Income',
-                    category: 'WiFi বিল কালেকশন',
-                    amount,
-                    note: `${c.name} (রুম ${c.room}) - মাধ্যম: ${method} ${note}`
-                });
-
-                db.history.push({
-                    id: Date.now(),
-                    custId: c.id,
-                    date,
-                    action: 'বিল পরিশোধ প্রাপ্তি',
-                    details: `পরিমাণ: ৳${amount} (${method})। অবশিষ্ট বকেয়া: ৳${c.due}`
-                });
-
-                toggleModal('pay-modal');
-                saveData();
-            }
-        }
-
-        function sendWhatsApp(phone, name, room, due) {
-            const msg = `আসসালামু আলাইকুম ${name} ভাই,\nআপনার Room No: ${room}-এর WiFi বিল পরিশোধের সময় হয়েছে।\nবর্তমান বকেয়া: ৳${due}।\nঅনুগ্রহ করে বিল পরিশোধ করুন।\nধন্যবাদ - মাই সুপার শপ`;
-            const url = `https://wa.me/88${phone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        function changeCustStatus(status) {
-            if(!currentProfileCustId) return;
-            let c = db.customers.find(item => item.id == currentProfileCustId);
-            if(c) {
-                c.status = status;
-                saveData();
-                openCustomerProfile(currentProfileCustId);
-            }
-        }
-
-        // --- Recharge & Investment ---
-        function saveRecharge() {
-            const date = document.getElementById('r-date').value || new Date().toISOString().slice(0,10);
-            const provider = document.getElementById('r-provider').value;
-            const packageDetails = document.getElementById('r-package').value;
-            const amount = parseFloat(document.getElementById('r-amount').value) || 0;
-
-            if(!amount) return alert("রিচার্জের পরিমাণ লিখুন!");
-
-            db.recharges.push({ id: Date.now(), date, provider, packageDetails, amount });
-            db.finances.push({
-                id: Date.now(), date, type: 'Expense',
-                category: 'WiFi লাইন রিচার্জ', amount,
-                note: `প্রোভাইডার: ${provider} (${packageDetails})`
-            });
-
-            toggleModal('recharge-modal');
-            saveData();
-        }
-
-        function saveInvestment() {
-            const date = document.getElementById('i-date').value || new Date().toISOString().slice(0,10);
-            const category = document.getElementById('i-category').value;
-            const amount = parseFloat(document.getElementById('i-amount').value) || 0;
-            const note = document.getElementById('i-note').value;
-
-            if(!amount) return alert("ইনভেস্টমেন্টের পরিমাণ লিখুন!");
-
-            db.investments.push({ id: Date.now(), date, category, amount, note });
-            db.finances.push({
-                id: Date.now(), date, type: 'Expense',
-                category: `WiFi মূলধন: ${category}`, amount, note
-            });
-
-            toggleModal('investment-modal');
-            saveData();
-        }
-
-        // --- Finance Management ---
-        function openFinanceModal(type) {
-            document.getElementById('f-type').value = type;
-            document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-            document.getElementById('finance-modal-title').innerText = type === 'Income' ? 'আয় এন্ট্রি করুন' : 'খরচ এন্ট্রি করুন';
-            toggleModal('finance-modal');
-        }
-
-        function saveFinance() {
-            const type = document.getElementById('f-type').value;
-            const date = document.getElementById('f-date').value || new Date().toISOString().slice(0,10);
-            const category = document.getElementById('f-category').value || 'অন্যান্য';
-            const amount = parseFloat(document.getElementById('f-amount').value) || 0;
-            const note = document.getElementById('f-note').value;
-
-            if(!amount) return alert("টাকার পরিমাণ লিখুন!");
-
-            db.finances.push({ id: Date.now(), date, type, category, amount, note });
-            toggleModal('finance-modal');
-            saveData();
-        }
-
-        function deleteFinance(id) {
-            if(confirm("আপনি কি এটি ট্র্যাশ বিনে পাঠাতে চান?")) {
-                let index = db.finances.findIndex(f => f.id == id);
-                if(index > -1) {
-                    let deleted = db.finances.splice(index, 1)[0];
-                    db.trash.push({ ...deleted, trashType: 'Finance', deletedAt: new Date().toLocaleDateString('bn-BD') });
-                    saveData();
-                }
-            }
-        }
-
-        // --- Dues / Ledger Management ---
-        function saveDue() {
-            const type = document.getElementById('d-type').value;
-            const name = document.getElementById('d-name').value;
-            const phone = document.getElementById('d-phone').value;
-            const amount = parseFloat(document.getElementById('d-amount').value) || 0;
-            const desc = document.getElementById('d-desc').value;
-
-            if(!name || !amount) return alert("নাম ও টাকার পরিমাণ লিখুন!");
-
-            db.dues.push({ id: Date.now(), type, name, phone, amount, desc });
-            toggleModal('due-modal');
-            saveData();
-        }
-
-        function deleteDue(id) {
-            if(confirm("আপনি কি এটি ট্র্যাশ বিনে স্থানান্তর করতে চান?")) {
-                let index = db.dues.findIndex(d => d.id == id);
-                if(index > -1) {
-                    let deleted = db.dues.splice(index, 1)[0];
-                    db.trash.push({ ...deleted, trashType: 'Ledger', deletedAt: new Date().toLocaleDateString('bn-BD') });
-                    saveData();
-                }
-            }
-        }
-
-        function restoreTrash(index) {
-            let item = db.trash.splice(index, 1)[0];
-            if(item.trashType === 'Finance') db.finances.push(item);
-            if(item.trashType === 'Ledger') db.dues.push(item);
-            saveData();
-        }
-
-        // --- Professional Reports Engine ---
-        function generateReport() {
-            const range = document.getElementById('report-range').value;
-            const todayStr = new Date().toISOString().slice(0,10);
-            const thisMonthStr = todayStr.slice(0,7);
-
-            let filteredFinances = db.finances.filter(f => {
-                if(range === 'today') return f.date === todayStr;
-                if(range === 'this-month') return f.date && f.date.startsWith(thisMonthStr);
-                return true;
-            });
-
-            let income = filteredFinances.filter(f => f.type === 'Income').reduce((sum, f) => sum + f.amount, 0);
-            let expense = filteredFinances.filter(f => f.type === 'Expense').reduce((sum, f) => sum + f.amount, 0);
-            let profit = income - expense;
-
-            const area = document.getElementById('report-render-area');
-            area.innerHTML = `
-                <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="bg-green-50 p-3 rounded-lg border border-green-200">
-                        <p class="text-xs text-green-700 font-semibold">মোট আয়</p>
-                        <p class="text-lg font-bold text-green-700">৳ ${income}</p>
+                        <span class="text-xs px-3 py-1 rounded-full bg-navy-700/60 light:bg-slate-200 text-gold-400 font-mono border border-gold-500/20">
+                            ${getBengaliFormattedDate()}
+                        </span>
                     </div>
-                    <div class="bg-red-50 p-3 rounded-lg border border-red-200">
-                        <p class="text-xs text-red-700 font-semibold">মোট ব্যয়</p>
-                        <p class="text-lg font-bold text-red-700">৳ ${expense}</p>
+                    <p class="text-xs text-slate-300 light:text-slate-600 italic">"${userProfile.motto}"</p>
+                </div>
+
+                <!-- DAILY MOTIVATION AYAH/QUOTE -->
+                <div class="p-4 rounded-xl bg-gradient-to-r from-navy-800 to-navy-700 light:from-slate-100 light:to-white border border-gold-500/20 shadow-md flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-quote-left text-lg"></i>
                     </div>
-                    <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                        <p class="text-xs text-purple-700 font-semibold">নিট লাভ</p>
-                        <p class="text-lg font-bold text-purple-700">৳ ${profit}</p>
+                    <div>
+                        <p class="text-xs font-medium text-slate-200 light:text-slate-700">"নিশ্চয়ই কষ্টের সাথেই রয়েছে স্বস্তি।"</p>
+                        <span class="text-[10px] text-gold-500/80 font-mono">— সূরা আল-ইনশিরাহ (৯৪:৬)</span>
                     </div>
                 </div>
 
-                <div class="bg-white p-4 rounded-xl shadow space-y-3">
-                    <h3 class="font-bold text-sm text-gray-700 border-b pb-2">📊 বিস্তারিত আয়-ব্যয় বিবরণী</h3>
-                    <table class="w-full text-left text-xs">
-                        <thead>
-                            <tr class="bg-gray-100 border-b">
-                                <th class="p-2">তারিখ</th>
-                                <th class="p-2">টাইপ</th>
-                                <th class="p-2">ক্যাটাগরি</th>
-                                <th class="p-2">পরিমাণ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${filteredFinances.map(f => `
-                                <tr class="border-b">
-                                    <td class="p-2">${f.date}</td>
-                                    <td class="p-2"><span class="px-1.5 py-0.5 rounded text-[10px] ${f.type==='Income'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${f.type}</span></td>
-                                    <td class="p-2">${f.category}</td>
-                                    <td class="p-2 font-bold ${f.type==='Income'?'text-green-600':'text-red-600'}">৳ ${f.amount}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <!-- QUICK STATS GRID -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div onclick="switchTab('islamic')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400">নামাজ</span>
+                            <i class="fa-solid fa-kaaba text-gold-500 text-sm"></i>
+                        </div>
+                        <div class="text-xl font-bold text-white light:text-slate-800">${toBengaliNumerals(completedPrayersCount)} <span class="text-xs font-normal text-slate-400">/ ৫</span></div>
+                        <div class="w-full bg-navy-900/50 h-1.5 rounded-full mt-2 overflow-hidden">
+                            <div class="bg-gold-500 h-full rounded-full transition-all duration-500" style="width: ${prayerPercent}%"></div>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('todo')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400">বাকি কাজ</span>
+                            <i class="fa-solid fa-list-check text-gold-500 text-sm"></i>
+                        </div>
+                        <div class="text-xl font-bold text-white light:text-slate-800">${toBengaliNumerals(pendingTodos)} <span class="text-xs font-normal text-slate-400">টি</span></div>
+                        <span class="text-[10px] text-gold-400 flex items-center gap-1 mt-2">
+                            <i class="fa-solid fa-arrow-right text-[8px]"></i> রুটিন দেখুন
+                        </span>
+                    </div>
+
+                    <div onclick="switchTab('health')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400">পানি গ্রহণ</span>
+                            <i class="fa-solid fa-droplet text-blue-400 text-sm"></i>
+                        </div>
+                        <div class="text-xl font-bold text-white light:text-slate-800">${toBengaliNumerals(healthData.water || 0)} <span class="text-xs font-normal text-slate-400">মি.লি.</span></div>
+                        <div class="w-full bg-navy-900/50 h-1.5 rounded-full mt-2 overflow-hidden">
+                            <div class="bg-blue-400 h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, ((healthData.water||0)/2000)*100)}%"></div>
+                        </div>
+                    </div>
+
+                    <div onclick="switchTab('habits')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400">অভ্যাস</span>
+                            <i class="fa-solid fa-fire text-amber-500 text-sm"></i>
+                        </div>
+                        <div class="text-xl font-bold text-white light:text-slate-800">${toBengaliNumerals(habits.length)} <span class="text-xs font-normal text-slate-400">সক্রিয়</span></div>
+                        <span class="text-[10px] text-slate-400 mt-2 block">ধারাবাহিকতা ট্র্যাকিং</span>
+                    </div>
+                </div>
+
+                <!-- NAVIGATION HUB BUTTONS -->
+                <div class="glass-card p-5 rounded-2xl">
+                    <h3 class="text-sm font-bold gold-gradient-text mb-4 uppercase tracking-wider">লাইফ ম্যানেজমেন্ট মডিউল</h3>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                        <button onclick="switchTab('islamic')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-kaaba text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">দীন</span>
+                        </button>
+                        <button onclick="switchTab('study')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-book-open text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">পড়াশোনা</span>
+                        </button>
+                        <button onclick="switchTab('todo')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-list-check text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">রুটিন</span>
+                        </button>
+                        <button onclick="switchTab('calendar')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-calendar-days text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">ক্যালেন্ডার</span>
+                        </button>
+                        <button onclick="switchTab('habits')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-chart-line text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">অভ্যাস</span>
+                        </button>
+                        <button onclick="switchTab('health')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-heart-pulse text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">ফিটনেস</span>
+                        </button>
+                        <button onclick="switchTab('diary')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-book-bookmark text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">ডায়েরি</span>
+                        </button>
+                        <button onclick="switchTab('goals')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-bullseye text-gold-500 text-xl mb-1"></i>
+                            <span class="text-xs font-medium">লক্ষ্য</span>
+                        </button>
+                    </div>
                 </div>
             `;
         }
 
-        function exportCSVReport() {
-            let csvContent = "data:text/csv;charset=utf-8,Date,Type,Category,Amount,Note\n";
-            db.finances.forEach(f => {
-                csvContent += `${f.date},${f.type},${f.category},${f.amount},"${f.note || ''}"\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `Financial_Report_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-        }
+        // B. ISLAMIC LIFE & PRAYER TRACKER
+        async function renderIslamicView() {
+            const today = getTodayDateStr();
+            let prayerData = (await dbGet('prayers', today)) || { date: today, fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false, tahajjud: false };
+            let dhikrCount = parseInt(localStorage.getItem('tasbih_count') || '0');
 
-        function printReport() {
-            window.print();
-        }
+            const prayerLabels = {
+                fajr: 'ফজর',
+                dhuhr: 'জোহর',
+                asr: 'আসর',
+                maghrib: 'মাগরিব',
+                isha: 'এশা'
+            };
 
-        // --- Render UI Engine ---
-        function renderAll() {
-            processAutomaticBilling();
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-kaaba"></i> ইসলামিক জীবন ও সালাত ট্র্যাকার
+                    </h2>
+                    <span class="text-xs text-gold-400 font-mono">${getBengaliFormattedDate()}</span>
+                </div>
 
-            const searchQuery = (document.getElementById('global-search') ? document.getElementById('global-search').value : '').toLowerCase();
-            const filterStatus = document.getElementById('filter-status') ? document.getElementById('filter-status').value : 'All';
-
-            // Calculations
-            let totalIncome = db.finances.filter(f => f.type === 'Income').reduce((sum, f) => sum + f.amount, 0);
-            let totalExpense = db.finances.filter(f => f.type === 'Expense').reduce((sum, f) => sum + f.amount, 0);
-            let wifiDue = db.customers.reduce((sum, c) => sum + (c.due || 0), 0);
-            let totalReceivable = db.dues.filter(d => d.type === 'Receivable').reduce((sum, d) => sum + d.amount, 0);
-            let totalPayable = db.dues.filter(d => d.type === 'Payable').reduce((sum, d) => sum + d.amount, 0);
-
-            let wifiIncomes = db.finances.filter(f => f.type === 'Income' && f.category.includes('WiFi')).reduce((sum, f) => sum + f.amount, 0);
-            let wifiExpenses = db.finances.filter(f => f.type === 'Expense' && f.category.includes('WiFi')).reduce((sum, f) => sum + f.amount, 0);
-            let wifiProfit = wifiIncomes - wifiExpenses;
-
-            // Render Dashboard Summary
-            document.getElementById('dash-income').innerText = '৳ ' + totalIncome;
-            document.getElementById('dash-expense').innerText = '৳ ' + totalExpense;
-            document.getElementById('dash-balance').innerText = '৳ ' + (totalIncome - totalExpense);
-            document.getElementById('dash-wifi-due').innerText = '৳ ' + wifiDue;
-
-            let activeCustCount = db.customers.filter(c => c.status === 'Active').length;
-            document.getElementById('dash-cust-count').innerText = `${db.customers.length} (সক্রিয়: ${activeCustCount})`;
-            document.getElementById('dash-receivable').innerText = '৳ ' + totalReceivable;
-            document.getElementById('dash-payable').innerText = '৳ ' + totalPayable;
-            document.getElementById('dash-wifi-profit').innerText = '৳ ' + wifiProfit;
-
-            // Render Customer Cards
-            const cList = document.getElementById('customer-list');
-            cList.innerHTML = db.customers.length === 0 ? '<p class="text-gray-400 text-center py-4">কোনো কাস্টমার রেজিস্টার্ড নেই</p>' : '';
-
-            db.customers.filter(c => {
-                let matchesSearch = c.name.toLowerCase().includes(searchQuery) || c.phone.includes(searchQuery) || c.room.toLowerCase().includes(searchQuery);
-                let matchesFilter = filterStatus === 'All' || (filterStatus === 'Due' ? c.due > 0 : c.status === filterStatus);
-                return matchesSearch && matchesFilter;
-            }).forEach(c => {
-                cList.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow flex justify-between items-center border-l-4 ${c.due > 0 ? 'border-red-500' : 'border-green-500'}">
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h4 class="font-bold text-gray-800 hover:text-blue-600 cursor-pointer text-base" onclick="openCustomerProfile(${c.id})">${c.name}</h4>
-                                <span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold">রুম: ${c.room}</span>
-                                <span class="text-xs px-2 py-0.5 rounded ${c.status==='Active'?'bg-green-100 text-green-700':'bg-yellow-100 text-yellow-700'}">${c.status}</span>
+                <!-- 5 DAILY PRAYERS CHECKLIST -->
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-sm font-bold text-slate-200 light:text-slate-700 uppercase tracking-wider mb-2">৫ ওয়াক্ত ফরজ সালাত</h3>
+                    
+                    ${['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map(prayer => `
+                        <label class="flex items-center justify-between p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 border border-gold-500/10 cursor-pointer hover:border-gold-500/40 transition">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" onchange="togglePrayer('${prayer}')" ${prayerData[prayer] ? 'checked' : ''} class="w-5 h-5 accent-amber-500 rounded cursor-pointer">
+                                <span class="capitalize font-semibold text-sm text-slate-200 light:text-slate-800">${prayerLabels[prayer]}</span>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">📱 ${c.phone} | বিল: ৳${c.bill} / মাস</p>
-                            <p class="text-xs font-semibold ${c.due > 0 ? 'text-red-500' : 'text-green-600'} mt-0.5">বর্তমান বকেয়া: ৳${c.due}</p>
-                        </div>
-                        <div class="flex space-x-1.5 items-center">
-                            <button onclick="sendWhatsApp('${c.whatsapp || c.phone}', '${c.name}', '${c.room}', '${c.due}')" class="bg-green-500 text-white p-2 rounded-lg text-xs" title="হোয়াটসঅ্যাপ রিমাইন্ডার"><i class="fa-brands fa-whatsapp text-sm"></i></button>
-                            <button onclick="openPayModal(${c.id})" class="bg-green-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold">পে</button>
-                            <button onclick="openEditCustomer(${c.id})" class="bg-gray-200 text-gray-700 px-2 py-1.5 rounded-lg text-xs" title="সম্পাদনা"><i class="fa-solid fa-pen"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
+                            <span class="text-xs text-slate-400 font-mono">${prayerData[prayer] ? 'সম্পন্ন ✓' : 'বাকি আছে'}</span>
+                        </label>
+                    `).join('')}
 
-            // Render Finance Ledger Table
-            const fBody = document.getElementById('finance-table-body');
-            fBody.innerHTML = db.finances.length === 0 ? '<tr><td colspan="5" class="text-center p-4 text-gray-400">কোনো আর্থিক এন্ট্রি নেই</td></tr>' : '';
-            db.finances.slice().reverse().forEach(f => {
-                fBody.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-3 text-xs font-medium">${f.date}</td>
-                        <td class="p-3"><span class="text-xs px-2 py-0.5 rounded ${f.type === 'Income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${f.type === 'Income' ? 'আয়' : 'খরচ'}</span></td>
-                        <td class="p-3 text-sm font-medium">${f.category} <p class="text-xs text-gray-400">${f.note || ''}</p></td>
-                        <td class="p-3 font-bold ${f.type === 'Income' ? 'text-green-600' : 'text-red-600'}">৳ ${f.amount}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="deleteFinance(${f.id})" class="text-red-500 hover:text-red-700 text-xs"><i class="fa-solid fa-trash-can"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            // Render Dues List
-            const dList = document.getElementById('dues-list');
-            dList.innerHTML = db.dues.length === 0 ? '<p class="text-gray-400 text-center py-4">কোনো পাওনা-দেনা রেকর্ড নেই</p>' : '';
-            db.dues.forEach(d => {
-                dList.innerHTML += `
-                    <div class="bg-white p-3 rounded-lg shadow flex justify-between items-center border-l-4 ${d.type === 'Receivable' ? 'border-green-500' : 'border-red-500'}">
-                        <div>
-                            <h4 class="font-bold text-sm text-gray-800">${d.name} <span class="text-xs text-gray-500">(${d.phone || 'N/A'})</span></h4>
-                            <p class="text-xs text-gray-500">${d.type === 'Receivable' ? 'পাবো (Receivable)' : 'দেবো (Payable)'} - ${d.desc || ''}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="font-bold ${d.type === 'Receivable' ? 'text-green-600' : 'text-red-600'}">৳ ${d.amount}</span>
-                            <button onclick="deleteDue(${d.id})" class="text-red-400 hover:text-red-600 text-xs"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
+                    <div class="pt-2 border-t border-gold-500/10">
+                        <label class="flex items-center justify-between p-3 rounded-xl bg-gold-500/10 border border-gold-500/30 cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" onchange="togglePrayer('tahajjud')" ${prayerData.tahajjud ? 'checked' : ''} class="w-5 h-5 accent-amber-500 rounded cursor-pointer">
+                                <span class="capitalize font-semibold text-sm gold-gradient-text">তাহাজ্জুদ / নফল সালাত</span>
+                            </div>
+                            <i class="fa-solid fa-moon text-gold-500"></i>
+                        </label>
                     </div>
-                `;
-            });
+                </div>
 
-            // Render Trash Bin List
-            const tList = document.getElementById('trash-list');
-            tList.innerHTML = db.trash.length === 0 ? '<p class="text-gray-400 text-center">ট্র্যাশ বিন খালি</p>' : '';
-            db.trash.forEach((t, index) => {
-                tList.innerHTML += `
-                    <div class="bg-gray-100 p-2 rounded flex justify-between items-center">
-                        <div>
-                            <p class="font-semibold">${t.category || t.name} (৳${t.amount})</p>
-                            <p class="text-gray-400">মুছে ফেলা হয়েছে: ${t.deletedAt}</p>
-                        </div>
-                        <button onclick="restoreTrash(${index})" class="bg-blue-600 text-white px-2 py-1 rounded text-xs">রিস্টোর</button>
+                <!-- DIGITAL TASBIH COUNTER -->
+                <div class="glass-card p-6 rounded-2xl text-center space-y-4">
+                    <h3 class="text-sm font-bold gold-gradient-text uppercase tracking-wider">ডিজিটাল তাসবীহ গণক</h3>
+                    
+                    <div class="text-5xl font-mono font-bold text-gold-400 py-4 bg-navy-900/60 light:bg-slate-100 rounded-2xl border border-gold-500/20 shadow-inner" id="tasbih-display">
+                        ${toBengaliNumerals(dhikrCount)}
                     </div>
-                `;
-            });
+
+                    <div class="flex justify-center gap-4">
+                        <button onclick="incrementTasbih()" class="w-20 h-20 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 text-navy-900 font-bold text-2xl shadow-xl hover:scale-105 active:scale-95 transition flex items-center justify-center">
+                            +১
+                        </button>
+                        <button onclick="resetTasbih()" class="w-12 h-12 rounded-full bg-navy-700 light:bg-slate-200 text-slate-300 hover:text-white flex items-center justify-center self-center transition" title="রিসেট করুন">
+                            <i class="fa-solid fa-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
-        // Initialize Application
-        renderAll();
+        async function togglePrayer(prayerName) {
+            const today = getTodayDateStr();
+            let prayerData = (await dbGet('prayers', today)) || { date: today, fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false, tahajjud: false };
+            prayerData[prayerName] = !prayerData[prayerName];
+            await dbPut('prayers', prayerData);
+
+            const prayerNamesBN = { fajr: 'ফজর', dhuhr: 'জোহর', asr: 'আসর', maghrib: 'মাগরিব', isha: 'এশা', tahajjud: 'তাহাজ্জুদ' };
+            showToast(`${prayerNamesBN[prayerName] || prayerName} সালাতের স্ট্যাটাস হালনাগাদ করা হয়েছে`);
+            renderIslamicView();
+        }
+
+        function incrementTasbih() {
+            let count = parseInt(localStorage.getItem('tasbih_count') || '0');
+            count++;
+            localStorage.setItem('tasbih_count', count.toString());
+            document.getElementById('tasbih-display').innerText = toBengaliNumerals(count);
+        }
+
+        function resetTasbih() {
+            localStorage.setItem('tasbih_count', '0');
+            document.getElementById('tasbih-display').innerText = '০';
+            showToast('তাসবীহ গণক রিসেট করা হয়েছে');
+        }
+
+        // C. STUDY & ENGLISH LEARNING
+        async function renderStudyView() {
+            const vocabs = await dbGetAll('vocab');
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-book-open"></i> পড়াশোনা ও ইংরেজি শেখার হাব
+                    </h2>
+                </div>
+
+                <!-- ADD NEW VOCABULARY -->
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">নতুন শব্দ যোগ করুন</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input id="vocab-word" type="text" placeholder="ইংরেজি শব্দ (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
+                        <input id="vocab-pronunciation" type="text" placeholder="বাংলা উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
+                    </div>
+                    <input id="vocab-meaning" type="text" placeholder="বাংলা অর্থ (যেমন: বাকপটু / সুন্দরভাষী)" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
+                    <textarea id="vocab-sentence" placeholder="উদাহরণ বাক্য..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500" rows="2"></textarea>
+                    <button onclick="addVocab()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-gold-400 to-gold-600 text-navy-900 font-bold text-xs uppercase tracking-wider shadow-md hover:brightness-110 transition">
+                        শব্দ সংরক্ষণ করুন
+                    </button>
+                </div>
+
+                <!-- FLIP CARDS CONTAINER -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</h3>
+                    
+                    ${vocabs.length === 0 ? `<p class="text-xs text-slate-400 italic">কোনো শব্দ সংরক্ষণ করা হয়নি। উপরে নতুন শব্দ যোগ করুন।</p>` : ''}
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        ${vocabs.map(item => `
+                            <div class="perspective-1000 h-44 cursor-pointer" onclick="this.querySelector('.card-inner').classList.toggle('rotate-y-180')">
+                                <div class="card-inner relative w-full h-full transform-style-3d shadow-lg rounded-2xl">
+                                    <!-- Front -->
+                                    <div class="absolute inset-0 backface-hidden glass-card p-4 rounded-2xl flex flex-col justify-between border-gold-500/30">
+                                        <div class="flex justify-between items-start">
+                                            <span class="text-[10px] text-gold-500 uppercase tracking-widest">অর্থ দেখতে চাপুন</span>
+                                            <button onclick="event.stopPropagation(); deleteVocab('${item.id}')" class="text-xs text-red-400 hover:text-red-300">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="text-center">
+                                            <h4 class="text-xl font-bold text-white light:text-slate-800">${item.word}</h4>
+                                            ${item.pronunciation ? `<span class="text-xs text-gold-400 mt-1 block">(${item.pronunciation})</span>` : ''}
+                                        </div>
+                                        <div class="text-[10px] text-right text-slate-400">শব্দ কার্ড</div>
+                                    </div>
+                                    <!-- Back -->
+                                    <div class="absolute inset-0 backface-hidden rotate-y-180 bg-navy-800 light:bg-slate-100 border border-gold-500/50 p-4 rounded-2xl flex flex-col justify-between">
+                                        <div>
+                                            <span class="text-xs font-bold text-gold-400">অর্থ: ${item.meaning}</span>
+                                            <p class="text-xs text-slate-300 light:text-slate-600 italic mt-2">"${item.sentence || ''}"</p>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400 text-right">সংরক্ষিত কার্ড</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addVocab() {
+            const word = document.getElementById('vocab-word').value.trim();
+            const pronunciation = document.getElementById('vocab-pronunciation').value.trim();
+            const meaning = document.getElementById('vocab-meaning').value.trim();
+            const sentence = document.getElementById('vocab-sentence').value.trim();
+
+            if (!word || !meaning) {
+                showToast('অনুগ্রহ করে শব্দ এবং অর্থ প্রদান করুন');
+                return;
+            }
+
+            const newCard = { id: Date.now().toString(), word, pronunciation, meaning, sentence };
+            await dbPut('vocab', newCard);
+            showToast('ভোকেবুলারি কার্ড সংরক্ষিত হয়েছে!');
+            renderStudyView();
+        }
+
+        async function deleteVocab(id) {
+            await dbDelete('vocab', id);
+            showToast('কার্ড মুছে ফেলা হয়েছে');
+            renderStudyView();
+        }
+
+        // D. DAILY ROUTINE & TO-DO MODULE
+        async function renderTodoView() {
+            const todos = await dbGetAll('todos');
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-list-check"></i> দৈনিক কাজের তালিকা ও রুটিন
+                    </h2>
+                </div>
+
+                <!-- ADD TASK INPUT -->
+                <div class="glass-card p-4 rounded-2xl flex gap-2">
+                    <input id="todo-input" type="text" placeholder="নতুন কাজের বিবরণ লিখুন..." class="flex-1 p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
+                    <button onclick="addTodo()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs hover:bg-gold-400 transition">
+                        যোগ করুন
+                    </button>
+                </div>
+
+                <!-- TASK LIST -->
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">আপনার কাজের তালিকা (${toBengaliNumerals(todos.length)})</h3>
+                    
+                    ${todos.length === 0 ? `<p class="text-xs text-slate-400 italic">কোনো কাজ নির্ধারিত নেই। নতুন কাজ যোগ করুন।</p>` : ''}
+
+                    <div class="space-y-2">
+                        ${todos.map(todo => `
+                            <div class="flex items-center justify-between p-3 rounded-xl ${todo.completed ? 'bg-navy-900/30 opacity-60' : 'bg-navy-700/40 light:bg-slate-100'} border border-gold-500/10 transition">
+                                <label class="flex items-center gap-3 cursor-pointer flex-1">
+                                    <input type="checkbox" onchange="toggleTodo('${todo.id}')" ${todo.completed ? 'checked' : ''} class="w-4 h-4 accent-amber-500 rounded">
+                                    <span class="text-xs text-slate-200 light:text-slate-800 ${todo.completed ? 'line-through text-slate-400' : ''}">${todo.title}</span>
+                                </label>
+                                <button onclick="deleteTodo('${todo.id}')" class="text-xs text-red-400 hover:text-red-300 p-1">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addTodo() {
+            const input = document.getElementById('todo-input');
+            const title = input.value.trim();
+            if (!title) return;
+
+            const todo = { id: Date.now().toString(), title, completed: false, created: new Date().toISOString() };
+            await dbPut('todos', todo);
+            input.value = '';
+            showToast('কাজ সফলভাবে যোগ করা হয়েছে');
+            renderTodoView();
+        }
+
+        async function toggleTodo(id) {
+            const todo = await dbGet('todos', id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                await dbPut('todos', todo);
+                renderTodoView();
+            }
+        }
+
+        async function deleteTodo(id) {
+            await dbDelete('todos', id);
+            showToast('কাজ মুছে ফেলা হয়েছে');
+            renderTodoView();
+        }
+
+        // E. HABIT TRACKER
+        async function renderHabitsView() {
+            const habits = await dbGetAll('habits');
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line"></i> অভ্যাস ট্র্যাকার
+                    </h2>
+                </div>
+
+                <!-- ADD HABIT FORM -->
+                <div class="glass-card p-4 rounded-2xl flex gap-2">
+                    <input id="habit-title" type="text" placeholder="অভ্যাসের নাম (যেমন: ১০ পৃষ্ঠা বই পড়া)..." class="flex-1 p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
+                    <button onclick="addHabit()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs hover:bg-gold-400 transition">
+                        তৈরি করুন
+                    </button>
+                </div>
+
+                <!-- HABITS DISPLAY -->
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">চলমান অভ্যাসসমূহ (${toBengaliNumerals(habits.length)})</h3>
+                    
+                    ${habits.length === 0 ? `<p class="text-xs text-slate-400 italic">কোনো অভ্যাস যোগ করা হয়নি। শুরু করতে নতুন অভ্যাস যোগ করুন।</p>` : ''}
+
+                    <div class="space-y-3">
+                        ${habits.map(habit => `
+                            <div class="p-4 rounded-xl bg-navy-700/40 light:bg-slate-100 border border-gold-500/10 flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-sm font-semibold text-slate-100 light:text-slate-800">${habit.title}</h4>
+                                    <span class="text-[10px] text-gold-500 font-mono">ধারাবাহিকতা: ${toBengaliNumerals(habit.streak || 0)} দিন</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="incrementStreak('${habit.id}')" class="px-3 py-1.5 rounded-lg bg-gold-500/20 text-gold-500 hover:bg-gold-500 hover:text-navy-900 text-xs font-bold transition">
+                                        সম্পন্ন ✓
+                                    </button>
+                                    <button onclick="deleteHabit('${habit.id}')" class="text-xs text-red-400 hover:text-red-300 p-2">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addHabit() {
+            const input = document.getElementById('habit-title');
+            const title = input.value.trim();
+            if(!title) return;
+
+            const habit = { id: Date.now().toString(), title, streak: 0, lastCheckin: null };
+            await dbPut('habits', habit);
+            input.value = '';
+            showToast('নতুন অভ্যাস যোগ করা হয়েছে!');
+            renderHabitsView();
+        }
+
+        async function incrementStreak(id) {
+            const habit = await dbGet('habits', id);
+            if(habit) {
+                habit.streak = (habit.streak || 0) + 1;
+                await dbPut('habits', habit);
+                showToast(`সাবাশ! ধারাবাহিকতা বাড়িয়ে ${toBengaliNumerals(habit.streak)} দিন করা হয়েছে`);
+                renderHabitsView();
+            }
+        }
+
+        async function deleteHabit(id) {
+            await dbDelete('habits', id);
+            showToast('অভ্যাস মুছে ফেলা হয়েছে');
+            renderHabitsView();
+        }
+
+        // F. HEALTH & FITNESS TRACKER
+        async function renderHealthView() {
+            const today = getTodayDateStr();
+            let health = (await dbGet('health', today)) || { date: today, water: 0, steps: 0, sleep: 0 };
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-heart-pulse"></i> স্বাস্থ্য ও ফিটনেস ট্র্যাকার
+                    </h2>
+                </div>
+
+                <!-- WATER TRACKER -->
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">পানি গ্রহণ</span>
+                        <span class="text-sm font-mono text-blue-400 font-bold">${toBengaliNumerals(health.water)} / ২০০০ মি.লি.</span>
+                    </div>
+
+                    <div class="w-full bg-navy-900/60 h-3 rounded-full overflow-hidden border border-blue-500/20">
+                        <div class="bg-blue-500 h-full rounded-full transition-all duration-300" style="width: ${Math.min(100, (health.water/2000)*100)}%"></div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="addWater(250)" class="flex-1 py-2.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-white font-bold text-xs transition border border-blue-500/30">
+                            +২৫০ মি.লি. গ্লাস
+                        </button>
+                        <button onclick="addWater(500)" class="flex-1 py-2.5 rounded-xl bg-blue-500/20 hover:bg-blue-500 text-blue-300 hover:text-white font-bold text-xs transition border border-blue-500/30">
+                            +৫০০ মি.লি. বোতল
+                        </button>
+                        <button onclick="resetWater()" class="px-3 rounded-xl bg-navy-700 text-slate-400 hover:text-white text-xs">
+                            রিসেট
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEPS & SLEEP RECORD -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">দৈনিক হাঁটা (কদম)</span>
+                        <input id="health-steps" type="number" value="${health.steps}" placeholder="কদমের সংখ্যা..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none">
+                        <button onclick="saveHealthStats()" class="w-full py-2 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">হালনাগাদ করুন</button>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-2xl space-y-3">
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">ঘুমের সময় (ঘণ্টা)</span>
+                        <input id="health-sleep" type="number" step="0.5" value="${health.sleep}" placeholder="ঘণ্টা..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none">
+                        <button onclick="saveHealthStats()" class="w-full py-2 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">হালনাগাদ করুন</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function addWater(amount) {
+            const today = getTodayDateStr();
+            let health = (await dbGet('health', today)) || { date: today, water: 0, steps: 0, sleep: 0 };
+            health.water = (health.water || 0) + amount;
+            await dbPut('health', health);
+            renderHealthView();
+        }
+
+        async function resetWater() {
+            const today = getTodayDateStr();
+            let health = (await dbGet('health', today)) || { date: today, water: 0, steps: 0, sleep: 0 };
+            health.water = 0;
+            await dbPut('health', health);
+            renderHealthView();
+        }
+
+        async function saveHealthStats() {
+            const today = getTodayDateStr();
+            let health = (await dbGet('health', today)) || { date: today, water: 0, steps: 0, sleep: 0 };
+            health.steps = parseInt(document.getElementById('health-steps').value || '0');
+            health.sleep = parseFloat(document.getElementById('health-sleep').value || '0');
+            await dbPut('health', health);
+            showToast('স্বাস্থ্য তথ্য হালনাগাদ করা হয়েছে!');
+            renderHealthView();
+        }
+
+        // G. PERSONAL DIARY / JOURNAL
+        async function renderDiaryView() {
+            const entries = await dbGetAll('diary');
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-book-bookmark"></i> ব্যক্তিগত ডায়েরি
+                    </h2>
+                </div>
+
+                <!-- CREATE ENTRY FORM -->
+                <div class="glass-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">নতুন ডায়েরি এন্ট্রি</h3>
+                    <input id="diary-title" type="text" placeholder="শিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none">
+                    <textarea id="diary-content" placeholder="আপনার অনুভূতি ও চিন্তাভাবনা লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none" rows="4"></textarea>
+                    
+                    <button onclick="saveDiaryEntry()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-gold-400 to-gold-600 text-navy-900 font-bold text-xs uppercase tracking-wider">
+                        গোপন এন্ট্রি সংরক্ষণ করুন
+                    </button>
+                </div>
+
+                <!-- DIARY LIST -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">পূর্ববর্তী লেখাসমূহ (${toBengaliNumerals(entries.length)})</h3>
+                    ${entries.map(entry => `
+                        <div class="glass-card p-5 rounded-2xl space-y-2 border-gold-500/20">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-sm font-bold text-gold-400">${entry.title}</h4>
+                                <span class="text-[10px] text-slate-400 font-mono">${new Date(entry.timestamp).toLocaleDateString('bn-BD')}</span>
+                            </div>
+                            <p class="text-xs text-slate-300 light:text-slate-700 whitespace-pre-line">${entry.content}</p>
+                            <div class="text-right">
+                                <button onclick="deleteDiaryEntry('${entry.id}')" class="text-xs text-red-400 hover:text-red-300">
+                                    <i class="fa-solid fa-trash"></i> মুছে ফেলুন
+                                </button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        async function saveDiaryEntry() {
+            const title = document.getElementById('diary-title').value.trim();
+            const content = document.getElementById('diary-content').value.trim();
+            if(!title || !content) {
+                showToast('অনুগ্রহ করে শিরোনাম এবং অনুভূতি প্রদান করুন');
+                return;
+            }
+
+            const entry = { id: Date.now().toString(), title, content, timestamp: new Date().toISOString() };
+            await dbPut('diary', entry);
+            showToast('ডায়েরি সফলভাবে সংরক্ষিত হয়েছে!');
+            renderDiaryView();
+        }
+
+        async function deleteDiaryEntry(id) {
+            await dbDelete('diary', id);
+            showToast('এন্ট্রি মুছে ফেলা হয়েছে');
+            renderDiaryView();
+        }
+
+        // H. MORE MENU NAVIGATION HUB
+        function renderMenuView() {
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text">অতিরিক্ত মডিউলসমূহ</h2>
+                    <p class="text-xs text-slate-400">আপনার জীবন আরও সুসংগঠিত করার জন্য অতিরিক্ত টুলস</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="switchTab('calendar')" class="glass-card p-5 rounded-2xl flex items-center gap-4 hover:border-gold-500/50 transition text-left">
+                        <div class="w-12 h-12 rounded-xl bg-gold-500/10 text-gold-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm">ক্যালেন্ডার ও ইভেন্ট</h3>
+                            <p class="text-xs text-slate-400">সময়সূচি ও রিমাইন্ডার</p>
+                        </div>
+                    </button>
+
+                    <button onclick="switchTab('goals')" class="glass-card p-5 rounded-2xl flex items-center gap-4 hover:border-gold-500/50 transition text-left">
+                        <div class="w-12 h-12 rounded-xl bg-gold-500/10 text-gold-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm">লক্ষ্য ও লক্ষ্যমাত্রা</h3>
+                            <p class="text-xs text-slate-400">দীর্ঘমেয়াদী ও স্বল্পমেয়াদী লক্ষ্য</p>
+                        </div>
+                    </button>
+
+                    <button onclick="switchTab('reports')" class="glass-card p-5 rounded-2xl flex items-center gap-4 hover:border-gold-500/50 transition text-left">
+                        <div class="w-12 h-12 rounded-xl bg-gold-500/10 text-gold-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm">অগ্রগতি রিপোর্ট</h3>
+                            <p class="text-xs text-slate-400">ভিজ্যুয়াল রিপোর্ট ও পরিসংখ্যান</p>
+                        </div>
+                    </button>
+
+                    <button onclick="switchTab('backup')" class="glass-card p-5 rounded-2xl flex items-center gap-4 hover:border-gold-500/50 transition text-left">
+                        <div class="w-12 h-12 rounded-xl bg-gold-500/10 text-gold-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-database"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm">ব্যাকআপ ও রিস্টোর</h3>
+                            <p class="text-xs text-slate-400">JSON ব্যাকআপ ও PDF এক্সপোর্ট</p>
+                        </div>
+                    </button>
+
+                    <button onclick="switchTab('settings')" class="glass-card p-5 rounded-2xl flex items-center gap-4 hover:border-gold-500/50 transition text-left">
+                        <div class="w-12 h-12 rounded-xl bg-gold-500/10 text-gold-500 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm">প্রোফাইল ও সেটিংস</h3>
+                            <p class="text-xs text-slate-400">ব্যক্তিগত তথ্য ও অ্যাপ কাস্টমাইজেশন</p>
+                        </div>
+                    </button>
+                </div>
+            `;
+        }
+
+        // I. BACKUP & RESTORE MODULE
+        function renderBackupView() {
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-database"></i> ডেটা ব্যাকআপ ও রিস্টোর
+                    </h2>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200">লোকাল JSON ব্যাকআপ</h3>
+                    <p class="text-xs text-slate-400">আপনার সমস্ত ডেটা নিরাপদ রাখতে একটি JSON ফাইল হিসেবে ডিভাইস ডাইনলোড করে রাখুন।</p>
+                    
+                    <button onclick="exportJSONBackup()" class="w-full py-3 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs uppercase tracking-wider hover:bg-gold-400 transition">
+                        সম্পূর্ণ ব্যাকআপ ডাউনলোড (JSON)
+                    </button>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200">ব্যাকআপ রিস্টোর করুন</h3>
+                    <p class="text-xs text-slate-400">পূর্বের ব্যাকআপ নেওয়া JSON ফাইলটি নির্বাচন করে পুনরায় অ্যাপে অ্যাপলোড করুন।</p>
+                    
+                    <input type="file" id="import-file" accept=".json" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-gold-500/20 file:text-gold-400 hover:file:bg-gold-500/30">
+                    
+                    <button onclick="importJSONBackup()" class="w-full py-3 rounded-xl bg-navy-700 text-gold-400 font-bold text-xs uppercase tracking-wider hover:bg-navy-600 transition border border-gold-500/30">
+                        ব্যাকআপ ফাইল আপলোড করুন
+                    </button>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-slate-200">PDF রিপোর্ট সামারি</h3>
+                    <p class="text-xs text-slate-400">আপনার নামাজ, রুটিন ও অভ্যাসের সামারি সম্বলিত PDF ডকুমেন্ট ডাউনলোড করুন।</p>
+                    
+                    <button onclick="generatePDFReport()" class="w-full py-3 rounded-xl bg-navy-700 text-white font-bold text-xs uppercase tracking-wider hover:bg-navy-600 transition border border-gold-500/30">
+                        PDF রিপোর্ট ডাউনলোড করুন
+                    </button>
+                </div>
+            `;
+        }
+
+        async function exportJSONBackup() {
+            const stores = ['prayers', 'dhikr', 'todos', 'habits', 'vocab', 'diary', 'goals', 'health', 'settings'];
+            const exportData = {};
+
+            for (const store of stores) {
+                exportData[store] = await dbGetAll(store);
+            }
+
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `hayat_os_backup_${getTodayDateStr()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('ব্যাকআপ সফলভাবে ডাউনলোড হয়েছে!');
+        }
+
+        async function importJSONBackup() {
+            const fileInput = document.getElementById('import-file');
+            if(!fileInput.files.length) {
+                showToast('অনুগ্রহ করে একটি JSON ফাইল নির্বাচন করুন');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    for (const storeName in data) {
+                        if (db.objectStoreNames.contains(storeName)) {
+                            for (const item of data[storeName]) {
+                                await dbPut(storeName, item);
+                            }
+                        }
+                    }
+                    showToast('ডেটা সফলভাবে রিস্টোর করা হয়েছে!');
+                    switchTab('dashboard');
+                } catch (err) {
+                    showToast('অকার্যকর JSON ফাইল ফরম্যাট');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function generatePDFReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text("HAYAT OS - Personal Life Management Report", 14, 20);
+            
+            doc.setFontSize(10);
+            doc.text(`Generated on: ${new Date().toLocaleString('bn-BD')}`, 14, 28);
+            doc.text("Tagline: Your Life. Your Time. Your Growth.", 14, 34);
+
+            doc.text("Summary status:", 14, 46);
+            doc.text("- All data safely stored locally in browser IndexedDB.", 14, 52);
+            doc.text("- Keep generating periodic JSON backups for safety.", 14, 58);
+
+            doc.save(`hayat_os_report_${getTodayDateStr()}.pdf`);
+            showToast('PDF রিপোর্ট ডাউনলোড হয়েছে');
+        }
+
+        // J. SETTINGS & PROFILE MODULE
+        async function renderSettingsView() {
+            const profile = (await dbGet('settings', 'profile')) || { key: 'profile', name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও ঈমানী জীবন' };
+
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2">
+                        <i class="fa-solid fa-sliders"></i> প্রোফাইল ও সেটিংস
+                    </h2>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl space-y-4">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">ব্যবহারকারীর তথ্য</h3>
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400">আপনার নাম</label>
+                        <input id="profile-name" type="text" value="${profile.name}" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-slate-400">ব্যক্তিগত নীতিবাক্য (Motto)</label>
+                        <input id="profile-motto" type="text" value="${profile.motto}" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none">
+                    </div>
+
+                    <button onclick="saveProfile()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">
+                        প্রোফাইল সংরক্ষণ করুন
+                    </button>
+                </div>
+            `;
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('profile-name').value.trim();
+            const motto = document.getElementById('profile-motto').value.trim();
+            await dbPut('settings', { key: 'profile', name, motto });
+            showToast('প্রোফাইল তথ্য সংরক্ষণ করা হয়েছে');
+        }
+
+        // K. STUB MODULES (Calendar, Goals, Reports)
+        function renderCalendarView() {
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-calendar-days"></i> ক্যালেন্ডার ও সময়সূচি</h2>
+                </div>
+                <div class="glass-card p-6 rounded-2xl text-center">
+                    <p class="text-xs text-slate-300">ইন্টারেক্টিভ অফলাইন ক্যালেন্ডার ও রিমাইন্ডার উইজেট।</p>
+                </div>
+            `;
+        }
+
+        function renderGoalsView() {
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-bullseye"></i> লক্ষ্যমাত্রা ও ভিশন</h2>
+                </div>
+                <div class="glass-card p-6 rounded-2xl text-center">
+                    <p class="text-xs text-slate-300">স্বল্প ও দীর্ঘমেয়াদী লক্ষ্য নির্ধারণ এবং ট্র্যাকিং মডিউল।</p>
+                </div>
+            `;
+        }
+
+        function renderReportsView() {
+            const app = document.getElementById('app-content');
+            app.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-chart-pie"></i> অগ্রগতি রিপোর্ট</h2>
+                </div>
+                <div class="glass-card p-6 rounded-2xl text-center">
+                    <p class="text-xs text-slate-300">নামাজ, পানি গ্রহণ এবং অভ্যাসের ভিজ্যুয়াল পরিসংখ্যান।</p>
+                </div>
+            `;
+        }
+
+        // --- 5. INITIALIZATION ---
+        window.addEventListener('DOMContentLoaded', async () => {
+            loadThemePreference();
+            await initDB();
+            switchTab('dashboard');
+
+            // Setup Inline Manifest
+            const manifest = {
+                name: "HAYAT OS",
+                short_name: "HAYAT OS",
+                start_url: ".",
+                display: "standalone",
+                background_color: "#0B132B",
+                theme_color: "#0B132B",
+                icons: [{ src: "https://placehold.co/192x192/0B132B/D4AF37?text=HAYAT", sizes: "192x192", type: "image/png" }]
+            };
+            const manifestStr = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
+            document.getElementById('manifest-placeholder').setAttribute('href', manifestStr);
+        });
     </script>
 </body>
 </html>
+```
