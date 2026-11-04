@@ -12,9 +12,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/0B132B/D4AF37?text=HAYAT">
 
-    <!-- Google Font: Hind Siliguri for Clean Bengali Typography -->
+    <!-- Performance Optimization: Resource Hints for Low Network Connections -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- font-display=swap to prevent invisible text during slow connections -->
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Tailwind CSS CDN -->
@@ -48,11 +54,11 @@
         }
     </script>
 
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Font Awesome Icons with fallback display -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <!-- jSPDF for PDF Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
     <style>
         /* Custom scrollbars and styling */
@@ -227,6 +233,7 @@
 
         function initDB() {
             return new Promise((resolve, reject) => {
+                if (db) return resolve(db);
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 request.onerror = (e) => reject("ডেটাবেস ত্রুটি: " + e.target.errorCode);
                 request.onsuccess = (e) => {
@@ -312,9 +319,9 @@
             toast.className = `p-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 border transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto bg-navy-800 text-white border-gold-500/40`;
             toast.innerHTML = `<i class="fa-solid fa-circle-info text-gold-500"></i> <span>${message}</span>`;
             container.appendChild(toast);
-            setTimeout(() => {
+            requestAnimationFrame(() => {
                 toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 10);
+            });
             setTimeout(() => {
                 toast.classList.add('opacity-0');
                 setTimeout(() => toast.remove(), 300);
@@ -1140,6 +1147,10 @@
         }
 
         function generatePDFReport() {
+            if(!window.jspdf) {
+                showToast('PDF মডিউল লোড হচ্ছে, অনুগ্রহ করে পুনরায় চেষ্টা করুন');
+                return;
+            }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
@@ -1240,18 +1251,21 @@
             await initDB();
             switchTab('dashboard');
 
-            // Setup Inline Manifest
-            const manifest = {
-                name: "HAYAT OS",
-                short_name: "HAYAT OS",
-                start_url: ".",
-                display: "standalone",
-                background_color: "#0B132B",
-                theme_color: "#0B132B",
-                icons: [{ src: "https://placehold.co/192x192/0B132B/D4AF37?text=HAYAT", sizes: "192x192", type: "image/png" }]
-            };
-            const manifestStr = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
-            document.getElementById('manifest-placeholder').setAttribute('href', manifestStr);
+            // Setup Inline Manifest safely
+            try {
+                const manifest = {
+                    name: "HAYAT OS",
+                    short_name: "HAYAT OS",
+                    start_url: ".",
+                    display: "standalone",
+                    background_color: "#0B132B",
+                    theme_color: "#0B132B",
+                    icons: [{ src: "https://placehold.co/192x192/0B132B/D4AF37?text=HAYAT", sizes: "192x192", type: "image/png" }]
+                };
+                const manifestStr = 'data:application/json;base64,' + btoa(JSON.stringify(manifest));
+                const manifestEl = document.getElementById('manifest-placeholder');
+                if(manifestEl) manifestEl.setAttribute('href', manifestStr);
+            } catch(e) {}
         });
     </script>
 </body>
