@@ -255,8 +255,8 @@
         let sentenceSearchQuery = '';
         const cardStepsState = {}; 
         const sentenceStepsState = {};
-        const conversationExpandedState = {}; // Tracks open/close state of conversation topics
-        const dialogueStepState = {}; // Tracks step state for each conversation line: 'id_lineIndex' -> 0, 1, 2
+        const conversationExpandedState = {};
+        const dialogueStepState = {};
 
         const getTodayDateStr = () => new Date().toISOString().split('T')[0];
 
@@ -483,8 +483,8 @@
                     </h3>
                     <input id="vocab-id" type="hidden">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input id="vocab-word" type="text" placeholder="১. English Word (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900">
-                        <input id="vocab-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900">
+                        <input id="vocab-word" type="text" placeholder="১. English Word (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900">
+                        <input id="vocab-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900">
                     </div>
                     <textarea id="vocab-meaning" placeholder="৩. বাংলা অর্থ" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
                     
@@ -504,7 +504,7 @@
                 <div class="space-y-3 pt-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                            <span>শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})[span_0](start_span)[span_0](end_span)</span>
+                            <span>শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</span>
                         </h3>
                         <div class="relative min-w-[200px]">
                             <input type="text" id="vocab-search-input" value="${vocabSearchQuery}" oninput="handleVocabSearch(this.value)" placeholder="শব্দ বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
@@ -523,7 +523,7 @@
                                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[210px]">
                                         <div class="flex justify-between items-center z-10 w-full mb-2">
                                             <span class="text-[10px] font-bold text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-md">
-                                                সিরিয়াল: #${serialNo}[span_1](start_span)[span_1](end_span)
+                                                সিরিয়াল: #${serialNo}
                                             </span>
                                             <div class="flex items-center gap-1">
                                                 <button onclick="event.stopPropagation(); editVocab('${item.id}', '${encodeURIComponent(item.word)}', '${encodeURIComponent(item.pronunciation || '')}', '${encodeURIComponent(item.meaning)}', '${encodeURIComponent(item.sentence || '')}', '${encodeURIComponent(item.translation || '')}')" class="text-xs text-gold-400 hover:text-gold-300 p-1.5 rounded-lg hover:bg-navy-700/50" title="এডিট">
@@ -543,7 +543,7 @@
 
                                         <div class="border-t border-gold-500/10 pt-3 flex items-center justify-between text-[11px] text-slate-400 z-10">
                                             <button onclick="event.stopPropagation(); changeCardStep('${item.id}', -1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
-                                                <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী[span_2](start_span)[span_2](end_span)
+                                                <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী
                                             </button>
                                             <div class="flex items-center gap-1.5" id="card-dots-${item.id}">
                                                 ${[0, 1, 2, 3].map(step => `
@@ -551,7 +551,7 @@
                                                 `).join('')}
                                             </div>
                                             <button onclick="event.stopPropagation(); changeCardStep('${item.id}', 1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
-                                                পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>[span_3](start_span)[span_3](end_span)
+                                                পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -713,7 +713,7 @@
                 <div class="space-y-3 pt-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                            <span>বাক্য ফ্ল্যাশ-কার্ড (${toBengaliNumerals(sentences.length)})[span_4](start_span)[span_4](end_span)</span>
+                            <span>বাক্য ফ্ল্যাশ-কার্ড (${toBengaliNumerals(sentences.length)})</span>
                         </h3>
                         <div class="relative min-w-[200px]">
                             <input type="text" value="${sentenceSearchQuery}" oninput="handleSentenceSearch(this.value)" placeholder="বাক্য বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
@@ -732,7 +732,7 @@
                                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[190px]">
                                         <div class="flex justify-between items-center z-10 w-full mb-2">
                                             <span class="text-[10px] font-bold text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-md">
-                                                সিরিয়াল: #${serialNo}[span_5](start_span)[span_5](end_span)
+                                                সিরিয়াল: #${serialNo}
                                             </span>
                                             <div class="flex items-center gap-1">
                                                 <button onclick="event.stopPropagation(); editSentence('${item.id}', '${encodeURIComponent(item.sentence)}', '${encodeURIComponent(item.pronunciation || '')}', '${encodeURIComponent(item.meaning)}')" class="text-xs text-gold-400 hover:text-gold-300 p-1.5 rounded-lg hover:bg-navy-700/50" title="এডিট">
@@ -752,7 +752,7 @@
 
                                         <div class="border-t border-gold-500/10 pt-3 flex items-center justify-between text-[11px] text-slate-400 z-10">
                                             <button onclick="event.stopPropagation(); changeSentenceStep('${item.id}', -1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5">
-                                                <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী[span_6](start_span)[span_6](end_span)
+                                                <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী
                                             </button>
                                             <div class="flex items-center gap-1.5" id="sentence-dots-${item.id}">
                                                 ${[0, 1, 2].map(step => `
@@ -760,7 +760,7 @@
                                                 `).join('')}
                                             </div>
                                             <button onclick="event.stopPropagation(); changeSentenceStep('${item.id}', 1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5">
-                                                পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>[span_7](start_span)[span_7](end_span)
+                                                পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -868,7 +868,7 @@
         }
 
 
-        // --- CONVERSATIONS MODULE (UPDATED WITH TOPIC ACCORDION & STEP-BY-STEP DIALOGUE FLIP) ---
+        // --- CONVERSATIONS MODULE (CLEAN HEADER & ICON REPLACED SERIAL) ---
         async function renderConversationsView() {
             const conversations = await dbGetAll('conversations');
 
@@ -896,9 +896,9 @@
                                 <option value="1">বক্তা ১</option>
                                 <option value="2">বক্তা ২</option>
                             </select>
-                            <input type="text" placeholder="ইংরেজি বাক্য (English sentence)..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                            <input type="text" placeholder="বাংলা উচ্চারণ (Pronunciation)..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                            <input type="text" placeholder="বাংলা অর্থ (Meaning)..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
+                            <input type="text" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
+                            <input type="text" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
+                            <input type="text" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
                             <button onclick="this.parentElement.remove()" class="sm:col-span-1 text-red-400 text-center"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                     </div>
@@ -917,27 +917,27 @@
 
                 <div class="space-y-3 pt-2">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                        <span>সংরক্ষিত কথোপকথন তালিকা (${toBengaliNumerals(conversations.length)})[span_8](start_span)[span_8](end_span)</span>
+                        <span>সংরক্ষিত কথোপকথন তালিকা (${toBengaliNumerals(conversations.length)})</span>
                     </h3>
                     
                     ${conversations.length === 0 ? `<p class="text-xs text-slate-400 italic py-2">কোনো কথোপকথন যোগ করা হয়নি।</p>` : ''}
 
                     <div class="space-y-3">
-                        ${conversations.map((c, index) => {
+                        ${conversations.map((c) => {
                             const isExpanded = conversationExpandedState[c.id] || false;
-                            const serialNo = toBengaliNumerals(index + 1);
+                            const totalLines = toBengaliNumerals(c.lines?.length || 0);
 
                             return `
                                 <div class="glass-card rounded-2xl border-gold-500/30 shadow-lg overflow-hidden transition-all">
-                                    <!-- TOPIC HEADER (CLICK TO EXPAND/COLLAPSE) -->
+                                    <!-- TOPIC HEADER WITH TOPIC-BASED ICON -->
                                     <div onclick="toggleConversationExpand('${c.id}')" class="p-4 cursor-pointer flex justify-between items-center hover:bg-gold-500/5 transition">
                                         <div class="flex items-center gap-3">
-                                            <span class="text-xs font-bold text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-md">
-                                                #${serialNo}[span_9](start_span)[span_9](end_span)
-                                            </span>
+                                            <div class="w-9 h-9 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 text-sm shadow-sm">
+                                                <i class="fa-solid fa-comments"></i>
+                                            </div>
                                             <div>
                                                 <h4 class="text-sm font-bold text-white light:text-slate-800">${c.topic}</h4>
-                                                <span class="text-[10px] text-slate-400">বক্তাগণ: ${c.p1 || 'বক্তা ১'} ও ${c.p2 || 'বক্তা ২'} (${toBengaliNumerals(c.lines?.length || 0)} টি লাইন)[span_10](start_span)[span_10](end_span)</span>
+                                                <span class="text-[10px] text-slate-400">বক্তাগণ: ${c.p1 || 'বক্তা ১'} ও ${c.p2 || 'বক্তা ২'} (${totalLines} টি লাইন)</span>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -947,10 +947,10 @@
                                         </div>
                                     </div>
 
-                                    <!-- DIALOGUE CONTENT (SHOWN ONLY WHEN EXPANDED) -->
+                                    <!-- DIALOGUE CONTENT (CLEAN & SUBTLE STEP HINT) -->
                                     ${isExpanded ? `
                                         <div class="p-4 bg-navy-900/40 border-t border-gold-500/10 space-y-2 text-xs">
-                                            <p class="text-[10px] text-slate-400 italic mb-2">প্রতিটি লাইনে ক্লিক করে বা টপকে ধাপে ধাপে উচ্চারণ ও অর্থ দেখতে পারেন:</p>
+                                            <p class="text-[10px] text-slate-400 italic mb-2">প্রতিটি লাইনে ক্লিক করে ধাপে ধাপে উচ্চারণ ও অর্থ দেখুন:</p>
                                             ${(c.lines || []).map((l, lIdx) => {
                                                 const dialogueKey = `${c.id}_${lIdx}`;
                                                 const step = dialogueStepState[dialogueKey] || 0;
@@ -960,7 +960,7 @@
                                                     <div onclick="nextDialogueStep('${c.id}', ${lIdx})" class="p-3 rounded-xl cursor-pointer transition ${l.speaker === '1' ? 'bg-navy-800/80 border-l-4 border-gold-500' : 'bg-navy-700/50 border-l-4 border-blue-400'}">
                                                         <div class="flex justify-between items-center mb-1">
                                                             <span class="font-bold text-gold-400">${speakerName}:</span>
-                                                            <span class="text-[9px] text-slate-400 bg-navy-900 px-1.5 py-0.5 rounded">ধাপ ${toBengaliNumerals(step + 1)}/৩[span_11](start_span)[span_11](end_span)</span>
+                                                            <span class="text-[9px] text-slate-400 font-mono opacity-75">ধাপ ${toBengaliNumerals(step + 1)}/৩</span>
                                                         </div>
                                                         <div class="dialogue-step-text text-slate-200">
                                                             ${getDialogueStepHTML(l, step)}
@@ -985,9 +985,9 @@
 
         function getDialogueStepHTML(lineObj, step) {
             if (step === 0) {
-                return `<div class="font-semibold text-white">"${lineObj.text}"</div><div class="text-[9px] text-gold-400/80 mt-1">উচ্চারণ ও অর্থ দেখতে ক্লিক করুন ➔</div>`;
+                return `<div class="font-semibold text-white">"${lineObj.text}"</div><div class="text-[9px] text-gold-400/70 mt-1">উচ্চারণ ও অর্থ দেখতে ক্লিক করুন ➔</div>`;
             } else if (step === 1) {
-                return `<div class="text-gold-300 font-medium">উচ্চারণ: ${lineObj.pron || 'দেয়া হয়নি'}</div><div class="text-[9px] text-gold-400/80 mt-1">অর্থ দেখতে আবার ক্লিক করুন ➔</div>`;
+                return `<div class="text-gold-300 font-medium">উচ্চারণ: ${lineObj.pron || 'দেয়া হয়নি'}</div><div class="text-[9px] text-gold-400/70 mt-1">অর্থ দেখতে আবার ক্লিক করুন ➔</div>`;
             } else {
                 return `<div class="text-emerald-300 font-semibold">অর্থ: ${lineObj.meaning || 'দেয়া হয়নি'}</div>`;
             }
@@ -1105,7 +1105,7 @@
                     <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
                         <i class="fa-solid fa-arrow-left"></i> ইংরেজি হাব এ ফিরে যান
                     </button>
-                    <span class="text-xs font-bold text-slate-300">কুইজ (${toBengaliNumerals(currentQuizIndex + 1)}/${toBengaliNumerals(activeVocabs.length)})[span_12](start_span)[span_12](end_span)</span>
+                    <span class="text-xs font-bold text-slate-300">কুইজ (${toBengaliNumerals(currentQuizIndex + 1)}/${toBengaliNumerals(activeVocabs.length)})</span>
                 </div>
 
                 <div class="space-y-4">
@@ -1192,7 +1192,7 @@
                     <button onclick="addHabit()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">তৈরি</button>
                 </div>
                 <div class="glass-card p-5 rounded-2xl space-y-2">
-                    ${habits.map(h => `<div class="p-3 rounded-xl bg-navy-700/40 flex justify-between items-center text-xs"><span>${h.title} (স্ট্রীক: ${toBengaliNumerals(h.streak||0)} দিন)[span_13](start_span)[span_13](end_span)</span><div class="flex gap-2"><button onclick="incrementStreak('${h.id}')" class="px-2.5 py-1 bg-gold-500/20 text-gold-400 rounded-lg">সম্পন্ন</button><button onclick="deleteHabit('${h.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`).join('')}
+                    ${habits.map(h => `<div class="p-3 rounded-xl bg-navy-700/40 flex justify-between items-center text-xs"><span>${h.title} (স্ট্রীক: ${toBengaliNumerals(h.streak||0)} দিন)</span><div class="flex gap-2"><button onclick="incrementStreak('${h.id}')" class="px-2.5 py-1 bg-gold-500/20 text-gold-400 rounded-lg">সম্পন্ন</button><button onclick="deleteHabit('${h.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`).join('')}
                 </div>
             `;
         }
@@ -1211,7 +1211,7 @@
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-heart-pulse"></i> ফিটনেস ট্র্যাকার</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-4 text-xs">
-                    <div class="flex justify-between font-bold text-slate-200"><span>পানি গ্রহণ</span><span class="text-blue-400">${toBengaliNumerals(health.water)} মি.লি.[span_14](start_span)[span_14](end_span)</span></div>
+                    <div class="flex justify-between font-bold text-slate-200"><span>পানি গ্রহণ</span><span class="text-blue-400">${toBengaliNumerals(health.water)} মি.লি.</span></div>
                     <div class="w-full bg-navy-900 h-3 rounded-full overflow-hidden border border-blue-500/20"><div class="bg-blue-500 h-full" style="width: ${Math.min(100, (health.water/2000)*100)}%"></div></div>
                     <div class="flex gap-2"><button onclick="addWater(250)" class="flex-1 py-2 bg-blue-500/20 text-blue-300 rounded-xl">+২৫০ মি.লি.</button><button onclick="addWater(500)" class="flex-1 py-2 bg-blue-500/20 text-blue-300 rounded-xl">+৫০০ মি.লি.</button><button onclick="resetWater()" class="px-3 bg-navy-700 text-slate-300 rounded-xl">রিসেট</button></div>
                 </div>
