@@ -50,7 +50,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- jSPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
     <style>
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -114,7 +114,7 @@
         <!-- Dynamic Modules -->
     </main>
 
-    <!-- BOTTOM NAVIGATION BAR -->
+    <!-- BOTTOM NAVIGATION BAR (Din/Islamic Removed) -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-navy-800/95 dark:bg-navy-800/95 light:bg-white/95 backdrop-blur-lg border-t border-gold-500/20 px-2 py-2 shadow-2xl">
         <div class="max-w-4xl mx-auto flex justify-around items-center overflow-x-auto no-scrollbar py-1">
             <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
@@ -141,9 +141,9 @@
                 <i class="fa-solid fa-book-bookmark text-lg mb-0.5"></i>
                 <span class="text-[10px]">ডায়েরি</span>
             </button>
-            <button onclick="switchTab('settings')" id="nav-settings" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
-                <i class="fa-solid fa-sliders text-lg mb-0.5"></i>
-                <span class="text-[10px]">সেটিংস</span>
+            <button onclick="switchTab('menu')" id="nav-menu" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
+                <i class="fa-solid fa-grid-2 text-lg mb-0.5"></i>
+                <span class="text-[10px]">আরও</span>
             </button>
         </div>
     </nav>
@@ -340,6 +340,11 @@
                 case 'habits': renderHabitsView(); break;
                 case 'health': renderHealthView(); break;
                 case 'diary': renderDiaryView(); break;
+                case 'menu': renderMenuView(); break;
+                case 'calendar': renderCalendarView(); break;
+                case 'goals': renderGoalsView(); break;
+                case 'reports': renderReportsView(); break;
+                case 'backup': renderBackupView(); break;
                 case 'settings': renderSettingsView(); break;
                 case 'sub_vocab_quiz': renderVocabQuizView(); break;
                 case 'sub_conversations': renderConversationsView(); break;
@@ -348,7 +353,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- DASHBOARD ---
+        // --- 1. DASHBOARD ---
         async function renderDashboardView() {
             const today = getTodayDateStr();
             const healthData = (await dbGet('health', today)) || { water: 0, steps: 0, sleep: 0 };
@@ -404,6 +409,9 @@
                         </button>
                         <button onclick="switchTab('diary')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
                             <i class="fa-solid fa-book-bookmark text-gold-500 text-xl mb-1"></i><span class="text-xs">ডায়েরি</span>
+                        </button>
+                        <button onclick="switchTab('backup')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                            <i class="fa-solid fa-database text-gold-500 text-xl mb-1"></i><span class="text-xs">ব্যাকআপ</span>
                         </button>
                         <button onclick="switchTab('settings')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
                             <i class="fa-solid fa-sliders text-gold-500 text-xl mb-1"></i><span class="text-xs">সেটিংস</span>
@@ -692,7 +700,7 @@
             }
         }
 
-        // --- SUB VIEW 2: CONVERSATIONS SECTION (FULL WORKING) ---
+        // --- SUB VIEW 2: CONVERSATIONS SECTION ---
         async function renderConversationsView() {
             let topics = await dbGetAll('conv_topics');
             if (topics.length === 0) {
@@ -754,19 +762,19 @@
                                 <p class="text-[11px] text-slate-400">${activeTopic ? (activeTopic.subtitle || '') : ''}</p>
                             </div>
                             <button onclick="openAddMessageModal('${selectedTopicId}')" class="px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow hover:bg-teal-500">
-                                + বার্তা যোগ করুন
+                                + বার্তা যোগ
                             </button>
                         </div>
 
                         <div class="space-y-3">
-                            ${topicMessages.length === 0 ? `<p class="text-xs text-slate-400 italic">এই বিষয়ে কোনো বার্তা নেই। "+ বার্তা যোগ করুন" এ ক্লিক করে কথা যুক্ত করুন।</p>` : ''}
+                            ${topicMessages.length === 0 ? `<p class="text-xs text-slate-400 italic">এই বিষয়ে কোনো বার্তা নেই।</p>` : ''}
                             ${topicMessages.map(msg => `
                                 <div class="p-3.5 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1 relative">
                                     <div class="flex justify-between items-center">
-                                        <span class="text-[10px] font-bold text-teal-400 uppercase tracking-wider">${msg.speaker}</span>
+                                        <span class="text-[10px] font-bold text-teal-400">${msg.speaker}</span>
                                         <div class="flex items-center gap-3">
-                                            <i class="fa-solid fa-volume-high text-xs text-gold-400 cursor-pointer hover:text-gold-300" onclick="speakText('${msg.en.replace(/'/g, "\\'")}')" title="উচ্চারণ শুনুন"></i>
-                                            <button onclick="deleteConvMessage('${msg.id}')" class="text-red-400/70 hover:text-red-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
+                                            <i class="fa-solid fa-volume-high text-xs text-gold-400 cursor-pointer" onclick="speakText('${msg.en.replace(/'/g, "\\'")}')" title="শুনুন"></i>
+                                            <button onclick="deleteConvMessage('${msg.id}')" class="text-red-400/70 text-xs"><i class="fa-solid fa-xmark"></i></button>
                                         </div>
                                     </div>
                                     <div class="text-sm font-semibold text-white tracking-wide">${msg.en}</div>
@@ -802,9 +810,9 @@
                 <button onclick="toggleGeneralModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 <h3 class="text-lg font-bold gold-gradient-text mb-4">নতুন বিষয় যোগ করুন</h3>
                 <div class="space-y-3">
-                    <input id="new-topic-title" type="text" placeholder="বিষয়ের নাম (যেমন: রেস্তোরাঁ / Restaurant)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white">
-                    <input id="new-topic-sub" type="text" placeholder="উপশিরোনাম (যেমন: খাবার অর্ডার দেওয়া)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white">
-                    <button onclick="saveConvTopic()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs uppercase shadow">বিষয় সংরক্ষণ</button>
+                    <input id="new-topic-title" type="text" placeholder="বিষয়ের নাম..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs">
+                    <input id="new-topic-sub" type="text" placeholder="উপশিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs">
+                    <button onclick="saveConvTopic()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs uppercase">সংরক্ষণ</button>
                 </div>
             `;
             toggleGeneralModal(true);
@@ -813,30 +821,28 @@
         async function saveConvTopic() {
             const title = document.getElementById('new-topic-title').value.trim();
             const subtitle = document.getElementById('new-topic-sub').value.trim();
-            if (!title) { showToast('বিষয়ের নাম দিন'); return; }
+            if (!title) return;
             const id = 'top_' + Date.now();
             await dbPut('conv_topics', { id, title, subtitle });
             selectedTopicId = id;
             toggleGeneralModal(false);
-            showToast('নতুন বিষয় যুক্ত হয়েছে!');
             renderConversationsView();
         }
 
         async function deleteConvTopic(id) {
             await dbDelete('conv_topics', id);
-            showToast('বিষয় মুছে ফেলা হয়েছে');
             renderConversationsView();
         }
 
         function openAddMessageModal(topicId) {
             document.getElementById('general-modal-content').innerHTML = `
                 <button onclick="toggleGeneralModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                <h3 class="text-lg font-bold gold-gradient-text mb-4">কথোপকথন বার্তা যোগ করুন</h3>
+                <h3 class="text-lg font-bold gold-gradient-text mb-4">বার্তা যোগ করুন</h3>
                 <div class="space-y-3">
-                    <input id="new-msg-speaker" type="text" placeholder="বক্তা (যেমন: Buyer / Seller / Waiter)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white">
-                    <textarea id="new-msg-en" placeholder="ইংরেজি বাক্য (যেমন: May I have the menu?)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white" rows="2"></textarea>
-                    <textarea id="new-msg-bn" placeholder="বাংলা অর্থ (যেমন: আমি কি মেন্যুটি পেতে পারি?)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white" rows="2"></textarea>
-                    <button onclick="saveConvMessage('${topicId}')" class="w-full py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs uppercase shadow">বার্তা সংরক্ষণ করুন</button>
+                    <input id="new-msg-speaker" type="text" placeholder="বক্তা (যেমন: Buyer / Seller)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs">
+                    <textarea id="new-msg-en" placeholder="ইংরেজি বাক্য..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs" rows="2"></textarea>
+                    <textarea id="new-msg-bn" placeholder="বাংলা অর্থ..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs" rows="2"></textarea>
+                    <button onclick="saveConvMessage('${topicId}')" class="w-full py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs uppercase">বার্তা সংরক্ষণ</button>
                 </div>
             `;
             toggleGeneralModal(true);
@@ -846,17 +852,15 @@
             const speaker = document.getElementById('new-msg-speaker').value.trim() || 'Speaker';
             const en = document.getElementById('new-msg-en').value.trim();
             const bn = document.getElementById('new-msg-bn').value.trim();
-            if (!en || !bn) { showToast('ইংরেজি ও বাংলা বাক্য লিখুন'); return; }
+            if (!en || !bn) return;
             const id = 'msg_' + Date.now();
             await dbPut('conv_messages', { id, topicId, speaker, en, bn });
             toggleGeneralModal(false);
-            showToast('বার্তা সফলভাবে যোগ হয়েছে!');
             renderConversationsView();
         }
 
         async function deleteConvMessage(id) {
             await dbDelete('conv_messages', id);
-            showToast('বার্তা মুছে ফেলা হয়েছে');
             renderConversationsView();
         }
 
@@ -964,6 +968,43 @@
         }
         async function deleteDiary(id) { await dbDelete('diary', id); renderDiaryView(); }
 
+        // --- BACKUP & EXPORT MODULE ---
+        function renderBackupView() {
+            document.getElementById('app-content').innerHTML = `
+                <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-database"></i> ব্যাকআপ ও রিপোর্ট</h2></div>
+                <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
+                    <h3 class="font-bold text-gold-400">লোকাল ব্যাকআপ</h3>
+                    <button onclick="exportJSON()" class="py-2.5 px-4 bg-gold-500 text-navy-900 font-bold rounded-xl w-full">JSON ব্যাকআপ ডাউনলোড</button>
+                </div>
+                <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
+                    <h3 class="font-bold text-gold-400">PDF রিপোর্ট সামারি</h3>
+                    <button onclick="generatePDFReport()" class="py-2.5 px-4 bg-navy-700 text-white font-bold rounded-xl w-full border border-gold-500/30">PDF ডকুমেন্ট ডাউনলোড</button>
+                </div>
+            `;
+        }
+        async function exportJSON() {
+            const data = {};
+            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'conv_topics', 'conv_messages']) {
+                data[store] = await dbGetAll(store);
+            }
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `hayat_backup_${getTodayDateStr()}.json`; a.click();
+            showToast('ব্যাকআপ ডাউনলোড হয়েছে!');
+        }
+        function generatePDFReport() {
+            if(!window.jspdf) { showToast('PDF মডিউল লোড হচ্ছে...'); return; }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(16);
+            doc.text("HAYAT OS - Personal Management Report", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Date: ${getBengaliFormattedDate()}`, 14, 28);
+            doc.text("All core modules and personal data safely stored locally.", 14, 36);
+            doc.save(`hayat_report_${getTodayDateStr()}.pdf`);
+            showToast('PDF রিপোর্ট ডাউনলোড হয়েছে!');
+        }
+
         // --- SETTINGS & PROFILE MODULE ---
         async function renderSettingsView() {
             const profile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও বিকাশ' };
@@ -984,6 +1025,11 @@
             await dbPut('settings', { key: 'profile', name, motto });
             showToast('প্রোফাইল সংরক্ষিত হয়েছে');
         }
+
+        function renderMenuView() { switchTab('backup'); }
+        function renderCalendarView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">ক্যালেন্ডার মডিউল</div>`; }
+        function renderGoalsView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">লক্ষ্য ও ভিশন মডিউল</div>`; }
+        function renderReportsView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">রিপোর্ট মডিউল</div>`; }
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', async () => {
