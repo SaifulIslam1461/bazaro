@@ -80,6 +80,32 @@
             transform: translateY(-2px);
             color: #D4AF37;
         }
+
+        /* --- 3D FLIP CARD STYLES --- */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            min-height: 230px;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            top: 0;
+            left: 0;
+            border-radius: 1rem;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
     </style>
 </head>
 <body class="bg-navy-900 text-slate-100 dark:bg-navy-900 dark:text-slate-100 light:bg-softwhite light:text-slate-800 font-sans transition-colors duration-300 min-h-screen pb-24 selection:bg-gold-500 selection:text-navy-900">
@@ -253,6 +279,8 @@
 
         let currentTab = 'dashboard';
         let currentQuizIndex = 0;
+        let vocabSearchQuery = '';
+        const cardStepsState = {}; // Key: card ID, Value: step index (0, 1, 2, 3)
 
         const getTodayDateStr = () => new Date().toISOString().split('T')[0];
 
@@ -409,9 +437,18 @@
             `;
         }
 
-        // --- STUDY & VOCABULARY MODULE ---
+        // --- STUDY & VOCABULARY MODULE (UPDATED WITH 3D FLIP & SEARCH) ---
         async function renderStudyView() {
-            const vocabs = await dbGetAll('vocab');
+            const allVocabs = await dbGetAll('vocab');
+            
+            // Filter by Search Query
+            const vocabs = allVocabs.filter(item => {
+                if (!vocabSearchQuery) return true;
+                const q = vocabSearchQuery.toLowerCase();
+                return (item.word && item.word.toLowerCase().includes(q)) ||
+                       (item.meaning && item.meaning.toLowerCase().includes(q)) ||
+                       (item.pronunciation && item.pronunciation.toLowerCase().includes(q));
+            });
 
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-2">
@@ -435,17 +472,25 @@
                     </div>
                 </div>
 
+                <!-- Input Form -->
                 <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">নতুন শব্দ যোগ করুন</h3>
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                        <span id="form-title">নতুন শব্দ যোগ করুন</span>
+                        <span class="text-[10px] text-gold-500 font-normal">৩ডি ফ্লিপ কার্ড স্টাইল</span>
+                    </h3>
                     <input id="vocab-id" type="hidden">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input id="vocab-word" type="text" placeholder="ইংরেজি শব্দ (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
-                        <input id="vocab-pronunciation" type="text" placeholder="উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500">
+                        <input id="vocab-word" type="text" placeholder="১. English Word (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900">
+                        <input id="vocab-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900">
                     </div>
-                    <textarea id="vocab-meaning" placeholder="বাংলা অর্থসমূহ (প্রতি লাইনে একটি বা কমা দিয়ে)..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500" rows="2"></textarea>
-                    <textarea id="vocab-sentence" placeholder="উদাহরণ বাক্যসমূহ (প্রতি লাইনে একটি)..." class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500" rows="3"></textarea>
+                    <textarea id="vocab-meaning" placeholder="৩. বাংলা অর্থ (যেমন: সুন্দর বা প্রাঞ্জল ভাষা ব্যবহারকারী)" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900" rows="2"></textarea>
                     
-                    <div class="flex gap-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <textarea id="vocab-sentence" placeholder="৪. Example Sentence (যেমন: She is an eloquent speaker.)" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900" rows="2"></textarea>
+                        <textarea id="vocab-translation" placeholder="৪. বাক্যের বাংলা অনুবাদ (যেমন: তিনি একজন সাবলীল বক্তা।)" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white light:text-slate-900" rows="2"></textarea>
+                    </div>
+
+                    <div class="flex gap-2 pt-1">
                         <button onclick="saveVocab()" id="vocab-save-btn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-gold-400 to-gold-600 text-navy-900 font-bold text-xs uppercase tracking-wider shadow-md hover:brightness-110 transition">
                             শব্দ সংরক্ষণ করুন
                         </button>
@@ -453,45 +498,75 @@
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</h3>
+                <!-- Flashcard List Header & Search Bar -->
+                <div class="space-y-3 pt-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                            <span>শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</span>
+                        </h3>
+                        <div class="relative min-w-[200px]">
+                            <input type="text" id="vocab-search-input" value="${vocabSearchQuery}" oninput="handleVocabSearch(this.value)" placeholder="শব্দ বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none focus:border-gold-500">
+                            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+                        </div>
+                    </div>
                     
-                    ${vocabs.length === 0 ? `<p class="text-xs text-slate-400 italic">কোনো শব্দ সংরক্ষণ করা হয়নি।</p>` : ''}
+                    ${vocabs.length === 0 ? `<p class="text-xs text-slate-400 italic py-4 text-center">কোনো শব্দ পাওয়া যায়নি।</p>` : ''}
 
+                    <!-- 3D FLIP CARDS GRID -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        ${vocabs.map(item => {
-                            const sentencesArr = (item.sentence || '').split('\n').filter(s => s.trim() !== '');
-                            const formattedSentences = sentencesArr.length > 0 
-                                ? sentencesArr.map(s => `<div class="mb-1 text-gold-300 light:text-slate-700 italic">"${s}"</div>`).join('')
-                                : '<div class="italic text-slate-400">কোনো উদাহরণ নেই</div>';
+                        ${vocabs.map((item, index) => {
+                            const currentStep = cardStepsState[item.id] || 0;
+                            const serialNo = toBengaliNumerals(index + 1);
+                            
+                            // Backward compatibility for sentence translation
+                            const sentenceText = item.sentence || '';
+                            const translationText = item.translation || '';
 
                             return `
-                                <div onclick="rotateCard(this)" data-state="0" class="glass-card p-5 rounded-2xl cursor-pointer hover:border-gold-500/50 transition relative flex flex-col justify-between min-h-[170px] select-none group">
-                                    <div class="flex justify-between items-start">
-                                        <span class="text-[10px] text-gold-500 uppercase tracking-widest card-step-label">১. শব্দ (ঘুরাতে ক্লিক করুন)</span>
-                                        <div class="flex items-center gap-1">
-                                            <button onclick="event.stopPropagation(); editVocab('${item.id}', '${encodeURIComponent(item.word)}', '${encodeURIComponent(item.pronunciation || '')}', '${encodeURIComponent(item.meaning)}', '${encodeURIComponent(item.sentence || '')}')" class="text-xs text-gold-400 hover:text-gold-300 p-1.5" title="এডিট">
-                                                <i class="fa-solid fa-pen-to-square"></i>
+                                <div class="perspective-1000 w-full select-none">
+                                    <div id="card-inner-${item.id}" class="flip-card-inner glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg">
+                                        
+                                        <!-- CARD TOP CONTROLS -->
+                                        <div class="flex justify-between items-center z-10 w-full mb-2">
+                                            <span class="text-[10px] font-bold text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-md">
+                                                সিরিয়াল: #${serialNo}
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <button onclick="event.stopPropagation(); editVocab('${item.id}', '${encodeURIComponent(item.word)}', '${encodeURIComponent(item.pronunciation || '')}', '${encodeURIComponent(item.meaning)}', '${encodeURIComponent(sentenceText)}', '${encodeURIComponent(translationText)}')" class="text-xs text-gold-400 hover:text-gold-300 p-1.5 rounded-lg hover:bg-navy-700/50" title="এডিট">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button onclick="event.stopPropagation(); deleteVocab('${item.id}')" class="text-xs text-red-400 hover:text-red-300 p-1.5 rounded-lg hover:bg-navy-700/50" title="ডিলিট">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- CARD CONTENT AREA (CLICKABLE FOR FLIP) -->
+                                        <div onclick="flipCardStep('${item.id}')" class="cursor-pointer my-auto py-2 flex flex-col items-center justify-center min-h-[110px]">
+                                            <div id="card-content-${item.id}" class="w-full text-center">
+                                                ${getCardStepHTML(item, currentStep)}
+                                            </div>
+                                        </div>
+
+                                        <!-- CARD BOTTOM NAVIGATION & PROGRESS INDICATOR -->
+                                        <div class="border-t border-gold-500/10 pt-3 flex items-center justify-between text-[11px] text-slate-400 z-10">
+                                            <button onclick="event.stopPropagation(); flipCardStep('${item.id}', -1)" class="text-gold-400/80 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
+                                                <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী
                                             </button>
-                                            <button onclick="event.stopPropagation(); deleteVocab('${item.id}')" class="text-xs text-red-400 hover:text-red-300 p-1.5" title="ডিলিট">
-                                                <i class="fa-solid fa-trash"></i>
+
+                                            <!-- 4 PROGRESS DOTS -->
+                                            <div class="flex items-center gap-1.5" id="card-dots-${item.id}">
+                                                ${[0, 1, 2, 3].map(step => `
+                                                    <span onclick="event.stopPropagation(); setCardStep('${item.id}', ${step})" class="w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${currentStep === step ? 'bg-gold-500 scale-125' : 'bg-slate-600 hover:bg-slate-400'}"></span>
+                                                `).join('')}
+                                            </div>
+
+                                            <button onclick="event.stopPropagation(); flipCardStep('${item.id}', 1)" class="text-gold-400/80 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
+                                                পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                             </button>
                                         </div>
-                                    </div>
-                                    
-                                    <div class="text-center py-3 card-content-area">
-                                        <h4 class="text-2xl font-bold text-white light:text-slate-800 tracking-wide">${item.word}</h4>
-                                    </div>
 
-                                    <div class="text-[10px] text-slate-400 flex justify-between items-center border-t border-gold-500/10 pt-2">
-                                        <span class="text-gold-400/80">পরবর্তী ধাপ দেখতে চাপুন ⟳</span>
-                                        <span>আইডি: ${item.id.slice(-4)}</span>
                                     </div>
-
-                                    <div class="d-word hidden">${item.word}</div>
-                                    <div class="d-pronunciation hidden">${item.pronunciation || 'দেয়া হয়নি'}</div>
-                                    <div class="d-meaning hidden">${item.meaning}</div>
-                                    <div class="d-sentence hidden">${formattedSentences}</div>
                                 </div>
                             `;
                         }).join('')}
@@ -500,41 +575,85 @@
             `;
         }
 
-        function rotateCard(cardEl) {
-            let state = parseInt(cardEl.getAttribute('data-state') || '0');
-            state = (state + 1) % 4; 
-            cardEl.setAttribute('data-state', state);
-
-            const word = cardEl.querySelector('.d-word').innerText;
-            const pronunciation = cardEl.querySelector('.d-pronunciation').innerText;
-            const meaning = cardEl.querySelector('.d-meaning').innerText;
-            const sentenceHTML = cardEl.querySelector('.d-sentence').innerHTML;
-            
-            const contentArea = cardEl.querySelector('.card-content-area');
-            const stepLabel = cardEl.querySelector('.card-step-label');
-
-            if (state === 0) {
-                stepLabel.innerText = "১. মূল শব্দ";
-                contentArea.innerHTML = `<h4 class="text-2xl font-bold text-white light:text-slate-800 tracking-wide">${word}</h4>`;
-            } else if (state === 1) {
-                stepLabel.innerText = "২. উচ্চারণ";
-                contentArea.innerHTML = `
-                    <div class="text-xs text-slate-400">উচ্চারণ:</div>
-                    <div class="text-lg font-bold text-gold-400 mt-1">${pronunciation}</div>
+        // Helper function to return content HTML based on card step
+        function getCardStepHTML(item, step) {
+            if (step === 0) {
+                return `
+                    <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">১. English Word</div>
+                    <h4 class="text-2xl font-bold text-white light:text-slate-800 tracking-wide">${item.word}</h4>
+                    <span class="text-[10px] text-slate-400 block mt-2">ফ্লিপ করতে চাপুন ⟳</span>
                 `;
-            } else if (state === 2) {
-                stepLabel.innerText = "৩. অর্থসমূহ";
-                contentArea.innerHTML = `
-                    <div class="text-xs text-slate-400">অর্থ:</div>
-                    <div class="text-sm font-semibold text-slate-200 light:text-slate-800 mt-1 whitespace-pre-line">${meaning}</div>
+            } else if (step === 1) {
+                return `
+                    <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">২. বাংলা উচ্চারণ</div>
+                    <div class="text-xl font-bold text-gold-300">${item.pronunciation || 'উচ্চারণ দেয়া হয়নি'}</div>
                 `;
-            } else if (state === 3) {
-                stepLabel.innerText = "৪. উদাহরণ বাক্য";
-                contentArea.innerHTML = `
-                    <div class="text-xs text-slate-400 mb-1">উদাহরণসমূহ:</div>
-                    <div class="text-xs text-left max-h-24 overflow-y-auto px-2">${sentenceHTML}</div>
+            } else if (step === 2) {
+                return `
+                    <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">৩. বাংলা অর্থ</div>
+                    <div class="text-base font-semibold text-slate-100 light:text-slate-800 whitespace-pre-line">${item.meaning}</div>
+                `;
+            } else if (step === 3) {
+                const sentence = item.sentence || 'কোনো উদাহরণ বাক্য যুক্ত করা হয়নি।';
+                const translation = item.translation ? `<div class="text-gold-300/90 text-xs mt-1 font-normal">(${item.translation})</div>` : '';
+                return `
+                    <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">৪. Example Sentence</div>
+                    <div class="text-xs text-slate-200 light:text-slate-700 italic px-2">"${sentence}"</div>
+                    ${translation}
                 `;
             }
+        }
+
+        // 3D FLIP & STEP NAVIGATION FUNCTIONS
+        function flipCardStep(id, direction = 1) {
+            let currentStep = cardStepsState[id] || 0;
+            let nextStep = (currentStep + direction) % 4;
+            if (nextStep < 0) nextStep = 3;
+
+            setCardStep(id, nextStep);
+        }
+
+        function setCardStep(id, targetStep) {
+            cardStepsState[id] = targetStep;
+            const innerCard = document.getElementById(`card-inner-${id}`);
+            const contentArea = document.getElementById(`card-content-${id}`);
+            const dotsArea = document.getElementById(`card-dots-${id}`);
+
+            if (!innerCard || !contentArea) return;
+
+            // Trigger 3D rotation animation
+            innerCard.style.transform = `rotateY(${targetStep * 180}deg)`;
+
+            // Update content midway through flip for seamless transition
+            setTimeout(async () => {
+                const item = await dbGet('vocab', id);
+                if (item) {
+                    contentArea.innerHTML = getCardStepHTML(item, targetStep);
+                    // Counter rotate inner content so text is readable
+                    if (targetStep % 2 !== 0) {
+                        contentArea.style.transform = 'rotateY(180deg)';
+                    } else {
+                        contentArea.style.transform = 'rotateY(0deg)';
+                    }
+                }
+            }, 150);
+
+            // Update Progress Dots
+            if (dotsArea) {
+                const dots = dotsArea.children;
+                for (let i = 0; i < dots.length; i++) {
+                    if (i === targetStep) {
+                        dots[i].className = 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-gold-500 scale-125';
+                    } else {
+                        dots[i].className = 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-slate-600 hover:bg-slate-400';
+                    }
+                }
+            }
+        }
+
+        function handleVocabSearch(query) {
+            vocabSearchQuery = query;
+            renderStudyView();
         }
 
         async function saveVocab() {
@@ -543,25 +662,29 @@
             const pronunciation = document.getElementById('vocab-pronunciation').value.trim();
             const meaning = document.getElementById('vocab-meaning').value.trim();
             const sentence = document.getElementById('vocab-sentence').value.trim();
+            const translation = document.getElementById('vocab-translation').value.trim();
 
             if (!word || !meaning) {
-                showToast('অনুগ্রহ করে শব্দ এবং অর্থ প্রদান করুন');
+                showToast('অনুগ্রহ করে ইংরেজি শব্দ এবং অর্থ প্রদান করুন');
                 return;
             }
 
             const id = idInput ? idInput : Date.now().toString();
-            await dbPut('vocab', { id, word, pronunciation, meaning, sentence });
+            await dbPut('vocab', { id, word, pronunciation, meaning, sentence, translation });
             showToast(idInput ? 'শব্দ হালনাগাদ করা হয়েছে!' : 'নতুন শব্দ সংরক্ষিত হয়েছে!');
             resetVocabForm();
             renderStudyView();
         }
 
-        function editVocab(id, word, pronunciation, meaning, sentence) {
+        function editVocab(id, word, pronunciation, meaning, sentence, translation) {
             document.getElementById('vocab-id').value = id;
             document.getElementById('vocab-word').value = decodeURIComponent(word);
             document.getElementById('vocab-pronunciation').value = decodeURIComponent(pronunciation);
             document.getElementById('vocab-meaning').value = decodeURIComponent(meaning);
-            document.getElementById('vocab-sentence').value = decodeURIComponent(sentence);
+            document.getElementById('vocab-sentence').value = decodeURIComponent(sentence || '');
+            document.getElementById('vocab-translation').value = decodeURIComponent(translation || '');
+            
+            document.getElementById('form-title').innerText = 'শব্দ সম্পাদনা করুন';
             document.getElementById('vocab-save-btn').innerText = 'হালনাগাদ করুন';
             document.getElementById('vocab-cancel-btn').classList.remove('hidden');
             window.scrollTo({ top: 100, behavior: 'smooth' });
@@ -573,12 +696,16 @@
             document.getElementById('vocab-pronunciation').value = '';
             document.getElementById('vocab-meaning').value = '';
             document.getElementById('vocab-sentence').value = '';
+            document.getElementById('vocab-translation').value = '';
+            
+            document.getElementById('form-title').innerText = 'নতুন শব্দ যোগ করুন';
             document.getElementById('vocab-save-btn').innerText = 'শব্দ সংরক্ষণ করুন';
             document.getElementById('vocab-cancel-btn').classList.add('hidden');
         }
 
         async function deleteVocab(id) {
             await dbDelete('vocab', id);
+            delete cardStepsState[id];
             showToast('কার্ড মুছে ফেলা হয়েছে');
             renderStudyView();
         }
