@@ -117,37 +117,33 @@
     <!-- BOTTOM NAVIGATION BAR -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-navy-800/95 dark:bg-navy-800/95 light:bg-white/95 backdrop-blur-lg border-t border-gold-500/20 px-2 py-2 shadow-2xl">
         <div class="max-w-4xl mx-auto flex justify-around items-center overflow-x-auto no-scrollbar py-1">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-house-laptop text-lg mb-0.5"></i>
                 <span class="text-[10px]">হোম</span>
             </button>
-            <button onclick="switchTab('islamic')" id="nav-islamic" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
-                <i class="fa-solid fa-kaaba text-lg mb-0.5"></i>
-                <span class="text-[10px]">দীন</span>
-            </button>
-            <button onclick="switchTab('study')" id="nav-study" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('study')" id="nav-study" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-book-open text-lg mb-0.5"></i>
                 <span class="text-[10px]">পড়াশোনা</span>
             </button>
-            <button onclick="switchTab('todo')" id="nav-todo" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('todo')" id="nav-todo" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-list-check text-lg mb-0.5"></i>
                 <span class="text-[10px]">কাজ</span>
             </button>
-            <button onclick="switchTab('habits')" id="nav-habits" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('habits')" id="nav-habits" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
                 <span class="text-[10px]">অভ্যাস</span>
             </button>
-            <button onclick="switchTab('health')" id="nav-health" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('health')" id="nav-health" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-heart-pulse text-lg mb-0.5"></i>
                 <span class="text-[10px]">স্বাস্থ্য</span>
             </button>
-            <button onclick="switchTab('diary')" id="nav-diary" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('diary')" id="nav-diary" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-book-bookmark text-lg mb-0.5"></i>
                 <span class="text-[10px]">ডায়েরি</span>
             </button>
-            <button onclick="switchTab('menu')" id="nav-menu" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
-                <i class="fa-solid fa-grid-2 text-lg mb-0.5"></i>
-                <span class="text-[10px]">আরও</span>
+            <button onclick="switchTab('settings')" id="nav-settings" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
+                <i class="fa-solid fa-sliders text-lg mb-0.5"></i>
+                <span class="text-[10px]">সেটিংস</span>
             </button>
         </div>
     </nav>
@@ -180,7 +176,7 @@
         </div>
     </div>
 
-    <!-- GENERAL MODAL CONTAINER (For Dialogs & Popups) -->
+    <!-- GENERAL MODAL CONTAINER -->
     <div id="general-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div id="general-modal-content" class="bg-navy-800 dark:bg-navy-800 light:bg-white rounded-2xl border border-gold-500/30 w-full max-w-md p-6 shadow-2xl relative">
             <!-- Dynamic Content -->
@@ -204,8 +200,6 @@
                 request.onsuccess = (e) => { db = e.target.result; resolve(db); };
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
-                    if (!db.objectStoreNames.contains('prayers')) db.createObjectStore('prayers', { keyPath: 'date' });
-                    if (!db.objectStoreNames.contains('dhikr')) db.createObjectStore('dhikr', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('todos')) db.createObjectStore('todos', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('habits')) db.createObjectStore('habits', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('vocab')) db.createObjectStore('vocab', { keyPath: 'id' });
@@ -213,8 +207,6 @@
                     if (!db.objectStoreNames.contains('goals')) db.createObjectStore('goals', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('health')) db.createObjectStore('health', { keyPath: 'date' });
                     if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
-                    if (!db.objectStoreNames.contains('conv_topics')) db.createObjectStore('conv_topics', { keyPath: 'id' });
-                    if (!db.objectStoreNames.contains('conv_messages')) db.createObjectStore('conv_messages', { keyPath: 'id' });
                 };
             });
         }
@@ -261,7 +253,6 @@
 
         let currentTab = 'dashboard';
         let currentQuizIndex = 0;
-        let selectedTopicId = null;
 
         const getTodayDateStr = () => new Date().toISOString().split('T')[0];
 
@@ -341,20 +332,13 @@
 
             switch(tabId) {
                 case 'dashboard': renderDashboardView(); break;
-                case 'islamic': renderIslamicView(); break;
                 case 'study': renderStudyView(); break;
                 case 'todo': renderTodoView(); break;
                 case 'habits': renderHabitsView(); break;
                 case 'health': renderHealthView(); break;
                 case 'diary': renderDiaryView(); break;
-                case 'menu': renderMenuView(); break;
-                case 'calendar': renderCalendarView(); break;
-                case 'goals': renderGoalsView(); break;
-                case 'reports': renderReportsView(); break;
-                case 'backup': renderBackupView(); break;
                 case 'settings': renderSettingsView(); break;
                 case 'sub_vocab_quiz': renderVocabQuizView(); break;
-                case 'sub_conversations': renderConversationsView(); break;
                 default: renderDashboardView();
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -363,20 +347,18 @@
         // --- DASHBOARD ---
         async function renderDashboardView() {
             const today = getTodayDateStr();
-            const prayerData = (await dbGet('prayers', today)) || { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
             const healthData = (await dbGet('health', today)) || { water: 0, steps: 0, sleep: 0 };
             const todos = await dbGetAll('todos');
             const pendingTodos = todos.filter(t => !t.completed).length;
             const habits = await dbGetAll('habits');
-            const completedPrayersCount = Object.values(prayerData).filter(v => v === true).length;
-            const userProfile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও ঈমানী জীবন' };
+            const userProfile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও বিকাশ' };
 
             document.getElementById('app-content').innerHTML = `
                 <div class="glass-card rounded-2xl p-5 border-gold-500/30 relative overflow-hidden shadow-xl">
                     <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl"></div>
                     <div class="flex justify-between items-start mb-3">
                         <div>
-                            <span class="text-xs font-semibold text-gold-500 uppercase tracking-widest">আসসালামু আলাইকুম</span>
+                            <span class="text-xs font-semibold text-gold-500 uppercase tracking-widest">স্বাগতম</span>
                             <h2 class="text-2xl font-bold text-slate-100 light:text-slate-800">${userProfile.name}</h2>
                         </div>
                         <span class="text-xs px-3 py-1 rounded-full bg-navy-700/60 light:bg-slate-200 text-gold-400 font-mono border border-gold-500/20">
@@ -386,20 +368,16 @@
                     <p class="text-xs text-slate-300 light:text-slate-600 italic">"${userProfile.motto}"</p>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div onclick="switchTab('islamic')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
-                        <span class="text-xs text-slate-400">নামাজ</span>
-                        <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(completedPrayersCount)} / ৫</div>
-                    </div>
-                    <div onclick="switchTab('todo')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                <div class="grid grid-cols-3 gap-3">
+                    <div onclick="switchTab('todo')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
                         <span class="text-xs text-slate-400">বাকি কাজ</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(pendingTodos)} টি</div>
                     </div>
-                    <div onclick="switchTab('health')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                    <div onclick="switchTab('health')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
                         <span class="text-xs text-slate-400">পানি গ্রহণ</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(healthData.water || 0)} মি.লি.</div>
                     </div>
-                    <div onclick="switchTab('habits')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                    <div onclick="switchTab('habits')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
                         <span class="text-xs text-slate-400">অভ্যাস</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(habits.length)} সক্রিয়</div>
                     </div>
@@ -408,9 +386,6 @@
                 <div class="glass-card p-5 rounded-2xl">
                     <h3 class="text-sm font-bold gold-gradient-text mb-4 uppercase tracking-wider">লাইফ ম্যানেজমেন্ট মডিউল</h3>
                     <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                        <button onclick="switchTab('islamic')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
-                            <i class="fa-solid fa-kaaba text-gold-500 text-xl mb-1"></i><span class="text-xs">দীন</span>
-                        </button>
                         <button onclick="switchTab('study')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
                             <i class="fa-solid fa-book-open text-gold-500 text-xl mb-1"></i><span class="text-xs">পড়াশোনা</span>
                         </button>
@@ -425,9 +400,6 @@
                         </button>
                         <button onclick="switchTab('diary')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
                             <i class="fa-solid fa-book-bookmark text-gold-500 text-xl mb-1"></i><span class="text-xs">ডায়েরি</span>
-                        </button>
-                        <button onclick="switchTab('backup')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
-                            <i class="fa-solid fa-database text-gold-500 text-xl mb-1"></i><span class="text-xs">ব্যাকআপ</span>
                         </button>
                         <button onclick="switchTab('settings')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
                             <i class="fa-solid fa-sliders text-gold-500 text-xl mb-1"></i><span class="text-xs">সেটিংস</span>
@@ -448,8 +420,7 @@
                     </h2>
                 </div>
 
-                <!-- TOP 2 CIRCULAR ROUNDED ACTION BOXES -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                <div class="grid grid-cols-1 gap-4 mb-5">
                     <div onclick="switchTab('sub_vocab_quiz')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -462,22 +433,8 @@
                         </div>
                         <i class="fa-solid fa-chevron-right text-gold-500 text-sm"></i>
                     </div>
-
-                    <div onclick="switchTab('sub_conversations')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xl group-hover:scale-110 transition">
-                                <i class="fa-solid fa-comments"></i>
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm text-white light:text-slate-800">কথোপকথন সেকশন</h3>
-                                <p class="text-[11px] text-slate-400">বিষয়ভিত্তিক বাক্য ও ডায়ালগ</p>
-                            </div>
-                        </div>
-                        <i class="fa-solid fa-chevron-right text-gold-500 text-sm"></i>
-                    </div>
                 </div>
 
-                <!-- ADD NEW VOCABULARY FORM -->
                 <div class="glass-card p-5 rounded-2xl space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">নতুন শব্দ যোগ করুন</h3>
                     <input id="vocab-id" type="hidden">
@@ -496,7 +453,6 @@
                     </div>
                 </div>
 
-                <!-- ROTATABLE FLASH CARDS CONTAINER -->
                 <div class="space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</h3>
                     
@@ -627,7 +583,7 @@
             renderStudyView();
         }
 
-        // --- SUB VIEW 1: BANGLA TO ENGLISH QUIZ ---
+        // --- SUB VIEW: BANGLA TO ENGLISH QUIZ ---
         async function renderVocabQuizView() {
             const vocabs = await dbGetAll('vocab');
             const activeVocabs = vocabs.length > 0 ? vocabs : [
@@ -646,7 +602,6 @@
                 </div>
 
                 <div class="space-y-4">
-                    <!-- Method 1: Show / Hide Answer -->
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
                         <span class="text-[10px] text-gold-500 uppercase font-bold">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
@@ -669,7 +624,6 @@
                         </div>
                     </div>
 
-                    <!-- Method 2: Active User Input Verification -->
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
                         <span class="text-[10px] text-gold-500 uppercase font-bold">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
@@ -719,236 +673,6 @@
                 resultBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ভুল হয়েছে! সঠিক উত্তর: <strong class="underline">${correctAnswer}</strong>`;
                 showToast('সঠিক হয়নি, আবার চেষ্টা করুন');
             }
-        }
-
-        // --- SUB VIEW 2: CONVERSATIONS SECTION ---
-        async function renderConversationsView() {
-            let topics = await dbGetAll('conv_topics');
-            if (topics.length === 0) {
-                const defaultTopic = { id: 'top_1', title: 'কেনাকাটা (Shopping)', subtitle: 'দোকানদারের সাথে কথা বলা' };
-                await dbPut('conv_topics', defaultTopic);
-                topics = [defaultTopic];
-            }
-
-            if (!selectedTopicId || !topics.some(t => t.id === selectedTopicId)) {
-                selectedTopicId = topics[0].id;
-            }
-
-            const activeTopic = topics.find(t => t.id === selectedTopicId);
-            const allMessages = await dbGetAll('conv_messages');
-            const topicMessages = allMessages.filter(m => m.topicId === selectedTopicId);
-
-            if (topicMessages.length === 0 && selectedTopicId === 'top_1') {
-                const m1 = { id: 'm1', topicId: 'top_1', speaker: 'Buyer', en: 'How much is this shirt?', bn: 'এই শার্টটির দাম কত?' };
-                const m2 = { id: 'm2', topicId: 'top_1', speaker: 'Seller', en: 'It is 500 Taka.', bn: 'এটার দাম ৫০০ টাকা।' };
-                await dbPut('conv_messages', m1);
-                await dbPut('conv_messages', m2);
-                topicMessages.push(m1, m2);
-            }
-
-            document.getElementById('app-content').innerHTML = `
-                <div class="flex items-center justify-between mb-4">
-                    <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
-                        <i class="fa-solid fa-arrow-left"></i> ইংরেজি হাব এ ফিরে যান
-                    </button>
-                    <span class="text-xs font-bold text-gold-400">কথোপকথন হাব</span>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-200">বিষয়সমূহ</h3>
-                        <button onclick="openAddTopicModal()" class="px-3 py-1.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs hover:brightness-110 shadow">
-                            + নতুন বিষয়
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        ${topics.map(t => `
-                            <div onclick="selectConvTopic('${t.id}')" class="glass-card p-4 rounded-2xl flex justify-between items-center cursor-pointer ${t.id === selectedTopicId ? 'border-gold-500 bg-gold-500/10' : 'border-gold-500/30'} hover:border-gold-500/60 transition">
-                                <div>
-                                    <h4 class="font-bold text-sm ${t.id === selectedTopicId ? 'text-gold-400' : 'text-white'}">${t.title}</h4>
-                                    <p class="text-[11px] text-slate-400">${t.subtitle || ''}</p>
-                                </div>
-                                ${topics.length > 1 ? `
-                                    <button onclick="event.stopPropagation(); deleteConvTopic('${t.id}')" class="text-red-400 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
-                                ` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-
-                    <div class="glass-card p-5 rounded-2xl space-y-4">
-                        <div class="flex justify-between items-center border-b border-gold-500/20 pb-3">
-                            <div>
-                                <h4 class="font-bold text-sm text-gold-400">${activeTopic ? activeTopic.title : 'ডায়ালগ'}</h4>
-                                <p class="text-[11px] text-slate-400">${activeTopic ? (activeTopic.subtitle || '') : ''}</p>
-                            </div>
-                            <button onclick="openAddMessageModal('${selectedTopicId}')" class="px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow hover:bg-teal-500">
-                                + বার্তা যোগ
-                            </button>
-                        </div>
-
-                        <div class="space-y-3">
-                            ${topicMessages.length === 0 ? `<p class="text-xs text-slate-400 italic">এই বিষয়ে কোনো বার্তা নেই।</p>` : ''}
-                            ${topicMessages.map(msg => `
-                                <div class="p-3.5 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1 relative">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-[10px] font-bold text-teal-400">${msg.speaker}</span>
-                                        <div class="flex items-center gap-3">
-                                            <i class="fa-solid fa-volume-high text-xs text-gold-400 cursor-pointer" onclick="speakText('${msg.en.replace(/'/g, "\\'")}')" title="শুনুন"></i>
-                                            <button onclick="deleteConvMessage('${msg.id}')" class="text-red-400/70 text-xs"><i class="fa-solid fa-xmark"></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="text-sm font-semibold text-white tracking-wide">${msg.en}</div>
-                                    <div class="text-xs text-slate-300">${msg.bn}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function selectConvTopic(id) {
-            selectedTopicId = id;
-            renderConversationsView();
-        }
-
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                window.speechSynthesis.speak(utterance);
-                showToast('অডিও প্লে হচ্ছে...');
-            } else {
-                showToast('আপনার ব্রাউজারে ভয়েস সাপোর্ট নেই');
-            }
-        }
-
-        function openAddTopicModal() {
-            document.getElementById('general-modal-content').innerHTML = `
-                <button onclick="toggleGeneralModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                <h3 class="text-lg font-bold gold-gradient-text mb-4">নতুন বিষয় যোগ করুন</h3>
-                <div class="space-y-3">
-                    <input id="new-topic-title" type="text" placeholder="বিষয়ের নাম..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs">
-                    <input id="new-topic-sub" type="text" placeholder="উপশিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs">
-                    <button onclick="saveConvTopic()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs uppercase">সংরক্ষণ</button>
-                </div>
-            `;
-            toggleGeneralModal(true);
-        }
-
-        async function saveConvTopic() {
-            const title = document.getElementById('new-topic-title').value.trim();
-            const subtitle = document.getElementById('new-topic-sub').value.trim();
-            if (!title) return;
-            const id = 'top_' + Date.now();
-            await dbPut('conv_topics', { id, title, subtitle });
-            selectedTopicId = id;
-            toggleGeneralModal(false);
-            renderConversationsView();
-        }
-
-        async function deleteConvTopic(id) {
-            await dbDelete('conv_topics', id);
-            renderConversationsView();
-        }
-
-        function openAddMessageModal(topicId) {
-            document.getElementById('general-modal-content').innerHTML = `
-                <button onclick="toggleGeneralModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
-                <h3 class="text-lg font-bold gold-gradient-text mb-4">বার্তা যোগ করুন</h3>
-                <div class="space-y-3">
-                    <input id="new-msg-speaker" type="text" placeholder="বক্তা (যেমন: Buyer / Seller)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs">
-                    <textarea id="new-msg-en" placeholder="ইংরেজি বাক্য..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs" rows="2"></textarea>
-                    <textarea id="new-msg-bn" placeholder="বাংলা অর্থ..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs" rows="2"></textarea>
-                    <button onclick="saveConvMessage('${topicId}')" class="w-full py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs uppercase">বার্তা সংরক্ষণ</button>
-                </div>
-            `;
-            toggleGeneralModal(true);
-        }
-
-        async function saveConvMessage(topicId) {
-            const speaker = document.getElementById('new-msg-speaker').value.trim() || 'Speaker';
-            const en = document.getElementById('new-msg-en').value.trim();
-            const bn = document.getElementById('new-msg-bn').value.trim();
-            if (!en || !bn) return;
-            const id = 'msg_' + Date.now();
-            await dbPut('conv_messages', { id, topicId, speaker, en, bn });
-            toggleGeneralModal(false);
-            renderConversationsView();
-        }
-
-        async function deleteConvMessage(id) {
-            await dbDelete('conv_messages', id);
-            renderConversationsView();
-        }
-
-        // --- ISLAMIC & TASBIH MODULE ---
-        async function renderIslamicView() {
-            const today = getTodayDateStr();
-            let prayerData = (await dbGet('prayers', today)) || { date: today, fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false, tahajjud: false };
-            let dhikrCount = parseInt(localStorage.getItem('tasbih_count') || '0');
-
-            const prayerLabels = { fajr: 'ফজর', dhuhr: 'জোহর', asr: 'আসর', maghrib: 'মাগরিব', isha: 'এশা' };
-
-            document.getElementById('app-content').innerHTML = `
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2"><i class="fa-solid fa-kaaba"></i> ইসলামিক জীবন ও সালাত ট্র্যাকার</h2>
-                </div>
-                <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">৫ ওয়াক্ত ফরজ সালাত</h3>
-                    ${['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map(p => `
-                        <label class="flex items-center justify-between p-3 rounded-xl bg-navy-700/40 border border-gold-500/10 cursor-pointer">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" onchange="togglePrayer('${p}')" ${prayerData[p] ? 'checked' : ''} class="w-5 h-5 accent-amber-500 rounded">
-                                <span class="capitalize font-semibold text-sm text-white">${prayerLabels[p]}</span>
-                            </div>
-                            <span class="text-xs text-slate-400">${prayerData[p] ? 'সম্পন্ন ✓' : 'বাকি আছে'}</span>
-                        </label>
-                    `).join('')}
-                    <div class="pt-2 border-t border-gold-500/10">
-                        <label class="flex items-center justify-between p-3 rounded-xl bg-gold-500/10 border border-gold-500/30 cursor-pointer">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" onchange="togglePrayer('tahajjud')" ${prayerData.tahajjud ? 'checked' : ''} class="w-5 h-5 accent-amber-500 rounded">
-                                <span class="capitalize font-semibold text-sm gold-gradient-text">তাহাজ্জুদ / নফল সালাত</span>
-                            </div>
-                            <i class="fa-solid fa-moon text-gold-500"></i>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl text-center space-y-4">
-                    <h3 class="text-sm font-bold gold-gradient-text uppercase">ডিজিটাল তাসবীহ গণক</h3>
-                    <div class="text-5xl font-mono font-bold text-gold-400 py-4 bg-navy-900 rounded-2xl border border-gold-500/20" id="tasbih-display">${toBengaliNumerals(dhikrCount)}</div>
-                    <div class="flex justify-center gap-4">
-                        <button onclick="incrementTasbih()" class="w-20 h-20 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 text-navy-900 font-bold text-2xl shadow-xl flex items-center justify-center hover:scale-105 transition">+১</button>
-                        <button onclick="resetTasbih()" class="w-12 h-12 rounded-full bg-navy-700 text-slate-300 flex items-center justify-center self-center" title="রিসেট"><i class="fa-solid fa-rotate-left"></i></button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function togglePrayer(p) {
-            const today = getTodayDateStr();
-            let data = (await dbGet('prayers', today)) || { date: today };
-            data[p] = !data[p];
-            await dbPut('prayers', data);
-            showToast('নামাজের স্ট্যাটাস হালনাগাদ হয়েছে');
-            renderIslamicView();
-        }
-
-        function incrementTasbih() {
-            let count = parseInt(localStorage.getItem('tasbih_count') || '0') + 1;
-            localStorage.setItem('tasbih_count', count);
-            document.getElementById('tasbih-display').innerText = toBengaliNumerals(count);
-        }
-
-        function resetTasbih() {
-            localStorage.setItem('tasbih_count', '0');
-            document.getElementById('tasbih-display').innerText = '০';
-            showToast('তাসবীহ রিসেট করা হয়েছে');
         }
 
         // --- TO-DO / ROUTINE MODULE ---
@@ -1055,46 +779,9 @@
         }
         async function deleteDiary(id) { await dbDelete('diary', id); renderDiaryView(); }
 
-        // --- BACKUP & EXPORT MODULE ---
-        function renderBackupView() {
-            document.getElementById('app-content').innerHTML = `
-                <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-database"></i> ব্যাকআপ ও রিপোর্ট</h2></div>
-                <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
-                    <h3 class="font-bold text-gold-400">লোকাল ব্যাকআপ</h3>
-                    <button onclick="exportJSON()" class="py-2.5 px-4 bg-gold-500 text-navy-900 font-bold rounded-xl w-full">JSON ব্যাকআপ ডাউনলোড</button>
-                </div>
-                <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
-                    <h3 class="font-bold text-gold-400">PDF রিপোর্ট সামারি</h3>
-                    <button onclick="generatePDFReport()" class="py-2.5 px-4 bg-navy-700 text-white font-bold rounded-xl w-full border border-gold-500/30">PDF ডকুমেন্ট ডাউনলোড</button>
-                </div>
-            `;
-        }
-        async function exportJSON() {
-            const data = {};
-            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'conv_topics', 'conv_messages', 'prayers']) {
-                data[store] = await dbGetAll(store);
-            }
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `hayat_backup_${getTodayDateStr()}.json`; a.click();
-            showToast('ব্যাকআপ ডাউনলোড হয়েছে!');
-        }
-        function generatePDFReport() {
-            if(!window.jspdf) { showToast('PDF মডিউল লোড হচ্ছে...'); return; }
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16);
-            doc.text("HAYAT OS - Personal Management Report", 14, 20);
-            doc.setFontSize(10);
-            doc.text(`Date: ${getBengaliFormattedDate()}`, 14, 28);
-            doc.text("All core modules and personal data safely stored locally.", 14, 36);
-            doc.save(`hayat_report_${getTodayDateStr()}.pdf`);
-            showToast('PDF রিপোর্ট ডাউনলোড হয়েছে!');
-        }
-
         // --- SETTINGS & PROFILE MODULE ---
         async function renderSettingsView() {
-            const profile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
+            const profile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও বিকাশ' };
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-sliders"></i> প্রোফাইল সেটিংস</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
@@ -1112,11 +799,6 @@
             await dbPut('settings', { key: 'profile', name, motto });
             showToast('প্রোফাইল সংরক্ষিত হয়েছে');
         }
-
-        function renderMenuView() { switchTab('backup'); }
-        function renderCalendarView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">ক্যালেন্ডার মডিউল</div>`; }
-        function renderGoalsView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">লক্ষ্য ও ভিশন মডিউল</div>`; }
-        function renderReportsView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">রিপোর্ট মডিউল</div>`; }
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', async () => {
