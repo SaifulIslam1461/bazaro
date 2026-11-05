@@ -180,13 +180,20 @@
         </div>
     </div>
 
+    <!-- DYNAMIC DIALOG MODAL FOR TOPIC / CONVERSATION ADDITION -->
+    <div id="dynamic-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div id="dynamic-modal-content" class="bg-navy-800 dark:bg-navy-800 light:bg-white rounded-2xl border border-gold-500/30 w-full max-w-md p-6 shadow-2xl relative">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+    </div>
+
     <!-- TOAST CONTAINER -->
     <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 max-w-xs pointer-events-none"></div>
 
     <!-- APP CORE LOGIC -->
     <script>
         const DB_NAME = 'HayatOSDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2; // Incremented version to support topic and conversation stores
         let db = null;
 
         function initDB() {
@@ -206,6 +213,7 @@
                     if (!db.objectStoreNames.contains('goals')) db.createObjectStore('goals', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('health')) db.createObjectStore('health', { keyPath: 'date' });
                     if (!db.objectStoreNames.contains('settings')) db.createObjectStore('settings', { keyPath: 'key' });
+                    if (!db.objectStoreNames.contains('topics')) db.createObjectStore('topics', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('conversations')) db.createObjectStore('conversations', { keyPath: 'id' });
                 };
             });
@@ -313,6 +321,10 @@
             document.getElementById('quick-modal').classList.toggle('hidden');
         }
 
+        function closeDynamicModal() {
+            document.getElementById('dynamic-modal').classList.add('hidden');
+        }
+
         function switchTab(tabId) {
             currentTab = tabId;
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -336,7 +348,7 @@
                 case 'reports': renderReportsView(); break;
                 case 'backup': renderBackupView(); break;
                 case 'settings': renderSettingsView(); break;
-                case 'sub_vocab_quiz': renderVocabQuizView(0); break;
+                case 'sub_vocab_quiz': renderVocabQuizView(); break;
                 case 'sub_conversations': renderConversationsView(); break;
                 default: renderDashboardView();
             }
@@ -427,6 +439,7 @@
 
                 <!-- TOP 2 CIRCULAR ROUNDED ACTION BOXES -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                    <!-- Box 1: Bangla to English Quiz / Learning -->
                     <div onclick="switchTab('sub_vocab_quiz')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -440,6 +453,7 @@
                         <i class="fa-solid fa-chevron-right text-gold-500 text-sm"></i>
                     </div>
 
+                    <!-- Box 2: Conversation Section -->
                     <div onclick="switchTab('sub_conversations')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -473,7 +487,7 @@
                     </div>
                 </div>
 
-                <!-- CARDS CONTAINER -->
+                <!-- FLIPPABLE & EDITABLE CARDS CONTAINER -->
                 <div class="space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</h3>
                     
@@ -509,6 +523,7 @@
                                         <span>কার্ড আইডি: ${item.id.slice(-4)}</span>
                                     </div>
 
+                                    <!-- Hidden payloads for rotation -->
                                     <div class="d-word hidden">${item.word}</div>
                                     <div class="d-pronunciation hidden">${item.pronunciation || 'দেয়া হয়নি'}</div>
                                     <div class="d-meaning hidden">${item.meaning}</div>
@@ -550,7 +565,7 @@
                     <div class="text-sm font-semibold text-slate-200 light:text-slate-800 mt-1 whitespace-pre-line">${meaning}</div>
                 `;
             } else if (state === 3) {
-                stepLabel.innerText = "৪. উদাহরণ বাক্য";
+                stepLabel.innerText = "৪. উদাহরণ বাক্য (সিরিয়াল অনুযায়ী)";
                 contentArea.innerHTML = `
                     <div class="text-xs text-slate-400 mb-1">উদাহরণসমূহ:</div>
                     <div class="text-xs text-left max-h-24 overflow-y-auto px-2">${sentenceHTML}</div>
@@ -607,28 +622,23 @@
             renderStudyView();
         }
 
-        // --- SUB VIEW 1: VOCABULARY QUIZ (Fully Dynamic & Responsive) ---
-        async function renderVocabQuizView(index = 0) {
-            const vocabs = await dbGetAll('vocab');
-            if (vocabs.length === 0) {
-                document.getElementById('app-content').innerHTML = `
-                    <div class="flex items-center justify-between mb-4">
-                        <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
-                            <i class="fa-solid fa-arrow-left"></i> ইংরেজি বক্স সমূহে ফিরে যান
-                        </button>
-                    </div>
-                    <div class="glass-card p-8 rounded-2xl text-center space-y-3">
-                        <p class="text-sm text-slate-300">কোনো ভোকেবুলারি ডেটা পাওয়া যায়নি। অনুগ্রহ করে আগে কিছু শব্দ যোগ করুন।</p>
-                        <button onclick="switchTab('study')" class="px-4 py-2 bg-gold-500 text-navy-900 rounded-xl text-xs font-bold">শব্দ যোগ করুন</button>
-                    </div>
-                `;
-                return;
+        // --- SUB VIEW 1: BANGLA TO ENGLISH QUIZ (FULLY WORKING) ---
+        let currentQuizIndex = 0;
+        let quizVocabs = [];
+
+        async function renderVocabQuizView() {
+            quizVocabs = await dbGetAll('vocab');
+            
+            // Fallback default word if DB is empty
+            if (quizVocabs.length === 0) {
+                quizVocabs = [
+                    { id: '1', word: 'Ox', pronunciation: 'অক্স', meaning: 'বৃষ' },
+                    { id: '2', word: 'Eloquent', pronunciation: 'এলোকুয়েন্ট', meaning: 'সুন্দর, মনমুগ্ধকর' },
+                    { id: '3', word: 'Rain', pronunciation: 'রেইন', meaning: 'বৃষ্টি' }
+                ];
             }
 
-            if (index < 0) index = vocabs.length - 1;
-            if (index >= vocabs.length) index = 0;
-
-            const currentItem = vocabs[index];
+            const activeItem = quizVocabs[currentQuizIndex % quizVocabs.length];
 
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4">
@@ -639,82 +649,107 @@
                 </div>
 
                 <div class="space-y-4">
-                    <!-- Method 1 -->
+                    <!-- Method 1: Reveal Answer Toggle -->
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
-                        <span class="text-[10px] text-gold-500 uppercase font-bold">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
+                        <span class="text-[10px] text-gold-500 uppercase font-bold tracking-wider">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
                             <span class="text-xs text-slate-400">বাংলা অর্থ</span>
-                            <h3 class="text-xl font-bold text-white mt-1">${currentItem.meaning}</h3>
+                            <h3 class="text-2xl font-bold text-white mt-1">${activeItem.meaning}</h3>
                         </div>
-                        <div id="quiz-ans-box" class="hidden p-3 rounded-xl bg-gold-500/10 border border-gold-500/30 text-center text-gold-400 font-bold text-sm">
-                            উত্তর: ${currentItem.word}
+                        
+                        <div id="quiz-answer-display" class="hidden bg-gold-500/10 border border-gold-500/30 rounded-xl p-3 text-center transition-all">
+                            <span class="text-[10px] text-slate-400 block">সঠিক ইংরেজি শব্দ & উচ্চারণ</span>
+                            <span class="text-lg font-bold text-gold-400">${activeItem.word}</span>
+                            <span class="text-xs text-slate-300 block">(${activeItem.pronunciation || 'উচ্চারণ নেই'})</span>
                         </div>
-                        <button onclick="document.getElementById('quiz-ans-box').classList.toggle('hidden')" class="w-full py-2.5 rounded-xl bg-navy-700/60 text-slate-300 text-xs hover:bg-navy-700 transition">
-                            উত্তর দেখুন / লুকান
-                        </button>
+
+                        <div class="flex gap-2">
+                            <button onclick="toggleQuizAnswer()" class="flex-1 py-2.5 rounded-xl bg-navy-700/80 text-slate-200 text-xs font-semibold hover:bg-navy-700 transition border border-gold-500/20">
+                                উত্তর দেখুন / লুকান
+                            </button>
+                            <button onclick="nextQuizItem()" class="px-4 py-2.5 rounded-xl bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 font-bold text-xs transition">
+                                পরবর্তী শব্দ ➔
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Method 2 -->
+                    <!-- Method 2: Write English & Validate -->
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
-                        <span class="text-[10px] text-gold-500 uppercase font-bold">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
+                        <span class="text-[10px] text-gold-500 uppercase font-bold tracking-wider">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
                             <span class="text-xs text-slate-400">বাংলা অর্থ</span>
-                            <h3 class="text-xl font-bold text-white mt-1">${currentItem.meaning}</h3>
+                            <h3 class="text-2xl font-bold text-white mt-1">${activeItem.meaning}</h3>
                         </div>
                         <div class="space-y-2">
                             <span class="text-xs text-slate-300">ইংরেজিতে লিখুন:</span>
-                            <input id="user-quiz-input" type="text" placeholder="আপনার উত্তর লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/80 border border-gold-500/20 text-xs focus:outline-none">
+                            <input id="user-quiz-input" type="text" placeholder="আপনার উত্তর লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/80 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white">
                         </div>
-                        <button onclick="verifyQuizAnswer('${currentItem.word}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase shadow-md">
-                            উত্তর যাচাই করুন
-                        </button>
-                    </div>
 
-                    <!-- Navigation Controls -->
-                    <div class="flex justify-between items-center pt-2">
-                        <button onclick="renderVocabQuizView(${index - 1})" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-200 text-xs hover:bg-navy-600">
-                            <i class="fa-solid fa-arrow-left"></i> আগের শব্দ
-                        </button>
-                        <span class="text-xs text-gold-400 font-mono">${toBengaliNumerals(index + 1)} / ${toBengaliNumerals(vocabs.length)}</span>
-                        <button onclick="renderVocabQuizView(${index + 1})" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-200 text-xs hover:bg-navy-600">
-                            পরের শব্দ <i class="fa-solid fa-arrow-right"></i>
+                        <div id="quiz-feedback-box" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+
+                        <button onclick="verifyQuizAnswer('${activeItem.word.replace(/'/g, "\\'")}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg hover:brightness-110 transition">
+                            উত্তর যাচাই করুন
                         </button>
                     </div>
                 </div>
             `;
         }
 
-        function verifyQuizAnswer(correctWord) {
-            const userIn = document.getElementById('user-quiz-input').value.trim();
-            if (!userIn) {
-                showToast('অনুগ্রহ করে উত্তর লিখুন');
-                return;
-            }
-            if (userIn.toLowerCase() === correctWord.toLowerCase()) {
-                showToast('অভিনন্দন! আপনার উত্তর সঠিক হয়েছে 🎉');
-            } else {
-                showToast(`ভুল হয়েছে! সঠিক উত্তরটি হলো: "${correctWord}"`);
+        function toggleQuizAnswer() {
+            const ansDisplay = document.getElementById('quiz-answer-display');
+            if (ansDisplay) {
+                ansDisplay.classList.toggle('hidden');
             }
         }
 
-        // --- SUB VIEW 2: CONVERSATIONS SECTION (Fully Functional Add Feature) ---
-        async function renderConversationsView() {
-            let convs = await dbGetAll('conversations');
-            if (convs.length === 0) {
-                // Default initial topic if empty
-                convs = [{
-                    id: '1',
-                    title: 'কেনাকাটা (Shopping)',
-                    subtitle: 'দোকানদারের সাথে কথা বলা',
-                    messages: [
-                        { speaker: 'Buyer', en: 'How much is this shirt?', bn: 'এই শার্টটির দাম কত?' },
-                        { speaker: 'Seller', en: 'It is 500 Taka.', bn: 'এটার দাম ৫০০ টাকা।' }
-                    ]
-                }];
-                await dbPut('conversations', convs[0]);
+        function nextQuizItem() {
+            currentQuizIndex++;
+            renderVocabQuizView();
+        }
+
+        function verifyQuizAnswer(correctWord) {
+            const userInput = document.getElementById('user-quiz-input').value.trim();
+            const feedbackBox = document.getElementById('quiz-feedback-box');
+            if (!userInput) {
+                showToast('অনুগ্রহ করে আপনার উত্তর লিখুন!');
+                return;
             }
 
-            const currentConv = convs[0];
+            feedbackBox.classList.remove('hidden', 'bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30', 'bg-red-500/20', 'text-red-400', 'border-red-500/30');
+
+            if (userInput.toLowerCase() === correctWord.toLowerCase()) {
+                feedbackBox.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border', 'border-emerald-500/30');
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> চমৎকার! আপনার উত্তর সঠিক হয়েছে (${correctWord})।`;
+                showToast('সঠিক উত্তর! অভিনন্দন 🎉');
+            } else {
+                feedbackBox.classList.add('bg-red-500/20', 'text-red-400', 'border', 'border-red-500/30');
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> উত্তরটি ভুল হয়েছে। সঠিক উত্তর: <b>${correctWord}</b>`;
+                showToast('উত্তরটি সঠিক নয়, পুনরায় চেষ্টা করুন');
+            }
+        }
+
+        // --- SUB VIEW 2: CONVERSATIONS SECTION (FULLY WORKING) ---
+        let selectedTopicId = null;
+
+        async function renderConversationsView() {
+            let topics = await dbGetAll('topics');
+            
+            // Pre-seed default topic if empty
+            if (topics.length === 0) {
+                const defaultTopic = { id: 'top_1', title: 'কেনাকাটা (Shopping)', subtitle: 'দোকানদারের সাথে কথা বলা' };
+                await dbPut('topics', defaultTopic);
+                await dbPut('conversations', { id: 'c1', topicId: 'top_1', speaker: 'Buyer', speakerColor: 'teal', en: 'How much is this shirt?', bn: 'এই শার্টটির দাম কত?' });
+                await dbPut('conversations', { id: 'c2', topicId: 'top_1', speaker: 'Seller', speakerColor: 'amber', en: 'It is 500 Taka.', bn: 'এটার দাম ৫০০ টাকা।' });
+                topics = [defaultTopic];
+            }
+
+            if (!selectedTopicId && topics.length > 0) {
+                selectedTopicId = topics[0].id;
+            }
+
+            const conversations = await dbGetAll('conversations');
+            const filteredConvos = conversations.filter(c => c.topicId === selectedTopicId);
+            const activeTopic = topics.find(t => t.id === selectedTopicId) || topics[0];
 
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4">
@@ -727,115 +762,195 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-bold text-slate-200">বিষয়সমূহ</h3>
-                        <button onclick="openAddTopicModal()" class="px-3 py-1.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs shadow-md">+ বিষয়</button>
+                        <button onclick="openAddTopicModal()" class="px-3 py-1.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs hover:brightness-110 shadow transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> বিষয়
+                        </button>
                     </div>
 
-                    <!-- Topic Summary Card -->
-                    <div class="glass-card p-4 rounded-2xl flex justify-between items-center border-gold-500/30">
-                        <div>
-                            <h4 class="font-bold text-sm text-white">${currentConv.title}</h4>
-                            <p class="text-[11px] text-slate-400">${currentConv.subtitle}</p>
-                        </div>
-                        <button onclick="deleteConversation('${currentConv.id}')" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-
-                    <!-- Chat / Message Box -->
-                    <div class="glass-card p-5 rounded-2xl space-y-4">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <h4 class="font-bold text-sm text-white">${currentConv.title}</h4>
-                                <p class="text-[11px] text-slate-400">ডায়ালগ ও কথোপকথন</p>
-                            </div>
-                            <button onclick="openAddMessageModal('${currentConv.id}')" class="px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md">+ বার্তা</button>
-                        </div>
-
-                        <div class="space-y-3" id="conversation-messages-list">
-                            ${currentConv.messages.map(m => `
-                                <div class="p-3 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-[10px] text-${m.speaker === 'Buyer' ? 'teal' : 'amber'}-400 font-bold">${m.speaker}</span>
-                                        <i class="fa-solid fa-volume-high text-xs text-slate-400 cursor-pointer" onclick="showToast('উচ্চারণ বাজানো হচ্ছে...')"></i>
-                                    </div>
-                                    <div class="text-sm font-semibold text-white">${m.en}</div>
-                                    <div class="text-xs text-slate-300">${m.bn}</div>
+                    <!-- Topics Selector List -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        ${topics.map(t => `
+                            <div onclick="selectTopic('${t.id}')" class="glass-card p-4 rounded-2xl flex justify-between items-center cursor-pointer transition border ${t.id === selectedTopicId ? 'border-gold-500 bg-gold-500/10' : 'border-gold-500/20 hover:border-gold-500/40'}">
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">${t.title}</h4>
+                                    <p class="text-[11px] text-slate-400">${t.subtitle || ''}</p>
                                 </div>
-                            `).join('')}
-                        </div>
+                                <button onclick="event.stopPropagation(); deleteTopic('${t.id}')" class="text-red-400 hover:text-red-300 text-xs p-2" title="মুছে ফেলুন">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        `).join('')}
                     </div>
-                </div>
 
-                <!-- ADD TOPIC/MESSAGE MODAL CONTAINER -->
-                <div id="conv-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
-                    <div class="bg-navy-800 rounded-2xl border border-gold-500/30 w-full max-w-md p-5 space-y-3 shadow-2xl relative">
-                        <h3 id="conv-modal-title" class="text-base font-bold text-gold-400">নতুন বার্তা যোগ করুন</h3>
-                        <div id="conv-modal-body" class="space-y-2">
-                            <!-- Dynamic inputs -->
+                    <!-- Chat / Conversation Messages Panel -->
+                    ${activeTopic ? `
+                        <div class="glass-card p-5 rounded-2xl space-y-4 border-gold-500/30">
+                            <div class="flex justify-between items-center border-b border-gold-500/10 pb-3">
+                                <div>
+                                    <h4 class="font-bold text-sm text-white">${activeTopic.title}</h4>
+                                    <p class="text-[11px] text-slate-400">${activeTopic.subtitle || ''}</p>
+                                </div>
+                                <button onclick="openAddMessageModal('${activeTopic.id}')" class="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shadow transition flex items-center gap-1">
+                                    <i class="fa-solid fa-plus"></i> বার্তা
+                                </button>
+                            </div>
+
+                            ${filteredConvos.length === 0 ? `<p class="text-xs text-slate-400 italic text-center py-4">এই বিষয়ে কোনো বার্তা যোগ করা হয়নি। "+ বার্তা" বাটনে চাপ দিয়ে বাক্য যুক্ত করুন।</p>` : ''}
+
+                            <div class="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                                ${filteredConvos.map(msg => `
+                                    <div class="p-3 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1 relative group">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[10px] ${msg.speakerColor === 'teal' ? 'text-teal-400' : 'text-amber-400'} font-bold uppercase tracking-wider">${msg.speaker}</span>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-solid fa-volume-high text-xs text-gold-400 hover:text-gold-300 cursor-pointer" onclick="speakText('${msg.en.replace(/'/g, "\\'")}')" title="শুনুন"></i>
+                                                <button onclick="deleteConvoMessage('${msg.id}')" class="text-xs text-red-400/80 hover:text-red-400" title="ডিলিট"><i class="fa-solid fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="text-sm font-semibold text-white tracking-wide">${msg.en}</div>
+                                        <div class="text-xs text-slate-300">${msg.bn}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
                         </div>
-                        <div class="flex gap-2 pt-2">
-                            <button onclick="submitConvModal()" class="flex-1 py-2 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">সংরক্ষণ</button>
-                            <button onclick="document.getElementById('conv-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-300 text-xs">বাতিল</button>
-                        </div>
-                    </div>
+                    ` : ''}
                 </div>
             `;
         }
 
-        let activeConvAction = null;
-        let activeConvId = null;
-
-        function openAddTopicModal() {
-            activeConvAction = 'topic';
-            document.getElementById('conv-modal-title').innerText = 'নতুন বিষয় যোগ করুন';
-            document.getElementById('conv-modal-body').innerHTML = `
-                <input id="modal-topic-title" type="text" placeholder="বিষয়ের নাম (যেমন: হোটেলে কথা বলা)..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
-                <input id="modal-topic-sub" type="text" placeholder="বর্ণনা (যেমন: রিসেপশনিস্টের সাথে কথোপকথন)..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
-            `;
-            document.getElementById('conv-modal').classList.remove('hidden');
-        }
-
-        function openAddMessageModal(convId) {
-            activeConvAction = 'message';
-            activeConvId = convId;
-            document.getElementById('conv-modal-title').innerText = 'নতুন বার্তা যোগ করুন';
-            document.getElementById('conv-modal-body').innerHTML = `
-                <select id="modal-msg-speaker" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
-                    <option value="Buyer">Buyer (ক্রেতা/জিজ্ঞাসাকারী)</option>
-                    <option value="Seller">Seller (বিক্রেতা/উত্তরদাতা)</option>
-                </select>
-                <input id="modal-msg-en" type="text" placeholder="ইংরেজি বাক্য (English sentence)..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
-                <input id="modal-msg-bn" type="text" placeholder="বাংলা অর্থ..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
-            `;
-            document.getElementById('conv-modal').classList.remove('hidden');
-        }
-
-        async function submitConvModal() {
-            if (activeConvAction === 'topic') {
-                const title = document.getElementById('modal-topic-title').value.trim();
-                const subtitle = document.getElementById('modal-topic-sub').value.trim();
-                if (!title) return showToast('বিষয়ের নাম দিন');
-                const newTopic = { id: Date.now().toString(), title, subtitle, messages: [] };
-                await dbPut('conversations', newTopic);
-                showToast('নতুন বিষয় সফলভাবে যোগ হয়েছে!');
-            } else if (activeConvAction === 'message') {
-                const speaker = document.getElementById('modal-msg-speaker').value;
-                const en = document.getElementById('modal-msg-en').value.trim();
-                const bn = document.getElementById('modal-msg-bn').value.trim();
-                if (!en || !bn) return showToast('ইংরেজি ও বাংলা বাক্য দিন');
-                
-                const conv = await dbGet('conversations', activeConvId);
-                if (conv) {
-                    conv.messages.push({ speaker, en, bn });
-                    await dbPut('conversations', conv);
-                    showToast('বার্তা যুক্ত করা হয়েছে!');
-                }
-            }
-            document.getElementById('conv-modal').classList.add('hidden');
+        function selectTopic(id) {
+            selectedTopicId = id;
             renderConversationsView();
         }
 
-        async function deleteConversation(id) {
+        async function deleteTopic(id) {
+            await dbDelete('topics', id);
+            // Delete associated messages
+            const convos = await dbGetAll('conversations');
+            for (let c of convos) {
+                if (c.topicId === id) await dbDelete('conversations', c.id);
+            }
+            showToast('বিষয় ও সংশ্লিষ্ট বার্তা মুছে ফেলা হয়েছে');
+            selectedTopicId = null;
+            renderConversationsView();
+        }
+
+        async function deleteConvoMessage(id) {
             await dbDelete('conversations', id);
-            showToast('মুছে ফেলা হয়েছে');
+            showToast('বার্তা মুছে ফেলা হয়েছে');
+            renderConversationsView();
+        }
+
+        // Text to Speech Functionality
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+                showToast('অডিও প্লে হচ্ছে...');
+            } else {
+                showToast('আপনার ব্রাউজারে স্পিচ সাপোর্ট নেই');
+            }
+        }
+
+        // Modal Handler 1: Open Add Topic
+        function openAddTopicModal() {
+            const modal = document.getElementById('dynamic-modal');
+            const content = document.getElementById('dynamic-modal-content');
+            content.innerHTML = `
+                <button onclick="closeDynamicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+                <h3 class="text-lg font-bold gold-gradient-text mb-4">নতুন বিষয় যোগ করুন</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">বিষয়/শিরোনাম (যেমন: কেনাকাটা (Shopping))</label>
+                        <input id="new-topic-title" type="text" placeholder="বিষয় লিখুন..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">উপ-শিরোনাম / বিবরণ (যেমন: দোকানদারের সাথে কথা বলা)</label>
+                        <input id="new-topic-subtitle" type="text" placeholder="বিবরণ লিখুন..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white">
+                    </div>
+                    <button onclick="saveNewTopic()" class="w-full py-3 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs uppercase tracking-wider shadow-lg">
+                        সংরক্ষণ করুন
+                    </button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        async function saveNewTopic() {
+            const title = document.getElementById('new-topic-title').value.trim();
+            const subtitle = document.getElementById('new-topic-subtitle').value.trim();
+            if (!title) {
+                showToast('অনুগ্রহ করে বিষয়ের শিরোনাম লিখুন');
+                return;
+            }
+            const id = 'top_' + Date.now();
+            await dbPut('topics', { id, title, subtitle });
+            selectedTopicId = id;
+            closeDynamicModal();
+            showToast('নতুন বিষয় যোগ করা হয়েছে!');
+            renderConversationsView();
+        }
+
+        // Modal Handler 2: Open Add Message
+        function openAddMessageModal(topicId) {
+            const modal = document.getElementById('dynamic-modal');
+            const content = document.getElementById('dynamic-modal-content');
+            content.innerHTML = `
+                <button onclick="closeDynamicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+                <h3 class="text-lg font-bold gold-gradient-text mb-4">নতুন বার্তা যোগ করুন</h3>
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">বক্তা/স্পিকার (যেমন: Buyer / Seller / Person A)</label>
+                        <input id="new-msg-speaker" type="text" placeholder="Buyer" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">ইংরেজি বাক্য</label>
+                        <input id="new-msg-en" type="text" placeholder="How much is this shirt?" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-300 block mb-1">বাংলা অনুবাদ</label>
+                        <input id="new-msg-bn" type="text" placeholder="এই শার্টটির দাম কত?" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs focus:outline-none focus:border-gold-500 text-white">
+                    </div>
+                    <button onclick="saveNewMessage('${topicId}')" class="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg">
+                        বার্তা সংরক্ষণ করুন
+                    </button>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        async function saveNewMessage(topicId) {
+            const speaker = document.getElementById('new-msg-speaker').value.trim() || 'Buyer';
+            const en = document.getElementById('new-msg-en').value.trim();
+            const bn = document.getElementById('new-msg-bn').value.trim();
+
+            if (!en || !bn) {
+                showToast('ইংরেজি ও বাংলা অনুবাদ প্রদান করুন');
+                return;
+            }
+
+            const conversations = await dbGetAll('conversations');
+            const filtered = conversations.filter(c => c.topicId === topicId);
+            const speakerColor = filtered.length % 2 === 0 ? 'teal' : 'amber';
+
+            const newMsg = {
+                id: 'c_' + Date.now(),
+                topicId,
+                speaker,
+                speakerColor,
+                en,
+                bn
+            };
+
+            await dbPut('conversations', newMsg);
+            closeDynamicModal();
+            showToast('নতুন বার্তা যোগ করা হয়েছে!');
             renderConversationsView();
         }
 
@@ -870,8 +985,8 @@
             const todos = await dbGetAll('todos');
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-list-check"></i> কাজের তালিকা</h2></div>
-                <div class="glass-card p-4 rounded-2xl flex gap-2">
-                    <input id="todo-input" type="text" placeholder="নতুন কাজ..." class="flex-1 p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none">
+                <div class="glass-card p-4 rounded-2xl flex gap-2 mb-4">
+                    <input id="todo-input" type="text" placeholder="নতুন কাজ..." class="flex-1 p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none text-white">
                     <button onclick="addTodo()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">যোগ</button>
                 </div>
                 <div class="glass-card p-5 rounded-2xl space-y-2">
@@ -891,8 +1006,8 @@
             const habits = await dbGetAll('habits');
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-chart-line"></i> অভ্যাস ট্র্যাকার</h2></div>
-                <div class="glass-card p-4 rounded-2xl flex gap-2">
-                    <input id="habit-title" type="text" placeholder="অভ্যাস..." class="flex-1 p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none">
+                <div class="glass-card p-4 rounded-2xl flex gap-2 mb-4">
+                    <input id="habit-title" type="text" placeholder="অভ্যাস..." class="flex-1 p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none text-white">
                     <button onclick="addHabit()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">তৈরি</button>
                 </div>
                 <div class="glass-card p-5 rounded-2xl space-y-2">
@@ -931,9 +1046,9 @@
             const entries = await dbGetAll('diary');
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-book-bookmark"></i> ডায়েরি</h2></div>
-                <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <input id="diary-title" type="text" placeholder="শিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none">
-                    <textarea id="diary-content" placeholder="অনুভূতি..." class="w-full p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none" rows="3"></textarea>
+                <div class="glass-card p-5 rounded-2xl space-y-3 mb-4">
+                    <input id="diary-title" type="text" placeholder="শিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none text-white">
+                    <textarea id="diary-content" placeholder="অনুভূতি..." class="w-full p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none text-white" rows="3"></textarea>
                     <button onclick="saveDiary()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">সংরক্ষণ</button>
                 </div>
                 <div class="space-y-3">
@@ -969,7 +1084,7 @@
         }
         async function exportJSON() {
             const data = {};
-            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'conversations']) {
+            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'topics', 'conversations']) {
                 data[store] = await dbGetAll(store);
             }
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -982,8 +1097,8 @@
             document.getElementById('app-content').innerHTML = `
                 <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
                     <h3 class="font-bold text-gold-400">প্রোফাইল</h3>
-                    <input id="set-name" type="text" value="${profile.name}" class="w-full p-2.5 rounded-xl bg-navy-900 border border-gold-500/20">
-                    <input id="set-motto" type="text" value="${profile.motto}" class="w-full p-2.5 rounded-xl bg-navy-900 border border-gold-500/20">
+                    <input id="set-name" type="text" value="${profile.name}" class="w-full p-2.5 rounded-xl bg-navy-900 border border-gold-500/20 text-white">
+                    <input id="set-motto" type="text" value="${profile.motto}" class="w-full p-2.5 rounded-xl bg-navy-900 border border-gold-500/20 text-white">
                     <button onclick="saveProfile()" class="py-2 px-4 bg-gold-500 text-navy-900 font-bold rounded-xl">সংরক্ষণ</button>
                 </div>
             `;
