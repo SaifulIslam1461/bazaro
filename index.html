@@ -271,8 +271,14 @@
             return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
         }
 
+        function escapeJS(str) {
+            if (!str) return '';
+            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
         function showToast(message) {
             const container = document.getElementById('toast-container');
+            if(!container) return;
             const toast = document.createElement('div');
             toast.className = `p-3 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 border transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto bg-navy-800 text-white border-gold-500/40`;
             toast.innerHTML = `<i class="fa-solid fa-circle-info text-gold-500"></i> <span>${message}</span>`;
@@ -284,7 +290,7 @@
             }, 3000);
         }
 
-        // --- SPEECH SYNTHESIS (FEMALE VOICE WITH NORMAL & SLOW MOTION) ---
+        // --- SPEECH SYNTHESIS ENGINE ---
         function speakText(text, rate = 1.0) {
             if (!('speechSynthesis' in window)) {
                 showToast('আপনার ব্রাউজার স্পিচ সাপোর্ট করে না');
@@ -293,21 +299,30 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = rate; // 1.0 = Normal, 0.6 = Slow Motion
+            utterance.rate = rate; 
 
-            const voices = window.speechSynthesis.getVoices();
-            // Try to find a female English voice
-            const femaleVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Female') || v.name.includes('Zira') || v.name.includes('Aria') || v.name.includes('Google US English') || v.name.includes('Samantha')));
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
+            let voices = window.speechSynthesis.getVoices();
+            const setVoiceAndSpeak = () => {
+                voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find(v => v.lang.includes('en') && (
+                    v.name.includes('Female') || 
+                    v.name.includes('Zira') || 
+                    v.name.includes('Aria') || 
+                    v.name.includes('Google US English') || 
+                    v.name.includes('Samantha') ||
+                    v.name.includes('Jenny')
+                ));
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                window.speechSynthesis.speak(utterance);
+            };
+
+            if (voices.length === 0) {
+                window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
+            } else {
+                setVoiceAndSpeak();
             }
-
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // Preload voices
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
         }
 
         function toggleTheme() {
@@ -316,12 +331,12 @@
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 html.classList.add('light');
-                icon.className = 'fa-solid fa-sun';
+                if(icon) icon.className = 'fa-solid fa-sun';
                 localStorage.setItem('hayat_theme', 'light');
             } else {
                 html.classList.remove('light');
                 html.classList.add('dark');
-                icon.className = 'fa-solid fa-moon';
+                if(icon) icon.className = 'fa-solid fa-moon';
                 localStorage.setItem('hayat_theme', 'dark');
             }
         }
@@ -370,7 +385,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- DASHBOARD ---
+        // --- DASHBOARD VIEW ---
         async function renderDashboardView() {
             const today = getTodayDateStr();
             const healthData = (await dbGet('health', today)) || { water: 0, steps: 0, sleep: 0 };
@@ -544,6 +559,9 @@
                         ${vocabs.map((item, index) => {
                             const currentStep = cardStepsState[item.id] || 0;
                             const serialNo = toBengaliNumerals(index + 1);
+                            const escapedWord = escapeJS(item.word);
+                            const escapedSentence = escapeJS(item.sentence);
+
                             return `
                                 <div class="w-full select-none">
                                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[210px]">
@@ -563,7 +581,7 @@
 
                                         <div onclick="nextCardStep('${item.id}')" class="cursor-pointer my-auto py-3 flex flex-col items-center justify-center min-h-[110px]">
                                             <div id="card-content-${item.id}" class="w-full text-center card-step-content">
-                                                ${getCardStepHTML(item, currentStep)}
+                                                ${getCardStepHTML(item, currentStep, escapedWord, escapedSentence)}
                                             </div>
                                         </div>
 
@@ -589,13 +607,16 @@
             `;
         }
 
-        function getCardStepHTML(item, step) {
+        function getCardStepHTML(item, step, escapedWord, escapedSentence) {
+            if (!escapedWord) escapedWord = escapeJS(item.word);
+            if (!escapedSentence) escapedSentence = escapeJS(item.sentence);
+
             if (step === 0) {
                 return `
                     <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">১. English Word</div>
                     <div class="flex items-center justify-center gap-2">
                         <h4 class="text-2xl font-bold text-white light:text-slate-800 tracking-wide">${item.word}</h4>
-                        <button onclick="event.stopPropagation(); speakText('${item.word.replace(/'/g, "\\'")}', 1.0)" class="w-7 h-7 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-xs" title="স্বাভাবিক উচ্চারণ (নারী কণ্ঠ)">
+                        <button onclick="event.stopPropagation(); speakText('${escapedWord}', 1.0)" class="w-7 h-7 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-xs" title="উচ্চারণ শুনুন">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
@@ -618,9 +639,10 @@
                     <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">৪. Example Sentence</div>
                     <div class="flex items-center justify-center gap-2 mb-1">
                         <span class="text-xs text-slate-200 light:text-slate-700 italic">"${sentence}"</span>
-                        <button onclick="event.stopPropagation(); speakText('${sentence.replace(/'/g, "\\'")}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]" title="উচ্চারণ শুনুন">
+                        ${item.sentence ? `
+                        <button onclick="event.stopPropagation(); speakText('${escapedSentence}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]" title="উচ্চারণ শুনুন">
                             <i class="fa-solid fa-volume-high"></i>
-                        </button>
+                        </button>` : ''}
                     </div>
                     ${translation}
                 `;
@@ -763,6 +785,8 @@
                         ${sentences.map((item, index) => {
                             const currentStep = sentenceStepsState[item.id] || 0;
                             const serialNo = toBengaliNumerals(index + 1);
+                            const escapedSentence = escapeJS(item.sentence);
+
                             return `
                                 <div class="w-full select-none">
                                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[190px]">
@@ -782,7 +806,7 @@
 
                                         <div onclick="nextSentenceStep('${item.id}')" class="cursor-pointer my-auto py-3 flex flex-col items-center justify-center min-h-[90px]">
                                             <div id="sentence-content-${item.id}" class="w-full text-center card-step-content">
-                                                ${getSentenceStepHTML(item, currentStep)}
+                                                ${getSentenceStepHTML(item, currentStep, escapedSentence)}
                                             </div>
                                         </div>
 
@@ -808,13 +832,15 @@
             `;
         }
 
-        function getSentenceStepHTML(item, step) {
+        function getSentenceStepHTML(item, step, escapedSentence) {
+            if (!escapedSentence) escapedSentence = escapeJS(item.sentence);
+
             if (step === 0) {
                 return `
                     <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">১. ইংরেজি বাক্য</div>
                     <div class="flex items-center justify-center gap-2">
                         <h4 class="text-lg font-bold text-white light:text-slate-800 tracking-wide">"${item.sentence}"</h4>
-                        <button onclick="event.stopPropagation(); speakText('${item.sentence.replace(/'/g, "\\'")}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]" title="উচ্চারণ শুনুন">
+                        <button onclick="event.stopPropagation(); speakText('${escapedSentence}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]" title="উচ্চারণ শুনুন">
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
@@ -909,7 +935,7 @@
         }
 
 
-        // --- CONVERSATIONS MODULE (WITH VOICE, NORMAL & SLOW-MOTION CONTROLS) ---
+        // --- CONVERSATIONS MODULE ---
         async function renderConversationsView() {
             const conversations = await dbGetAll('conversations');
 
@@ -970,7 +996,7 @@
 
                             return `
                                 <div class="glass-card rounded-2xl border-gold-500/30 shadow-lg overflow-hidden transition-all">
-                                    <!-- TOPIC HEADER WITH TOPIC-BASED ICON -->
+                                    <!-- TOPIC HEADER -->
                                     <div onclick="toggleConversationExpand('${c.id}')" class="p-4 cursor-pointer flex justify-between items-center hover:bg-gold-500/5 transition">
                                         <div class="flex items-center gap-3">
                                             <div class="w-9 h-9 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 text-sm shadow-sm">
@@ -988,7 +1014,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- DIALOGUE CONTENT WITH SPEECH & SLOW-MO BUTTONS -->
+                                    <!-- DIALOGUE CONTENT -->
                                     ${isExpanded ? `
                                         <div class="p-4 bg-navy-900/40 border-t border-gold-500/10 space-y-2 text-xs">
                                             <p class="text-[10px] text-slate-400 italic mb-2">প্রতিটি লাইনে ক্লিক করে ধাপে ধাপে উচ্চারণ ও অর্থ দেখুন এবং অডিও শুনুন:</p>
@@ -996,17 +1022,17 @@
                                                 const dialogueKey = `${c.id}_${lIdx}`;
                                                 const step = dialogueStepState[dialogueKey] || 0;
                                                 const speakerName = l.speaker === '1' ? (c.p1 || 'বক্তা ১') : (c.p2 || 'বক্তা ২');
-                                                const escapedText = l.text.replace(/'/g, "\\'");
+                                                const escapedLineText = escapeJS(l.text);
 
                                                 return `
                                                     <div onclick="nextDialogueStep('${c.id}', ${lIdx})" class="p-3 rounded-xl cursor-pointer transition ${l.speaker === '1' ? 'bg-navy-800/80 border-l-4 border-gold-500' : 'bg-navy-700/50 border-l-4 border-blue-400'}">
                                                         <div class="flex justify-between items-center mb-1">
                                                             <span class="font-bold text-gold-400">${speakerName}:</span>
                                                             <div class="flex items-center gap-2">
-                                                                <button onclick="event.stopPropagation(); speakText('${escapedText}', 1.0)" class="px-2 py-0.5 rounded bg-gold-500/20 text-gold-300 hover:bg-gold-500 hover:text-navy-900 text-[10px] transition flex items-center gap-1" title="স্বাভাবিক গতিতে শুনুন">
+                                                                <button onclick="event.stopPropagation(); speakText('${escapedLineText}', 1.0)" class="px-2 py-0.5 rounded bg-gold-500/20 text-gold-300 hover:bg-gold-500 hover:text-navy-900 text-[10px] transition flex items-center gap-1" title="স্বাভাবিক গতিতে শুনুন">
                                                                     <i class="fa-solid fa-volume-high"></i> স্বাভাবিক
                                                                 </button>
-                                                                <button onclick="event.stopPropagation(); speakText('${escapedText}', 0.6)" class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white text-[10px] transition flex items-center gap-1" title="স্লো মোশনে শুনুন">
+                                                                <button onclick="event.stopPropagation(); speakText('${escapedLineText}', 0.6)" class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white text-[10px] transition flex items-center gap-1" title="স্লো মোশনে শুনুন">
                                                                     <i class="fa-solid fa-person-walking text-[9px]"></i> স্লো
                                                                 </button>
                                                                 <span class="text-[9px] text-slate-400 font-mono opacity-75 ml-1">ধাপ ${toBengaliNumerals(step + 1)}/৩</span>
@@ -1149,6 +1175,7 @@
 
             if (currentQuizIndex >= activeVocabs.length) currentQuizIndex = 0;
             const currentItem = activeVocabs[currentQuizIndex];
+            const escapedQuizWord = escapeJS(currentItem.word);
 
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4">
@@ -1168,7 +1195,12 @@
 
                         <div id="quiz-answer-display" class="hidden bg-gold-500/10 border border-gold-500/30 p-3 rounded-xl text-center">
                             <span class="text-[10px] text-gold-400 uppercase tracking-widest block">সঠিক ইংরেজি শব্দ</span>
-                            <span class="text-lg font-bold text-gold-300">${currentItem.word}</span>
+                            <div class="flex items-center justify-center gap-2 mt-1">
+                                <span class="text-lg font-bold text-gold-300">${currentItem.word}</span>
+                                <button onclick="speakText('${escapedQuizWord}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="flex gap-2">
@@ -1185,7 +1217,7 @@
                         </div>
                         <input id="quiz-user-input" type="text" placeholder="আপনার উত্তর এখানে লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/80 border border-gold-500/20 text-xs text-white focus:outline-none">
                         <div id="quiz-verify-result" class="hidden p-3 rounded-xl text-xs font-semibold text-center"></div>
-                        <button onclick="verifyQuizAnswer('${currentItem.word.replace(/'/g, "\\'")}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase shadow-md">উত্তর যাচাই করুন</button>
+                        <button onclick="verifyQuizAnswer('${escapedQuizWord}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase shadow-md">উত্তর যাচাই করুন</button>
                     </div>
                 </div>
             `;
@@ -1202,6 +1234,7 @@
             if (userInput === target) {
                 resultBox.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border', 'border-emerald-500/30');
                 resultBox.innerHTML = `<i class="fa-solid fa-circle-check"></i> চমৎকার! সঠিক উত্তর হয়েছে (${correctAnswer})।`;
+                speakText(correctAnswer, 1.0);
                 showToast('সঠিক উত্তর!');
             } else {
                 resultBox.classList.add('bg-red-500/20', 'text-red-300', 'border', 'border-red-500/30');
@@ -1306,8 +1339,7 @@
         async function deleteDiary(id) { await dbDelete('diary', id); renderDiaryView(); }
 
         async function renderSettingsView() {
-            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন'
-Quran:  'بسم الله الرحمن الرحيم ' };
+            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-sliders"></i> প্রোফাইল সেটিংস</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
