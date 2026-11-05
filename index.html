@@ -692,7 +692,7 @@
             }
         }
 
-        // --- SUB VIEW 2: CONVERSATIONS SECTION (FULL WORKING) ---
+        // --- SUB VIEW 2: CONVERSATIONS SECTION ---
         async function renderConversationsView() {
             let topics = await dbGetAll('conv_topics');
             if (topics.length === 0) {
@@ -833,7 +833,7 @@
                 <button onclick="toggleGeneralModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-xl"></i></button>
                 <h3 class="text-lg font-bold gold-gradient-text mb-4">কথোপকথন বার্তা যোগ করুন</h3>
                 <div class="space-y-3">
-                    <input id="new-msg-speaker" type="text" placeholder="বক্তা ১ বা ২ (যেমন: Buyer / Seller / Waiter)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white">
+                    <input id="new-msg-speaker" type="text" placeholder="বক্তা (যেমন: Buyer / Seller / Waiter)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white">
                     <textarea id="new-msg-en" placeholder="ইংরেজি বাক্য (যেমন: May I have the menu?)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white" rows="2"></textarea>
                     <textarea id="new-msg-bn" placeholder="বাংলা অর্থ (যেমন: আমি কি মেন্যুটি পেতে পারি?)" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white" rows="2"></textarea>
                     <button onclick="saveConvMessage('${topicId}')" class="w-full py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs uppercase shadow">বার্তা সংরক্ষণ করুন</button>
@@ -984,10 +984,6 @@
             await dbPut('settings', { key: 'profile', name, motto });
             showToast('প্রোফাইল সংরক্ষিত হয়েছে');
         }
-
-        function renderCalendarView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">ক্যালেন্ডার মডিউল</div>`; }
-        function renderGoalsView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">লক্ষ্য ও ভিশন মডিউল</div>`; }
-        function renderReportsView() { document.getElementById('app-content').innerHTML = `<div class="glass-card p-5 rounded-2xl text-xs">রিপোর্ট মডিউল</div>`; }
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', async () => {
