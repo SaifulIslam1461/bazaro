@@ -336,7 +336,7 @@
                 case 'reports': renderReportsView(); break;
                 case 'backup': renderBackupView(); break;
                 case 'settings': renderSettingsView(); break;
-                case 'sub_vocab_quiz': renderVocabQuizView(); break;
+                case 'sub_vocab_quiz': renderVocabQuizView(0); break;
                 case 'sub_conversations': renderConversationsView(); break;
                 default: renderDashboardView();
             }
@@ -414,7 +414,7 @@
             `;
         }
 
-        // --- STUDY & VOCABULARY MODULE (UPDATED WITH 2 TOP BOXES & EDITABLE CARDS) ---
+        // --- STUDY & VOCABULARY MODULE ---
         async function renderStudyView() {
             const vocabs = await dbGetAll('vocab');
 
@@ -425,9 +425,8 @@
                     </h2>
                 </div>
 
-                <!-- TOP 2 CIRCULAR ROUNDED ACTION BOXES (As per user request & screenshot 6018) -->
+                <!-- TOP 2 CIRCULAR ROUNDED ACTION BOXES -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-                    <!-- Box 1: Bangla to English Quiz / Learning -->
                     <div onclick="switchTab('sub_vocab_quiz')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -441,7 +440,6 @@
                         <i class="fa-solid fa-chevron-right text-gold-500 text-sm"></i>
                     </div>
 
-                    <!-- Box 2: Conversation Section -->
                     <div onclick="switchTab('sub_conversations')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-full bg-gold-500/20 text-gold-500 flex items-center justify-center text-xl group-hover:scale-110 transition">
@@ -475,7 +473,7 @@
                     </div>
                 </div>
 
-                <!-- FLIPPABLE & EDITABLE CARDS CONTAINER -->
+                <!-- CARDS CONTAINER -->
                 <div class="space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</h3>
                     
@@ -483,7 +481,6 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         ${vocabs.map(item => {
-                            // Format sentences line by line vertically as requested
                             const sentencesArr = (item.sentence || '').split('\n').filter(s => s.trim() !== '');
                             const formattedSentences = sentencesArr.length > 0 
                                 ? sentencesArr.map(s => `<div class="mb-1 text-gold-300 light:text-slate-700 italic">"${s}"</div>`).join('')
@@ -512,7 +509,6 @@
                                         <span>কার্ড আইডি: ${item.id.slice(-4)}</span>
                                     </div>
 
-                                    <!-- Hidden payloads for rotation -->
                                     <div class="d-word hidden">${item.word}</div>
                                     <div class="d-pronunciation hidden">${item.pronunciation || 'দেয়া হয়নি'}</div>
                                     <div class="d-meaning hidden">${item.meaning}</div>
@@ -525,7 +521,6 @@
             `;
         }
 
-        // Multi-Step Card Rotation Logic (Word -> Pronunciation -> Meaning -> Sentences)
         function rotateCard(cardEl) {
             let state = parseInt(cardEl.getAttribute('data-state') || '0');
             state = (state + 1) % 4; 
@@ -555,7 +550,7 @@
                     <div class="text-sm font-semibold text-slate-200 light:text-slate-800 mt-1 whitespace-pre-line">${meaning}</div>
                 `;
             } else if (state === 3) {
-                stepLabel.innerText = "৪. উদাহরণ বাক্য (সিরিয়াল অনুযায়ী)";
+                stepLabel.innerText = "৪. উদাহরণ বাক্য";
                 contentArea.innerHTML = `
                     <div class="text-xs text-slate-400 mb-1">উদাহরণসমূহ:</div>
                     <div class="text-xs text-left max-h-24 overflow-y-auto px-2">${sentenceHTML}</div>
@@ -612,9 +607,29 @@
             renderStudyView();
         }
 
-        // Sub View 1: Bangla to English Quiz / Learning Interface (Screenshot 6017)
-        async function renderVocabQuizView() {
+        // --- SUB VIEW 1: VOCABULARY QUIZ (Fully Dynamic & Responsive) ---
+        async function renderVocabQuizView(index = 0) {
             const vocabs = await dbGetAll('vocab');
+            if (vocabs.length === 0) {
+                document.getElementById('app-content').innerHTML = `
+                    <div class="flex items-center justify-between mb-4">
+                        <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-arrow-left"></i> ইংরেজি বক্স সমূহে ফিরে যান
+                        </button>
+                    </div>
+                    <div class="glass-card p-8 rounded-2xl text-center space-y-3">
+                        <p class="text-sm text-slate-300">কোনো ভোকেবুলারি ডেটা পাওয়া যায়নি। অনুগ্রহ করে আগে কিছু শব্দ যোগ করুন।</p>
+                        <button onclick="switchTab('study')" class="px-4 py-2 bg-gold-500 text-navy-900 rounded-xl text-xs font-bold">শব্দ যোগ করুন</button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (index < 0) index = vocabs.length - 1;
+            if (index >= vocabs.length) index = 0;
+
+            const currentItem = vocabs[index];
+
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
@@ -629,9 +644,12 @@
                         <span class="text-[10px] text-gold-500 uppercase font-bold">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
                             <span class="text-xs text-slate-400">বাংলা অর্থ</span>
-                            <h3 class="text-xl font-bold text-white mt-1">${vocabs.length > 0 ? vocabs[0].meaning : 'সুন্দর, মনমুগ্ধকর'}</h3>
+                            <h3 class="text-xl font-bold text-white mt-1">${currentItem.meaning}</h3>
                         </div>
-                        <button onclick="showToast('উত্তর: ' + '${vocabs.length > 0 ? vocabs.value?.word || 'Eloquent' : 'Eloquent'}')" class="w-full py-2.5 rounded-xl bg-navy-700/60 text-slate-300 text-xs hover:bg-navy-700">
+                        <div id="quiz-ans-box" class="hidden p-3 rounded-xl bg-gold-500/10 border border-gold-500/30 text-center text-gold-400 font-bold text-sm">
+                            উত্তর: ${currentItem.word}
+                        </div>
+                        <button onclick="document.getElementById('quiz-ans-box').classList.toggle('hidden')" class="w-full py-2.5 rounded-xl bg-navy-700/60 text-slate-300 text-xs hover:bg-navy-700 transition">
                             উত্তর দেখুন / লুকান
                         </button>
                     </div>
@@ -641,22 +659,63 @@
                         <span class="text-[10px] text-gold-500 uppercase font-bold">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
                             <span class="text-xs text-slate-400">বাংলা অর্থ</span>
-                            <h3 class="text-xl font-bold text-white mt-1">${vocabs.length > 0 ? vocabs[0].meaning : 'সুন্দর, মনমুগ্ধকর'}</h3>
+                            <h3 class="text-xl font-bold text-white mt-1">${currentItem.meaning}</h3>
                         </div>
                         <div class="space-y-2">
                             <span class="text-xs text-slate-300">ইংরেজিতে লিখুন:</span>
-                            <input type="text" placeholder="আপনার উত্তর লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/80 border border-gold-500/20 text-xs focus:outline-none">
+                            <input id="user-quiz-input" type="text" placeholder="আপনার উত্তর লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/80 border border-gold-500/20 text-xs focus:outline-none">
                         </div>
-                        <button onclick="showToast('উত্তর যাচাই করা হয়েছে!')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase">
+                        <button onclick="verifyQuizAnswer('${currentItem.word}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase shadow-md">
                             উত্তর যাচাই করুন
+                        </button>
+                    </div>
+
+                    <!-- Navigation Controls -->
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="renderVocabQuizView(${index - 1})" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-200 text-xs hover:bg-navy-600">
+                            <i class="fa-solid fa-arrow-left"></i> আগের শব্দ
+                        </button>
+                        <span class="text-xs text-gold-400 font-mono">${toBengaliNumerals(index + 1)} / ${toBengaliNumerals(vocabs.length)}</span>
+                        <button onclick="renderVocabQuizView(${index + 1})" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-200 text-xs hover:bg-navy-600">
+                            পরের শব্দ <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
             `;
         }
 
-        // Sub View 2: Conversations Section (Screenshot 6018)
+        function verifyQuizAnswer(correctWord) {
+            const userIn = document.getElementById('user-quiz-input').value.trim();
+            if (!userIn) {
+                showToast('অনুগ্রহ করে উত্তর লিখুন');
+                return;
+            }
+            if (userIn.toLowerCase() === correctWord.toLowerCase()) {
+                showToast('অভিনন্দন! আপনার উত্তর সঠিক হয়েছে 🎉');
+            } else {
+                showToast(`ভুল হয়েছে! সঠিক উত্তরটি হলো: "${correctWord}"`);
+            }
+        }
+
+        // --- SUB VIEW 2: CONVERSATIONS SECTION (Fully Functional Add Feature) ---
         async function renderConversationsView() {
+            let convs = await dbGetAll('conversations');
+            if (convs.length === 0) {
+                // Default initial topic if empty
+                convs = [{
+                    id: '1',
+                    title: 'কেনাকাটা (Shopping)',
+                    subtitle: 'দোকানদারের সাথে কথা বলা',
+                    messages: [
+                        { speaker: 'Buyer', en: 'How much is this shirt?', bn: 'এই শার্টটির দাম কত?' },
+                        { speaker: 'Seller', en: 'It is 500 Taka.', bn: 'এটার দাম ৫০০ টাকা।' }
+                    ]
+                }];
+                await dbPut('conversations', convs[0]);
+            }
+
+            const currentConv = convs[0];
+
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4">
                     <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
@@ -668,50 +727,116 @@
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-bold text-slate-200">বিষয়সমূহ</h3>
-                        <button onclick="showToast('নতুন বিষয় যোগ করার ফর্ম আসছে')" class="px-3 py-1.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">+ বিষয়</button>
+                        <button onclick="openAddTopicModal()" class="px-3 py-1.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs shadow-md">+ বিষয়</button>
                     </div>
 
-                    <!-- Topic Card -->
+                    <!-- Topic Summary Card -->
                     <div class="glass-card p-4 rounded-2xl flex justify-between items-center border-gold-500/30">
                         <div>
-                            <h4 class="font-bold text-sm text-white">কেনাকাটা (Shopping)</h4>
-                            <p class="text-[11px] text-slate-400">দোকানদারের সাথে কথা বলা</p>
+                            <h4 class="font-bold text-sm text-white">${currentConv.title}</h4>
+                            <p class="text-[11px] text-slate-400">${currentConv.subtitle}</p>
                         </div>
-                        <button onclick="showToast('মুছে ফেলা হয়েছে')" class="text-red-400 hover:text-red-300 text-xs"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="deleteConversation('${currentConv.id}')" class="text-red-400 hover:text-red-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
                     </div>
 
                     <!-- Chat / Message Box -->
                     <div class="glass-card p-5 rounded-2xl space-y-4">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h4 class="font-bold text-sm text-white">কেনাকাটা (Shopping)</h4>
-                                <p class="text-[11px] text-slate-400">দোকানদারের সাথে কথা বলা</p>
+                                <h4 class="font-bold text-sm text-white">${currentConv.title}</h4>
+                                <p class="text-[11px] text-slate-400">ডায়ালগ ও কথোপকথন</p>
                             </div>
-                            <button onclick="showToast('নতুন বার্তা যোগ')" class="px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs">+ বার্তা</button>
+                            <button onclick="openAddMessageModal('${currentConv.id}')" class="px-3 py-1.5 rounded-xl bg-teal-600 text-white font-bold text-xs shadow-md">+ বার্তা</button>
                         </div>
 
-                        <!-- Message 1 -->
-                        <div class="p-3 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] text-teal-400 font-bold">Buyer</span>
-                                <i class="fa-solid fa-volume-high text-xs text-slate-400 cursor-pointer" onclick="showToast('অডিও প্লে হচ্ছে...')"></i>
-                            </div>
-                            <div class="text-sm font-semibold text-white">How much is this shirt?</div>
-                            <div class="text-xs text-slate-300">এই শার্টটির দাম কত?</div>
+                        <div class="space-y-3" id="conversation-messages-list">
+                            ${currentConv.messages.map(m => `
+                                <div class="p-3 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-[10px] text-${m.speaker === 'Buyer' ? 'teal' : 'amber'}-400 font-bold">${m.speaker}</span>
+                                        <i class="fa-solid fa-volume-high text-xs text-slate-400 cursor-pointer" onclick="showToast('উচ্চারণ বাজানো হচ্ছে...')"></i>
+                                    </div>
+                                    <div class="text-sm font-semibold text-white">${m.en}</div>
+                                    <div class="text-xs text-slate-300">${m.bn}</div>
+                                </div>
+                            `).join('')}
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Message 2 -->
-                        <div class="p-3 rounded-xl bg-navy-900/70 border border-gold-500/10 space-y-1">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[10px] text-amber-400 font-bold">Seller</span>
-                                <i class="fa-solid fa-volume-high text-xs text-slate-400 cursor-pointer" onclick="showToast('অডিও প্লে হচ্ছে...')"></i>
-                            </div>
-                            <div class="text-sm font-semibold text-white">It is 500 Taka.</div>
-                            <div class="text-xs text-slate-300">এটার দাম ৫০০ টাকা।</div>
+                <!-- ADD TOPIC/MESSAGE MODAL CONTAINER -->
+                <div id="conv-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+                    <div class="bg-navy-800 rounded-2xl border border-gold-500/30 w-full max-w-md p-5 space-y-3 shadow-2xl relative">
+                        <h3 id="conv-modal-title" class="text-base font-bold text-gold-400">নতুন বার্তা যোগ করুন</h3>
+                        <div id="conv-modal-body" class="space-y-2">
+                            <!-- Dynamic inputs -->
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button onclick="submitConvModal()" class="flex-1 py-2 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">সংরক্ষণ</button>
+                            <button onclick="document.getElementById('conv-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-navy-700 text-slate-300 text-xs">বাতিল</button>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        let activeConvAction = null;
+        let activeConvId = null;
+
+        function openAddTopicModal() {
+            activeConvAction = 'topic';
+            document.getElementById('conv-modal-title').innerText = 'নতুন বিষয় যোগ করুন';
+            document.getElementById('conv-modal-body').innerHTML = `
+                <input id="modal-topic-title" type="text" placeholder="বিষয়ের নাম (যেমন: হোটেলে কথা বলা)..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
+                <input id="modal-topic-sub" type="text" placeholder="বর্ণনা (যেমন: রিসেপশনিস্টের সাথে কথোপকথন)..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
+            `;
+            document.getElementById('conv-modal').classList.remove('hidden');
+        }
+
+        function openAddMessageModal(convId) {
+            activeConvAction = 'message';
+            activeConvId = convId;
+            document.getElementById('conv-modal-title').innerText = 'নতুন বার্তা যোগ করুন';
+            document.getElementById('conv-modal-body').innerHTML = `
+                <select id="modal-msg-speaker" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
+                    <option value="Buyer">Buyer (ক্রেতা/জিজ্ঞাসাকারী)</option>
+                    <option value="Seller">Seller (বিক্রেতা/উত্তরদাতা)</option>
+                </select>
+                <input id="modal-msg-en" type="text" placeholder="ইংরেজি বাক্য (English sentence)..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
+                <input id="modal-msg-bn" type="text" placeholder="বাংলা অর্থ..." class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-xs text-white focus:outline-none">
+            `;
+            document.getElementById('conv-modal').classList.remove('hidden');
+        }
+
+        async function submitConvModal() {
+            if (activeConvAction === 'topic') {
+                const title = document.getElementById('modal-topic-title').value.trim();
+                const subtitle = document.getElementById('modal-topic-sub').value.trim();
+                if (!title) return showToast('বিষয়ের নাম দিন');
+                const newTopic = { id: Date.now().toString(), title, subtitle, messages: [] };
+                await dbPut('conversations', newTopic);
+                showToast('নতুন বিষয় সফলভাবে যোগ হয়েছে!');
+            } else if (activeConvAction === 'message') {
+                const speaker = document.getElementById('modal-msg-speaker').value;
+                const en = document.getElementById('modal-msg-en').value.trim();
+                const bn = document.getElementById('modal-msg-bn').value.trim();
+                if (!en || !bn) return showToast('ইংরেজি ও বাংলা বাক্য দিন');
+                
+                const conv = await dbGet('conversations', activeConvId);
+                if (conv) {
+                    conv.messages.push({ speaker, en, bn });
+                    await dbPut('conversations', conv);
+                    showToast('বার্তা যুক্ত করা হয়েছে!');
+                }
+            }
+            document.getElementById('conv-modal').classList.add('hidden');
+            renderConversationsView();
+        }
+
+        async function deleteConversation(id) {
+            await dbDelete('conversations', id);
+            showToast('মুছে ফেলা হয়েছে');
+            renderConversationsView();
         }
 
         // --- OTHER CORE MODULES ---
@@ -844,7 +969,7 @@
         }
         async function exportJSON() {
             const data = {};
-            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings']) {
+            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'conversations']) {
                 data[store] = await dbGetAll(store);
             }
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
