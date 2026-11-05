@@ -81,30 +81,9 @@
             color: #D4AF37;
         }
 
-        /* --- 3D FLIP CARD STYLES --- */
-        .perspective-1000 {
-            perspective: 1000px;
-        }
-        .flip-card-inner {
-            position: relative;
-            width: 100%;
-            min-height: 230px;
-            text-align: center;
-            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-        .flip-card-front, .flip-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            top: 0;
-            left: 0;
-            border-radius: 1rem;
-        }
-        .flip-card-back {
-            transform: rotateY(180deg);
+        /* --- CARD FADE ANIMATION (PREVENTS TEXT INVERSION) --- */
+        .card-step-content {
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
     </style>
 </head>
@@ -437,7 +416,7 @@
             `;
         }
 
-        // --- STUDY & VOCABULARY MODULE (UPDATED WITH 3D FLIP & SEARCH) ---
+        // --- STUDY & VOCABULARY MODULE (FIXED TEXT ORIENTATION & SEARCH) ---
         async function renderStudyView() {
             const allVocabs = await dbGetAll('vocab');
             
@@ -476,7 +455,7 @@
                 <div class="glass-card p-5 rounded-2xl space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
                         <span id="form-title">নতুন শব্দ যোগ করুন</span>
-                        <span class="text-[10px] text-gold-500 font-normal">৩ডি ফ্লিপ কার্ড স্টাইল</span>
+                        <span class="text-[10px] text-gold-500 font-normal">৪-ধাপ ফ্ল্যাশ কার্ড সিস্টেম</span>
                     </h3>
                     <input id="vocab-id" type="hidden">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -512,19 +491,18 @@
                     
                     ${vocabs.length === 0 ? `<p class="text-xs text-slate-400 italic py-4 text-center">কোনো শব্দ পাওয়া যায়নি।</p>` : ''}
 
-                    <!-- 3D FLIP CARDS GRID -->
+                    <!-- CARDS GRID -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         ${vocabs.map((item, index) => {
                             const currentStep = cardStepsState[item.id] || 0;
                             const serialNo = toBengaliNumerals(index + 1);
                             
-                            // Backward compatibility for sentence translation
                             const sentenceText = item.sentence || '';
                             const translationText = item.translation || '';
 
                             return `
-                                <div class="perspective-1000 w-full select-none">
-                                    <div id="card-inner-${item.id}" class="flip-card-inner glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg">
+                                <div class="w-full select-none">
+                                    <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[210px]">
                                         
                                         <!-- CARD TOP CONTROLS -->
                                         <div class="flex justify-between items-center z-10 w-full mb-2">
@@ -541,16 +519,16 @@
                                             </div>
                                         </div>
 
-                                        <!-- CARD CONTENT AREA (CLICKABLE FOR FLIP) -->
-                                        <div onclick="flipCardStep('${item.id}')" class="cursor-pointer my-auto py-2 flex flex-col items-center justify-center min-h-[110px]">
-                                            <div id="card-content-${item.id}" class="w-full text-center">
+                                        <!-- CARD CONTENT AREA (CLICKABLE TO CYCLE STEPS) -->
+                                        <div onclick="nextCardStep('${item.id}')" class="cursor-pointer my-auto py-3 flex flex-col items-center justify-center min-h-[110px]">
+                                            <div id="card-content-${item.id}" class="w-full text-center card-step-content">
                                                 ${getCardStepHTML(item, currentStep)}
                                             </div>
                                         </div>
 
                                         <!-- CARD BOTTOM NAVIGATION & PROGRESS INDICATOR -->
                                         <div class="border-t border-gold-500/10 pt-3 flex items-center justify-between text-[11px] text-slate-400 z-10">
-                                            <button onclick="event.stopPropagation(); flipCardStep('${item.id}', -1)" class="text-gold-400/80 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
+                                            <button onclick="event.stopPropagation(); changeCardStep('${item.id}', -1)" class="text-gold-400/80 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
                                                 <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী
                                             </button>
 
@@ -561,7 +539,7 @@
                                                 `).join('')}
                                             </div>
 
-                                            <button onclick="event.stopPropagation(); flipCardStep('${item.id}', 1)" class="text-gold-400/80 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
+                                            <button onclick="event.stopPropagation(); changeCardStep('${item.id}', 1)" class="text-gold-400/80 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
                                                 পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                             </button>
                                         </div>
@@ -581,7 +559,7 @@
                 return `
                     <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">১. English Word</div>
                     <h4 class="text-2xl font-bold text-white light:text-slate-800 tracking-wide">${item.word}</h4>
-                    <span class="text-[10px] text-slate-400 block mt-2">ফ্লিপ করতে চাপুন ⟳</span>
+                    <span class="text-[10px] text-slate-400 block mt-2">পরবর্তী ধাপ দেখতে ক্লিক করুন ⟳</span>
                 `;
             } else if (step === 1) {
                 return `
@@ -604,8 +582,12 @@
             }
         }
 
-        // 3D FLIP & STEP NAVIGATION FUNCTIONS
-        function flipCardStep(id, direction = 1) {
+        // STEP NAVIGATION FUNCTIONS (FIXED ORIENTATION)
+        function nextCardStep(id) {
+            changeCardStep(id, 1);
+        }
+
+        function changeCardStep(id, direction) {
             let currentStep = cardStepsState[id] || 0;
             let nextStep = (currentStep + direction) % 4;
             if (nextStep < 0) nextStep = 3;
@@ -613,28 +595,23 @@
             setCardStep(id, nextStep);
         }
 
-        function setCardStep(id, targetStep) {
+        async function setCardStep(id, targetStep) {
             cardStepsState[id] = targetStep;
-            const innerCard = document.getElementById(`card-inner-${id}`);
             const contentArea = document.getElementById(`card-content-${id}`);
             const dotsArea = document.getElementById(`card-dots-${id}`);
 
-            if (!innerCard || !contentArea) return;
+            if (!contentArea) return;
 
-            // Trigger 3D rotation animation
-            innerCard.style.transform = `rotateY(${targetStep * 180}deg)`;
+            // Smooth fade transition
+            contentArea.style.opacity = '0';
+            contentArea.style.transform = 'translateY(4px)';
 
-            // Update content midway through flip for seamless transition
             setTimeout(async () => {
                 const item = await dbGet('vocab', id);
                 if (item) {
                     contentArea.innerHTML = getCardStepHTML(item, targetStep);
-                    // Counter rotate inner content so text is readable
-                    if (targetStep % 2 !== 0) {
-                        contentArea.style.transform = 'rotateY(180deg)';
-                    } else {
-                        contentArea.style.transform = 'rotateY(0deg)';
-                    }
+                    contentArea.style.opacity = '1';
+                    contentArea.style.transform = 'translateY(0px)';
                 }
             }, 150);
 
