@@ -1306,7 +1306,8 @@
         async function deleteDiary(id) { await dbDelete('diary', id); renderDiaryView(); }
 
         async function renderSettingsView() {
-            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
+            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন'
+Quran:  'بسم الله الرحمن الرحيم ' };
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-sliders"></i> প্রোফাইল সেটিংস</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
