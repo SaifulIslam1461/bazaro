@@ -50,7 +50,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- jSPDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
     <style>
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -114,38 +114,34 @@
         <!-- Dynamic Modules -->
     </main>
 
-    <!-- BOTTOM NAVIGATION BAR -->
+    <!-- BOTTOM NAVIGATION BAR (Din/Islamic Removed) -->
     <nav class="fixed bottom-0 left-0 right-0 z-50 bg-navy-800/95 dark:bg-navy-800/95 light:bg-white/95 backdrop-blur-lg border-t border-gold-500/20 px-2 py-2 shadow-2xl">
         <div class="max-w-4xl mx-auto flex justify-around items-center overflow-x-auto no-scrollbar py-1">
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-house-laptop text-lg mb-0.5"></i>
                 <span class="text-[10px]">হোম</span>
             </button>
-            <button onclick="switchTab('islamic')" id="nav-islamic" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
-                <i class="fa-solid fa-kaaba text-lg mb-0.5"></i>
-                <span class="text-[10px]">দীন</span>
-            </button>
-            <button onclick="switchTab('study')" id="nav-study" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('study')" id="nav-study" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-book-open text-lg mb-0.5"></i>
                 <span class="text-[10px]">পড়াশোনা</span>
             </button>
-            <button onclick="switchTab('todo')" id="nav-todo" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('todo')" id="nav-todo" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-list-check text-lg mb-0.5"></i>
                 <span class="text-[10px]">কাজ</span>
             </button>
-            <button onclick="switchTab('habits')" id="nav-habits" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('habits')" id="nav-habits" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
                 <span class="text-[10px]">অভ্যাস</span>
             </button>
-            <button onclick="switchTab('health')" id="nav-health" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('health')" id="nav-health" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-heart-pulse text-lg mb-0.5"></i>
                 <span class="text-[10px]">স্বাস্থ্য</span>
             </button>
-            <button onclick="switchTab('diary')" id="nav-diary" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('diary')" id="nav-diary" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-book-bookmark text-lg mb-0.5"></i>
                 <span class="text-[10px]">ডায়েরি</span>
             </button>
-            <button onclick="switchTab('menu')" id="nav-menu" class="nav-item flex flex-col items-center min-w-[55px] text-slate-400 transition-all">
+            <button onclick="switchTab('menu')" id="nav-menu" class="nav-item flex flex-col items-center min-w-[65px] text-slate-400 transition-all">
                 <i class="fa-solid fa-grid-2 text-lg mb-0.5"></i>
                 <span class="text-[10px]">আরও</span>
             </button>
@@ -180,7 +176,7 @@
         </div>
     </div>
 
-    <!-- GENERAL MODAL CONTAINER (For Dialogs & Popups) -->
+    <!-- GENERAL MODAL CONTAINER -->
     <div id="general-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div id="general-modal-content" class="bg-navy-800 dark:bg-navy-800 light:bg-white rounded-2xl border border-gold-500/30 w-full max-w-md p-6 shadow-2xl relative">
             <!-- Dynamic Content -->
@@ -204,8 +200,6 @@
                 request.onsuccess = (e) => { db = e.target.result; resolve(db); };
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
-                    if (!db.objectStoreNames.contains('prayers')) db.createObjectStore('prayers', { keyPath: 'date' });
-                    if (!db.objectStoreNames.contains('dhikr')) db.createObjectStore('dhikr', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('todos')) db.createObjectStore('todos', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('habits')) db.createObjectStore('habits', { keyPath: 'id' });
                     if (!db.objectStoreNames.contains('vocab')) db.createObjectStore('vocab', { keyPath: 'id' });
@@ -341,7 +335,6 @@
 
             switch(tabId) {
                 case 'dashboard': renderDashboardView(); break;
-                case 'islamic': renderIslamicView(); break;
                 case 'study': renderStudyView(); break;
                 case 'todo': renderTodoView(); break;
                 case 'habits': renderHabitsView(); break;
@@ -360,23 +353,21 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // --- DASHBOARD ---
+        // --- 1. DASHBOARD ---
         async function renderDashboardView() {
             const today = getTodayDateStr();
-            const prayerData = (await dbGet('prayers', today)) || { fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false };
             const healthData = (await dbGet('health', today)) || { water: 0, steps: 0, sleep: 0 };
             const todos = await dbGetAll('todos');
             const pendingTodos = todos.filter(t => !t.completed).length;
             const habits = await dbGetAll('habits');
-            const completedPrayersCount = Object.values(prayerData).filter(v => v === true).length;
-            const userProfile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও ঈমানী জীবন' };
+            const userProfile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও বিকাশ' };
 
             document.getElementById('app-content').innerHTML = `
                 <div class="glass-card rounded-2xl p-5 border-gold-500/30 relative overflow-hidden shadow-xl">
                     <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-gold-500/10 rounded-full blur-2xl"></div>
                     <div class="flex justify-between items-start mb-3">
                         <div>
-                            <span class="text-xs font-semibold text-gold-500 uppercase tracking-widest">আসসালামু আলাইকুম</span>
+                            <span class="text-xs font-semibold text-gold-500 uppercase tracking-widest">স্বাগতম</span>
                             <h2 class="text-2xl font-bold text-slate-100 light:text-slate-800">${userProfile.name}</h2>
                         </div>
                         <span class="text-xs px-3 py-1 rounded-full bg-navy-700/60 light:bg-slate-200 text-gold-400 font-mono border border-gold-500/20">
@@ -386,20 +377,16 @@
                     <p class="text-xs text-slate-300 light:text-slate-600 italic">"${userProfile.motto}"</p>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div onclick="switchTab('islamic')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
-                        <span class="text-xs text-slate-400">নামাজ</span>
-                        <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(completedPrayersCount)} / ৫</div>
-                    </div>
-                    <div onclick="switchTab('todo')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                <div class="grid grid-cols-3 gap-3">
+                    <div onclick="switchTab('todo')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
                         <span class="text-xs text-slate-400">বাকি কাজ</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(pendingTodos)} টি</div>
                     </div>
-                    <div onclick="switchTab('health')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                    <div onclick="switchTab('health')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
                         <span class="text-xs text-slate-400">পানি গ্রহণ</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(healthData.water || 0)} মি.লি.</div>
                     </div>
-                    <div onclick="switchTab('habits')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition">
+                    <div onclick="switchTab('habits')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
                         <span class="text-xs text-slate-400">অভ্যাস</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(habits.length)} সক্রিয়</div>
                     </div>
@@ -408,9 +395,6 @@
                 <div class="glass-card p-5 rounded-2xl">
                     <h3 class="text-sm font-bold gold-gradient-text mb-4 uppercase tracking-wider">লাইফ ম্যানেজমেন্ট মডিউল</h3>
                     <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                        <button onclick="switchTab('islamic')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
-                            <i class="fa-solid fa-kaaba text-gold-500 text-xl mb-1"></i><span class="text-xs">দীন</span>
-                        </button>
                         <button onclick="switchTab('study')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
                             <i class="fa-solid fa-book-open text-gold-500 text-xl mb-1"></i><span class="text-xs">পড়াশোনা</span>
                         </button>
@@ -448,7 +432,6 @@
                     </h2>
                 </div>
 
-                <!-- TOP 2 CIRCULAR ROUNDED ACTION BOXES -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                     <div onclick="switchTab('sub_vocab_quiz')" class="glass-card p-5 rounded-3xl cursor-pointer hover:border-gold-500/60 border border-gold-500/30 flex items-center justify-between transition shadow-lg group">
                         <div class="flex items-center gap-4">
@@ -477,7 +460,6 @@
                     </div>
                 </div>
 
-                <!-- ADD NEW VOCABULARY FORM -->
                 <div class="glass-card p-5 rounded-2xl space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">নতুন শব্দ যোগ করুন</h3>
                     <input id="vocab-id" type="hidden">
@@ -496,7 +478,6 @@
                     </div>
                 </div>
 
-                <!-- ROTATABLE FLASH CARDS CONTAINER -->
                 <div class="space-y-3">
                     <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</h3>
                     
@@ -646,7 +627,6 @@
                 </div>
 
                 <div class="space-y-4">
-                    <!-- Method 1: Show / Hide Answer -->
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
                         <span class="text-[10px] text-gold-500 uppercase font-bold">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
@@ -669,7 +649,6 @@
                         </div>
                     </div>
 
-                    <!-- Method 2: Active User Input Verification -->
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
                         <span class="text-[10px] text-gold-500 uppercase font-bold">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
                         <div class="bg-navy-900/60 p-4 rounded-xl text-center">
@@ -885,72 +864,6 @@
             renderConversationsView();
         }
 
-        // --- ISLAMIC & TASBIH MODULE ---
-        async function renderIslamicView() {
-            const today = getTodayDateStr();
-            let prayerData = (await dbGet('prayers', today)) || { date: today, fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false, tahajjud: false };
-            let dhikrCount = parseInt(localStorage.getItem('tasbih_count') || '0');
-
-            const prayerLabels = { fajr: 'ফজর', dhuhr: 'জোহর', asr: 'আসর', maghrib: 'মাগরিব', isha: 'এশা' };
-
-            document.getElementById('app-content').innerHTML = `
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold gold-gradient-text flex items-center gap-2"><i class="fa-solid fa-kaaba"></i> ইসলামিক জীবন ও সালাত ট্র্যাকার</h2>
-                </div>
-                <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">৫ ওয়াক্ত ফরজ সালাত</h3>
-                    ${['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].map(p => `
-                        <label class="flex items-center justify-between p-3 rounded-xl bg-navy-700/40 border border-gold-500/10 cursor-pointer">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" onchange="togglePrayer('${p}')" ${prayerData[p] ? 'checked' : ''} class="w-5 h-5 accent-amber-500 rounded">
-                                <span class="capitalize font-semibold text-sm text-white">${prayerLabels[p]}</span>
-                            </div>
-                            <span class="text-xs text-slate-400">${prayerData[p] ? 'সম্পন্ন ✓' : 'বাকি আছে'}</span>
-                        </label>
-                    `).join('')}
-                    <div class="pt-2 border-t border-gold-500/10">
-                        <label class="flex items-center justify-between p-3 rounded-xl bg-gold-500/10 border border-gold-500/30 cursor-pointer">
-                            <div class="flex items-center gap-3">
-                                <input type="checkbox" onchange="togglePrayer('tahajjud')" ${prayerData.tahajjud ? 'checked' : ''} class="w-5 h-5 accent-amber-500 rounded">
-                                <span class="capitalize font-semibold text-sm gold-gradient-text">তাহাজ্জুদ / নফল সালাত</span>
-                            </div>
-                            <i class="fa-solid fa-moon text-gold-500"></i>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="glass-card p-6 rounded-2xl text-center space-y-4">
-                    <h3 class="text-sm font-bold gold-gradient-text uppercase">ডিজিটাল তাসবীহ গণক</h3>
-                    <div class="text-5xl font-mono font-bold text-gold-400 py-4 bg-navy-900 rounded-2xl border border-gold-500/20" id="tasbih-display">${toBengaliNumerals(dhikrCount)}</div>
-                    <div class="flex justify-center gap-4">
-                        <button onclick="incrementTasbih()" class="w-20 h-20 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 text-navy-900 font-bold text-2xl shadow-xl flex items-center justify-center hover:scale-105 transition">+১</button>
-                        <button onclick="resetTasbih()" class="w-12 h-12 rounded-full bg-navy-700 text-slate-300 flex items-center justify-center self-center" title="রিসেট"><i class="fa-solid fa-rotate-left"></i></button>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function togglePrayer(p) {
-            const today = getTodayDateStr();
-            let data = (await dbGet('prayers', today)) || { date: today };
-            data[p] = !data[p];
-            await dbPut('prayers', data);
-            showToast('নামাজের স্ট্যাটাস হালনাগাদ হয়েছে');
-            renderIslamicView();
-        }
-
-        function incrementTasbih() {
-            let count = parseInt(localStorage.getItem('tasbih_count') || '0') + 1;
-            localStorage.setItem('tasbih_count', count);
-            document.getElementById('tasbih-display').innerText = toBengaliNumerals(count);
-        }
-
-        function resetTasbih() {
-            localStorage.setItem('tasbih_count', '0');
-            document.getElementById('tasbih-display').innerText = '০';
-            showToast('তাসবীহ রিসেট করা হয়েছে');
-        }
-
         // --- TO-DO / ROUTINE MODULE ---
         async function renderTodoView() {
             const todos = await dbGetAll('todos');
@@ -1071,7 +984,7 @@
         }
         async function exportJSON() {
             const data = {};
-            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'conv_topics', 'conv_messages', 'prayers']) {
+            for (let store of ['todos', 'habits', 'vocab', 'diary', 'health', 'settings', 'conv_topics', 'conv_messages']) {
                 data[store] = await dbGetAll(store);
             }
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1094,7 +1007,7 @@
 
         // --- SETTINGS & PROFILE MODULE ---
         async function renderSettingsView() {
-            const profile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
+            const profile = (await dbGet('settings', 'profile')) || { name: 'জ্ঞান অন্বেষণকারী', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন ও বিকাশ' };
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-sliders"></i> প্রোফাইল সেটিংস</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
