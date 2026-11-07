@@ -83,30 +83,44 @@
         .card-step-content {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
+        /* Custom Header Background with Overlay */
+        .custom-header-bg {
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            position: relative;
+        }
+        .custom-header-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(7, 11, 25, 0.88), rgba(11, 19, 43, 0.75));
+            z-index: 1;
+        }
     </style>
 </head>
 <body class="bg-navy-900 text-slate-100 dark:bg-navy-900 dark:text-slate-100 light:bg-softwhite light:text-slate-800 font-sans transition-colors duration-300 min-h-screen pb-24 selection:bg-gold-500 selection:text-navy-900">
 
     <!-- APP HEADER -->
-    <header class="sticky top-0 z-40 bg-navy-800/90 dark:bg-navy-800/90 light:bg-white/90 backdrop-blur-md border-b border-gold-500/20 px-4 py-3 flex items-center justify-between shadow-md">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-900 font-bold text-xl shadow-lg">
+    <header id="main-app-header" class="sticky top-0 z-40 bg-navy-800/90 dark:bg-navy-800/90 light:bg-white/90 backdrop-blur-md border-b border-gold-500/20 px-4 py-3 flex items-center justify-between shadow-md transition-all duration-300">
+        <div class="flex items-center gap-3 relative z-10">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-900 font-bold text-xl shadow-lg border border-gold-300/30">
                 H
             </div>
             <div>
-                <h1 class="text-lg font-bold tracking-tight gold-gradient-text flex items-center gap-2">
+                <h1 class="text-lg font-bold tracking-tight gold-gradient-text flex items-center gap-2 drop-shadow-sm">
                     HAYAT OS
                     <span class="text-[10px] uppercase tracking-widest px-1.5 py-0.5 rounded bg-gold-500/10 text-gold-500 border border-gold-500/30">প্রো</span>
                 </h1>
-                <p class="text-[10px] text-slate-400 light:text-slate-500 font-medium tracking-wide">আপনার জীবন। আপনার সময়। আপনার বিকাশ।</p>
+                <p class="text-[10px] text-slate-300 light:text-slate-600 font-medium tracking-wide drop-shadow-sm">আপনার জীবন। আপনার সময়। আপনার বিকাশ।</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
-            <button onclick="toggleQuickModal()" class="w-9 h-9 rounded-lg bg-gold-500/10 text-gold-500 hover:bg-gold-500 hover:text-navy-900 transition-all flex items-center justify-center border border-gold-500/30" title="দ্রুত যোগ করুন">
+        <div class="flex items-center gap-2 relative z-10">
+            <button onclick="toggleQuickModal()" class="w-9 h-9 rounded-lg bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition-all flex items-center justify-center border border-gold-500/40 shadow-sm" title="দ্রুত যোগ করুন">
                 <i class="fa-solid fa-plus"></i>
             </button>
-            <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-navy-700/50 light:bg-slate-100 text-gold-500 hover:bg-gold-500/20 transition-all flex items-center justify-center border border-gold-500/20" title="থিম পরিবর্তন">
+            <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg bg-navy-700/60 light:bg-slate-100 text-gold-400 hover:bg-gold-500/20 transition-all flex items-center justify-center border border-gold-500/30 shadow-sm" title="থিম পরিবর্তন">
                 <i id="theme-icon" class="fa-solid fa-moon"></i>
             </button>
         </div>
@@ -322,6 +336,20 @@
                 window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
             } else {
                 setVoiceAndSpeak();
+            }
+        }
+
+        // --- HEADER BACKGROUND UPDATE ENGINE ---
+        async function applyHeaderBackground() {
+            const header = document.getElementById('main-app-header');
+            if (!header) return;
+            const profile = await dbGet('settings', 'profile');
+            if (profile && profile.bgImage) {
+                header.classList.add('custom-header-bg');
+                header.style.backgroundImage = `url('${profile.bgImage}')`;
+            } else {
+                header.classList.remove('custom-header-bg');
+                header.style.backgroundImage = 'none';
             }
         }
 
@@ -1338,30 +1366,103 @@
         }
         async function deleteDiary(id) { await dbDelete('diary', id); renderDiaryView(); }
 
+        // --- SETTINGS VIEW WITH IMAGE UPLOAD ---
         async function renderSettingsView() {
-            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
+            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন', bgImage: '' };
+            
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-sliders"></i> প্রোফাইল সেটিংস</h2></div>
-                <div class="glass-card p-5 rounded-2xl space-y-3 text-xs">
-                    <label class="text-slate-400">নাম</label>
-                    <input id="set-name" type="text" value="${profile.name}" class="w-full p-2.5 rounded-xl bg-navy-900 border border-gold-500/20 text-white">
-                    <label class="text-slate-400">নীতিবাক্য (Motto)</label>
-                    <input id="set-motto" type="text" value="${profile.motto}" class="w-full p-2.5 rounded-xl bg-navy-900 border border-gold-500/20 text-white">
-                    <button onclick="saveProfile()" class="py-2.5 px-4 bg-gold-500 text-navy-900 font-bold rounded-xl w-full">সংরক্ষণ করুন</button>
+                <div class="glass-card p-5 rounded-2xl space-y-4 text-xs">
+                    <div>
+                        <label class="text-slate-400 font-medium mb-1 block">আপনার নাম</label>
+                        <input id="set-name" type="text" value="${profile.name}" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-white focus:outline-none focus:border-gold-500/50">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 font-medium mb-1 block">নীতিবাক্য (Motto)</label>
+                        <input id="set-motto" type="text" value="${profile.motto}" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-white focus:outline-none focus:border-gold-500/50">
+                    </div>
+                    
+                    <!-- HEADER BACKGROUND IMAGE UPLOAD SECTION -->
+                    <div class="border-t border-gold-500/20 pt-4 mt-2">
+                        <label class="text-gold-400 font-bold mb-1 flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-image"></i> হেডার ব্যাকগ্রাউন্ড ছবি
+                        </label>
+                        <p class="text-[10px] text-slate-400 mb-3">গ্যালারি থেকে আপনার পছন্দের ছবি সিলেক্ট করুন। অ্যাপের ওপরের হেডার অংশে স্পষ্ট ও আকর্ষণীয়ভাবে প্রদর্শন করা হবে।</p>
+                        
+                        <div class="flex flex-col gap-3">
+                            <input type="file" id="header-bg-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                            <button onclick="document.getElementById('header-bg-input').click()" class="py-3 px-4 bg-navy-700/80 hover:bg-navy-700 text-gold-400 border border-gold-500/30 font-semibold rounded-xl flex items-center justify-center gap-2 transition">
+                                <i class="fa-solid fa-upload text-sm"></i> গ্যালারি থেকে ছবি আপলোড করুন
+                            </button>
+                            
+                            <div id="image-preview-container" class="${profile.bgImage ? '' : 'hidden'} relative rounded-xl overflow-hidden border border-gold-500/30 max-h-32">
+                                <img id="header-bg-preview" src="${profile.bgImage || ''}" class="w-full h-32 object-cover">
+                                <button onclick="removeHeaderImage()" class="absolute top-2 right-2 bg-red-600/80 hover:bg-red-600 text-white text-[10px] px-2 py-1 rounded-lg backdrop-blur-sm transition flex items-center gap-1">
+                                    <i class="fa-solid fa-trash"></i> রিমুভ করুন
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="saveProfile()" class="py-3 px-4 bg-gradient-to-r from-gold-400 to-gold-600 text-navy-900 font-bold rounded-xl w-full shadow-lg text-xs uppercase tracking-wider mt-2">
+                        সেটিংস সংরক্ষণ করুন
+                    </button>
                 </div>
             `;
         }
+
+        let tempUploadedImageData = null;
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('ছবি ৫ MB এর চেয়ে ছোট হতে হবে');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempUploadedImageData = e.target.result;
+                const preview = document.getElementById('header-bg-preview');
+                const container = document.getElementById('image-preview-container');
+                if (preview && container) {
+                    preview.src = tempUploadedImageData;
+                    container.classList.remove('hidden');
+                }
+                showToast('ছবি প্রিভিউ রেডি, সেভ চাপুন!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function removeHeaderImage() {
+            tempUploadedImageData = '';
+            const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
+            profile.bgImage = '';
+            await dbPut('settings', { key: 'profile', ...profile });
+            await applyHeaderBackground();
+            showToast('হেডার ছবি মুছে ফেলা হয়েছে');
+            renderSettingsView();
+        }
+
         async function saveProfile() {
-            const name = document.getElementById('set-name').value;
-            const motto = document.getElementById('set-motto').value;
-            await dbPut('settings', { key: 'profile', name, motto });
-            showToast('প্রোফাইল সংরক্ষিত হয়েছে');
+            const name = document.getElementById('set-name').value.trim();
+            const motto = document.getElementById('set-motto').value.trim();
+            const existingProfile = (await dbGet('settings', 'profile')) || {};
+            
+            const bgImage = tempUploadedImageData !== null ? tempUploadedImageData : (existingProfile.bgImage || '');
+
+            await dbPut('settings', { key: 'profile', name, motto, bgImage });
+            await applyHeaderBackground();
+            showToast('প্রোফাইল ও হেডার সেটিং সংরক্ষিত হয়েছে!');
         }
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', async () => {
             loadThemePreference();
             await initDB();
+            await applyHeaderBackground();
             switchTab('dashboard');
         });
     </script>
