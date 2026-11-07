@@ -62,16 +62,45 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
+        /* Glass Cards with Dynamic User Background Integration */
         .glass-card {
-            background: rgba(28, 37, 65, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(212, 175, 55, 0.18);
-        }
-        .light .glass-card {
-            background: rgba(255, 255, 255, 0.85);
+            background-color: rgba(11, 19, 43, 0.75);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(212, 175, 55, 0.25);
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
+
+        /* Dark Overlay inside cards to make text crisp and clear over photos */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(7, 11, 25, 0.88) 0%, rgba(11, 19, 43, 0.82) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .light .glass-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .light .glass-card::before {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(248, 249, 250, 0.88) 100%);
+        }
+
+        /* Ensure card contents stay above the background overlay */
+        .glass-card > * {
+            position: relative;
+            z-index: 2;
+        }
+
         .nav-item.active {
             color: #D4AF37;
             font-weight: 600;
@@ -83,6 +112,7 @@
         .card-step-content {
             transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
         }
+
         /* Custom Header Background with Overlay */
         .custom-header-bg {
             background-size: cover !important;
@@ -97,13 +127,17 @@
             background: linear-gradient(to right, rgba(7, 11, 25, 0.88), rgba(11, 19, 43, 0.75));
             z-index: 1;
         }
+        .custom-header-bg > * {
+            position: relative;
+            z-index: 2;
+        }
     </style>
 </head>
 <body class="bg-navy-900 text-slate-100 dark:bg-navy-900 dark:text-slate-100 light:bg-softwhite light:text-slate-800 font-sans transition-colors duration-300 min-h-screen pb-24 selection:bg-gold-500 selection:text-navy-900">
 
     <!-- APP HEADER -->
     <header id="main-app-header" class="sticky top-0 z-40 bg-navy-800/90 dark:bg-navy-800/90 light:bg-white/90 backdrop-blur-md border-b border-gold-500/20 px-4 py-3 flex items-center justify-between shadow-md transition-all duration-300">
-        <div class="flex items-center gap-3 relative z-10">
+        <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-900 font-bold text-xl shadow-lg border border-gold-300/30">
                 H
             </div>
@@ -116,7 +150,7 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2 relative z-10">
+        <div class="flex items-center gap-2">
             <button onclick="toggleQuickModal()" class="w-9 h-9 rounded-lg bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition-all flex items-center justify-center border border-gold-500/40 shadow-sm" title="দ্রুত যোগ করুন">
                 <i class="fa-solid fa-plus"></i>
             </button>
@@ -339,18 +373,31 @@
             }
         }
 
-        // --- HEADER BACKGROUND UPDATE ENGINE ---
-        async function applyHeaderBackground() {
-            const header = document.getElementById('main-app-header');
-            if (!header) return;
+        // --- APPLY BACKGROUND IMAGES TO HEADER AND CARDS ---
+        async function applyCustomBackgrounds() {
             const profile = await dbGet('settings', 'profile');
-            if (profile && profile.bgImage) {
-                header.classList.add('custom-header-bg');
-                header.style.backgroundImage = `url('${profile.bgImage}')`;
-            } else {
-                header.classList.remove('custom-header-bg');
-                header.style.backgroundImage = 'none';
+            const bgImage = profile && profile.bgImage ? profile.bgImage : '';
+
+            // Header Background
+            const header = document.getElementById('main-app-header');
+            if (header) {
+                if (bgImage) {
+                    header.classList.add('custom-header-bg');
+                    header.style.backgroundImage = `url('${bgImage}')`;
+                } else {
+                    header.classList.remove('custom-header-bg');
+                    header.style.backgroundImage = 'none';
+                }
             }
+
+            // All Glass Cards Background
+            document.querySelectorAll('.glass-card').forEach(card => {
+                if (bgImage) {
+                    card.style.backgroundImage = `url('${bgImage}')`;
+                } else {
+                    card.style.backgroundImage = 'none';
+                }
+            });
         }
 
         function toggleTheme() {
@@ -411,6 +458,7 @@
                 default: renderDashboardView();
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         // --- DASHBOARD VIEW ---
@@ -439,15 +487,15 @@
 
                 <div class="grid grid-cols-3 gap-3">
                     <div onclick="switchTab('todo')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
-                        <span class="text-xs text-slate-400">বাকি কাজ</span>
+                        <span class="text-xs text-slate-300">বাকি কাজ</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(pendingTodos)} টি</div>
                     </div>
                     <div onclick="switchTab('health')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
-                        <span class="text-xs text-slate-400">পানি গ্রহণ</span>
+                        <span class="text-xs text-slate-300">পানি গ্রহণ</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(healthData.water || 0)} মি.লি.</div>
                     </div>
                     <div onclick="switchTab('habits')" class="glass-card p-4 rounded-2xl cursor-pointer hover:border-gold-500/50 transition text-center">
-                        <span class="text-xs text-slate-400">অভ্যাস</span>
+                        <span class="text-xs text-slate-300">অভ্যাস</span>
                         <div class="text-xl font-bold text-white light:text-slate-800 mt-1">${toBengaliNumerals(habits.length)} সক্রিয়</div>
                     </div>
                 </div>
@@ -455,33 +503,34 @@
                 <div class="glass-card p-5 rounded-2xl">
                     <h3 class="text-sm font-bold gold-gradient-text mb-4 uppercase tracking-wider">লাইফ ম্যানেজমেন্ট মডিউল</h3>
                     <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                        <button onclick="switchTab('study')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('study')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-book-open text-gold-500 text-xl mb-1"></i><span class="text-xs">পড়াশোনা</span>
                         </button>
-                        <button onclick="switchTab('sentences')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('sentences')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-comment-dots text-gold-500 text-xl mb-1"></i><span class="text-xs">বাক্য</span>
                         </button>
-                        <button onclick="switchTab('conversations')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('conversations')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-comments text-gold-500 text-xl mb-1"></i><span class="text-xs">কথোপকথন</span>
                         </button>
-                        <button onclick="switchTab('todo')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('todo')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-list-check text-gold-500 text-xl mb-1"></i><span class="text-xs">রুটিন</span>
                         </button>
-                        <button onclick="switchTab('habits')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('habits')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-chart-line text-gold-500 text-xl mb-1"></i><span class="text-xs">অভ্যাস</span>
                         </button>
-                        <button onclick="switchTab('health')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('health')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-heart-pulse text-gold-500 text-xl mb-1"></i><span class="text-xs">ফিটনেস</span>
                         </button>
-                        <button onclick="switchTab('diary')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('diary')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-book-bookmark text-gold-500 text-xl mb-1"></i><span class="text-xs">ডায়েরি</span>
                         </button>
-                        <button onclick="switchTab('settings')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/30 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/10 transition">
+                        <button onclick="switchTab('settings')" class="flex flex-col items-center p-3 rounded-xl bg-navy-700/40 light:bg-slate-100 hover:bg-gold-500/10 border border-gold-500/15 transition">
                             <i class="fa-solid fa-sliders text-gold-500 text-xl mb-1"></i><span class="text-xs">সেটিংস</span>
                         </button>
                     </div>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         // --- STUDY & VOCABULARY MODULE ---
@@ -510,7 +559,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-xs text-white light:text-slate-800">বাক্য প্র্যাকটিস</h3>
-                                <p class="text-[10px] text-slate-400">ছোট ছোট ইংরেজি বাক্য ও অর্থ</p>
+                                <p class="text-[10px] text-slate-300">ছোট ছোট ইংরেজি বাক্য ও অর্থ</p>
                             </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-gold-500 text-xs"></i>
@@ -523,7 +572,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-xs text-white light:text-slate-800">কথোপকথন</h3>
-                                <p class="text-[10px] text-slate-400">দুই ব্যক্তির পারস্পরিক ডায়লগ</p>
+                                <p class="text-[10px] text-slate-300">দুই ব্যক্তির পারস্পরিক ডায়লগ</p>
                             </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-gold-500 text-xs"></i>
@@ -538,7 +587,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-sm text-white light:text-slate-800">বাংলা থেকে ইংরেজি কুইজ</h3>
-                                <p class="text-[11px] text-slate-400">শব্দার্থ ও নিজে লেখার প্র্যাকটিস</p>
+                                <p class="text-[11px] text-slate-300">শব্দার্থ ও নিজে লেখার প্র্যাকটিস</p>
                             </div>
                         </div>
                         <i class="fa-solid fa-chevron-right text-gold-500 text-sm"></i>
@@ -546,20 +595,20 @@
                 </div>
 
                 <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center justify-between">
                         <span id="form-title">নতুন শব্দ যোগ করুন</span>
-                        <span class="text-[10px] text-gold-500 font-normal">৪-ধাপ ফ্ল্যাশ কার্ড সিস্টেম</span>
+                        <span class="text-[10px] text-gold-400 font-normal">৪-ধাপ ফ্ল্যাশ কার্ড সিস্টেম</span>
                     </h3>
                     <input id="vocab-id" type="hidden">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input id="vocab-word" type="text" placeholder="১. English Word (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900">
-                        <input id="vocab-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900">
+                        <input id="vocab-word" type="text" placeholder="১. English Word (যেমন: Eloquent)" class="p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs focus:outline-none text-white light:text-slate-900">
+                        <input id="vocab-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ (যেমন: এলোকুয়েন্ট)" class="p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs focus:outline-none text-white light:text-slate-900">
                     </div>
-                    <textarea id="vocab-meaning" placeholder="৩. বাংলা অর্থ" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
+                    <textarea id="vocab-meaning" placeholder="৩. বাংলা অর্থ" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <textarea id="vocab-sentence" placeholder="৪. Example Sentence" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
-                        <textarea id="vocab-translation" placeholder="৪. বাক্যের বাংলা অনুবাদ" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
+                        <textarea id="vocab-sentence" placeholder="৪. Example Sentence" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
+                        <textarea id="vocab-translation" placeholder="৪. বাক্যের বাংলা অনুবাদ" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs focus:outline-none text-white light:text-slate-900" rows="2"></textarea>
                     </div>
 
                     <div class="flex gap-2 pt-1">
@@ -572,16 +621,16 @@
 
                 <div class="space-y-3 pt-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">
                             <span>শব্দ ভাণ্ডার ফ্ল্যাশ-কার্ড (${toBengaliNumerals(vocabs.length)})</span>
                         </h3>
                         <div class="relative min-w-[200px]">
-                            <input type="text" id="vocab-search-input" value="${vocabSearchQuery}" oninput="handleVocabSearch(this.value)" placeholder="শব্দ বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
+                            <input type="text" id="vocab-search-input" value="${vocabSearchQuery}" oninput="handleVocabSearch(this.value)" placeholder="শব্দ বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800/80 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
                             <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
                         </div>
                     </div>
                     
-                    ${vocabs.length === 0 ? `<p class="text-xs text-slate-400 italic py-4 text-center">কোনো শব্দ পাওয়া যায়নি।</p>` : ''}
+                    ${vocabs.length === 0 ? `<p class="text-xs text-slate-300 italic py-4 text-center">কোনো শব্দ পাওয়া যায়নি।</p>` : ''}
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         ${vocabs.map((item, index) => {
@@ -594,7 +643,7 @@
                                 <div class="w-full select-none">
                                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[210px]">
                                         <div class="flex justify-between items-center z-10 w-full mb-2">
-                                            <span class="text-[10px] font-bold text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-md">
+                                            <span class="text-[10px] font-bold text-gold-400 bg-gold-500/20 border border-gold-500/30 px-2 py-0.5 rounded-md">
                                                 সিরিয়াল: #${serialNo}
                                             </span>
                                             <div class="flex items-center gap-1">
@@ -613,16 +662,16 @@
                                             </div>
                                         </div>
 
-                                        <div class="border-t border-gold-500/10 pt-3 flex items-center justify-between text-[11px] text-slate-400 z-10">
-                                            <button onclick="event.stopPropagation(); changeCardStep('${item.id}', -1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
+                                        <div class="border-t border-gold-500/20 pt-3 flex items-center justify-between text-[11px] text-slate-300 z-10">
+                                            <button onclick="event.stopPropagation(); changeCardStep('${item.id}', -1)" class="text-gold-400 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
                                                 <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী
                                             </button>
                                             <div class="flex items-center gap-1.5" id="card-dots-${item.id}">
                                                 ${[0, 1, 2, 3].map(step => `
-                                                    <span onclick="event.stopPropagation(); setCardStep('${item.id}', ${step})" class="w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${currentStep === step ? 'bg-gold-500 scale-125' : 'bg-slate-600 hover:bg-slate-400'}"></span>
+                                                    <span onclick="event.stopPropagation(); setCardStep('${item.id}', ${step})" class="w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${currentStep === step ? 'bg-gold-400 scale-125 ring-1 ring-gold-200' : 'bg-slate-500 hover:bg-slate-300'}"></span>
                                                 `).join('')}
                                             </div>
-                                            <button onclick="event.stopPropagation(); changeCardStep('${item.id}', 1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
+                                            <button onclick="event.stopPropagation(); changeCardStep('${item.id}', 1)" class="text-gold-400 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5 rounded">
                                                 পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                             </button>
                                         </div>
@@ -633,6 +682,7 @@
                     </div>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         function getCardStepHTML(item, step, escapedWord, escapedSentence) {
@@ -648,7 +698,7 @@
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
-                    <span class="text-[10px] text-slate-400 block mt-2">পরবর্তী ধাপ দেখতে ক্লিক করুন ⟳</span>
+                    <span class="text-[10px] text-slate-300 block mt-2">পরবর্তী ধাপ দেখতে ক্লিক করুন ⟳</span>
                 `;
             } else if (step === 1) {
                 return `
@@ -662,11 +712,11 @@
                 `;
             } else if (step === 3) {
                 const sentence = item.sentence || 'কোনো উদাহরণ বাক্য নেই।';
-                const translation = item.translation ? `<div class="text-gold-300/90 text-xs mt-1 font-normal">(${item.translation})</div>` : '';
+                const translation = item.translation ? `<div class="text-gold-300 text-xs mt-1 font-normal">(${item.translation})</div>` : '';
                 return `
                     <div class="text-[10px] text-gold-400 uppercase tracking-widest font-bold mb-1">৪. Example Sentence</div>
                     <div class="flex items-center justify-center gap-2 mb-1">
-                        <span class="text-xs text-slate-200 light:text-slate-700 italic">"${sentence}"</span>
+                        <span class="text-xs text-slate-100 light:text-slate-700 italic">"${sentence}"</span>
                         ${item.sentence ? `
                         <button onclick="event.stopPropagation(); speakText('${escapedSentence}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]" title="উচ্চারণ শুনুন">
                             <i class="fa-solid fa-volume-high"></i>
@@ -703,7 +753,7 @@
             if (dotsArea) {
                 const dots = dotsArea.children;
                 for (let i = 0; i < dots.length; i++) {
-                    dots[i].className = i === targetStep ? 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-gold-500 scale-125' : 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-slate-600 hover:bg-slate-400';
+                    dots[i].className = i === targetStep ? 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-gold-400 scale-125 ring-1 ring-gold-200' : 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-slate-500 hover:bg-slate-300';
                 }
             }
         }
@@ -779,14 +829,14 @@
                 </div>
 
                 <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center justify-between">
                         <span id="sentence-form-title">নতুন বাক্য যোগ করুন</span>
-                        <span class="text-[10px] text-gold-500 font-normal">৩-ধাপ ফ্ল্যাশ কার্ড</span>
+                        <span class="text-[10px] text-gold-400 font-normal">৩-ধাপ ফ্ল্যাশ কার্ড</span>
                     </h3>
                     <input id="sentence-id" type="hidden">
-                    <input id="sentence-text" type="text" placeholder="১. ইংরেজি বাক্য" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs text-white light:text-slate-900 focus:outline-none">
-                    <input id="sentence-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs text-white light:text-slate-900 focus:outline-none">
-                    <textarea id="sentence-meaning" placeholder="৩. বাংলা অর্থ" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs text-white light:text-slate-900 focus:outline-none" rows="2"></textarea>
+                    <input id="sentence-text" type="text" placeholder="১. ইংরেজি বাক্য" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
+                    <input id="sentence-pronunciation" type="text" placeholder="২. বাংলা উচ্চারণ" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
+                    <textarea id="sentence-meaning" placeholder="৩. বাংলা অর্থ" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none" rows="2"></textarea>
                     
                     <div class="flex gap-2 pt-1">
                         <button onclick="saveSentence()" id="sentence-save-btn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-gold-400 to-gold-600 text-navy-900 font-bold text-xs uppercase shadow-md">
@@ -798,16 +848,16 @@
 
                 <div class="space-y-3 pt-2">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">
                             <span>বাক্য ফ্ল্যাশ-কার্ড (${toBengaliNumerals(sentences.length)})</span>
                         </h3>
                         <div class="relative min-w-[200px]">
-                            <input type="text" value="${sentenceSearchQuery}" oninput="handleSentenceSearch(this.value)" placeholder="বাক্য বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
+                            <input type="text" value="${sentenceSearchQuery}" oninput="handleSentenceSearch(this.value)" placeholder="বাক্য বা অর্থ অনুসন্ধান..." class="w-full pl-8 pr-3 py-1.5 rounded-xl bg-navy-800/80 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
                             <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
                         </div>
                     </div>
 
-                    ${sentences.length === 0 ? `<p class="text-xs text-slate-400 italic py-4 text-center">কোনো বাক্য পাওয়া যায়নি।</p>` : ''}
+                    ${sentences.length === 0 ? `<p class="text-xs text-slate-300 italic py-4 text-center">কোনো বাক্য পাওয়া যায়নি।</p>` : ''}
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         ${sentences.map((item, index) => {
@@ -819,7 +869,7 @@
                                 <div class="w-full select-none">
                                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 relative flex flex-col justify-between shadow-lg min-h-[190px]">
                                         <div class="flex justify-between items-center z-10 w-full mb-2">
-                                            <span class="text-[10px] font-bold text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-md">
+                                            <span class="text-[10px] font-bold text-gold-400 bg-gold-500/20 border border-gold-500/30 px-2 py-0.5 rounded-md">
                                                 সিরিয়াল: #${serialNo}
                                             </span>
                                             <div class="flex items-center gap-1">
@@ -838,16 +888,16 @@
                                             </div>
                                         </div>
 
-                                        <div class="border-t border-gold-500/10 pt-3 flex items-center justify-between text-[11px] text-slate-400 z-10">
-                                            <button onclick="event.stopPropagation(); changeSentenceStep('${item.id}', -1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5">
+                                        <div class="border-t border-gold-500/20 pt-3 flex items-center justify-between text-[11px] text-slate-300 z-10">
+                                            <button onclick="event.stopPropagation(); changeSentenceStep('${item.id}', -1)" class="text-gold-400 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5">
                                                 <i class="fa-solid fa-chevron-left text-[9px]"></i> পূর্ববর্তী
                                             </button>
                                             <div class="flex items-center gap-1.5" id="sentence-dots-${item.id}">
                                                 ${[0, 1, 2].map(step => `
-                                                    <span onclick="event.stopPropagation(); setSentenceStep('${item.id}', ${step})" class="w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${currentStep === step ? 'bg-gold-500 scale-125' : 'bg-slate-600 hover:bg-slate-400'}"></span>
+                                                    <span onclick="event.stopPropagation(); setSentenceStep('${item.id}', ${step})" class="w-2 h-2 rounded-full cursor-pointer transition-all duration-300 ${currentStep === step ? 'bg-gold-400 scale-125 ring-1 ring-gold-200' : 'bg-slate-500 hover:bg-slate-300'}"></span>
                                                 `).join('')}
                                             </div>
-                                            <button onclick="event.stopPropagation(); changeSentenceStep('${item.id}', 1)" class="text-gold-400/85 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5">
+                                            <button onclick="event.stopPropagation(); changeSentenceStep('${item.id}', 1)" class="text-gold-400 hover:text-gold-300 flex items-center gap-1 px-1 py-0.5">
                                                 পরবর্তী <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                             </button>
                                         </div>
@@ -858,6 +908,7 @@
                     </div>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         function getSentenceStepHTML(item, step, escapedSentence) {
@@ -872,7 +923,7 @@
                             <i class="fa-solid fa-volume-high"></i>
                         </button>
                     </div>
-                    <span class="text-[10px] text-slate-400 block mt-2">পরবর্তী ধাপ দেখতে ক্লিক করুন ⟳</span>
+                    <span class="text-[10px] text-slate-300 block mt-2">পরবর্তী ধাপ দেখতে ক্লিক করুন ⟳</span>
                 `;
             } else if (step === 1) {
                 return `
@@ -913,7 +964,7 @@
             if (dotsArea) {
                 const dots = dotsArea.children;
                 for (let i = 0; i < dots.length; i++) {
-                    dots[i].className = i === targetStep ? 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-gold-500 scale-125' : 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-slate-600 hover:bg-slate-400';
+                    dots[i].className = i === targetStep ? 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-gold-400 scale-125 ring-1 ring-gold-200' : 'w-2 h-2 rounded-full cursor-pointer transition-all duration-300 bg-slate-500 hover:bg-slate-300';
                 }
             }
         }
@@ -976,24 +1027,24 @@
                 </div>
 
                 <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider" id="conv-form-title">নতুন কথোপকথন যোগ করুন</h3>
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider" id="conv-form-title">নতুন কথোপকথন যোগ করুন</h3>
                     <input id="conv-id" type="hidden">
-                    <input id="conv-topic" type="text" placeholder="বিষয় (যেমন: হোটেলে রুম বুকিং / পরিচিত হওয়া)" class="w-full p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs text-white light:text-slate-900 focus:outline-none">
+                    <input id="conv-topic" type="text" placeholder="বিষয় (যেমন: হোটেলে রুম বুকিং / পরিচিত হওয়া)" class="w-full p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <input id="conv-person1-name" type="text" placeholder="বক্তা ১ এর নাম (যেমন: A / John)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs text-white light:text-slate-900 focus:outline-none">
-                        <input id="conv-person2-name" type="text" placeholder="বক্তা ২ এর নাম (যেমন: B / Receptionist)" class="p-3 rounded-xl bg-navy-900/60 light:bg-slate-100 border border-gold-500/20 text-xs text-white light:text-slate-900 focus:outline-none">
+                        <input id="conv-person1-name" type="text" placeholder="বক্তা ১ এর নাম (যেমন: A / John)" class="p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
+                        <input id="conv-person2-name" type="text" placeholder="বক্তা ২ এর নাম (যেমন: B / Receptionist)" class="p-3 rounded-xl bg-navy-900/70 light:bg-slate-100 border border-gold-500/30 text-xs text-white light:text-slate-900 focus:outline-none">
                     </div>
 
                     <div id="dialogues-container" class="space-y-2 pt-2">
                         <div class="dialogue-input-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
-                            <select class="speaker-select sm:col-span-2 p-2.5 rounded-xl bg-navy-900 text-xs text-gold-400 border border-gold-500/20">
+                            <select class="speaker-select sm:col-span-2 p-2.5 rounded-xl bg-navy-900 text-xs text-gold-400 border border-gold-500/30">
                                 <option value="1">বক্তা ১</option>
                                 <option value="2">বক্তা ২</option>
                             </select>
-                            <input type="text" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                            <input type="text" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                            <input type="text" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
+                            <input type="text" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
+                            <input type="text" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
+                            <input type="text" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
                             <button onclick="this.parentElement.remove()" class="sm:col-span-1 text-red-400 text-center"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                     </div>
@@ -1011,11 +1062,11 @@
                 </div>
 
                 <div class="space-y-3 pt-2">
-                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">
                         <span>সংরক্ষিত কথোপকথন তালিকা (${toBengaliNumerals(conversations.length)})</span>
                     </h3>
                     
-                    ${conversations.length === 0 ? `<p class="text-xs text-slate-400 italic py-2">কোনো কথোপকথন যোগ করা হয়নি।</p>` : ''}
+                    ${conversations.length === 0 ? `<p class="text-xs text-slate-300 italic py-2">কোনো কথোপকথন যোগ করা হয়নি।</p>` : ''}
 
                     <div class="space-y-3">
                         ${conversations.map((c) => {
@@ -1025,14 +1076,14 @@
                             return `
                                 <div class="glass-card rounded-2xl border-gold-500/30 shadow-lg overflow-hidden transition-all">
                                     <!-- TOPIC HEADER -->
-                                    <div onclick="toggleConversationExpand('${c.id}')" class="p-4 cursor-pointer flex justify-between items-center hover:bg-gold-500/5 transition">
+                                    <div onclick="toggleConversationExpand('${c.id}')" class="p-4 cursor-pointer flex justify-between items-center hover:bg-gold-500/10 transition">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 text-sm shadow-sm">
+                                            <div class="w-9 h-9 rounded-xl bg-gold-500/20 border border-gold-500/30 flex items-center justify-center text-gold-400 text-sm shadow-sm">
                                                 <i class="fa-solid fa-comments"></i>
                                             </div>
                                             <div>
                                                 <h4 class="text-sm font-bold text-white light:text-slate-800">${c.topic}</h4>
-                                                <span class="text-[10px] text-slate-400">বক্তাগণ: ${c.p1 || 'বক্তা ১'} ও ${c.p2 || 'বক্তা ২'} (${totalLines} টি লাইন)</span>
+                                                <span class="text-[10px] text-slate-300">বক্তাগণ: ${c.p1 || 'বক্তা ১'} ও ${c.p2 || 'বক্তা ২'} (${totalLines} টি লাইন)</span>
                                             </div>
                                         </div>
                                         <div class="flex items-center gap-2">
@@ -1044,8 +1095,8 @@
 
                                     <!-- DIALOGUE CONTENT -->
                                     ${isExpanded ? `
-                                        <div class="p-4 bg-navy-900/40 border-t border-gold-500/10 space-y-2 text-xs">
-                                            <p class="text-[10px] text-slate-400 italic mb-2">প্রতিটি লাইনে ক্লিক করে ধাপে ধাপে উচ্চারণ ও অর্থ দেখুন এবং অডিও শুনুন:</p>
+                                        <div class="p-4 bg-navy-900/60 border-t border-gold-500/20 space-y-2 text-xs">
+                                            <p class="text-[10px] text-slate-300 italic mb-2">প্রতিটি লাইনে ক্লিক করে ধাপে ধাপে উচ্চারণ ও অর্থ দেখুন এবং অডিও শুনুন:</p>
                                             ${(c.lines || []).map((l, lIdx) => {
                                                 const dialogueKey = `${c.id}_${lIdx}`;
                                                 const step = dialogueStepState[dialogueKey] || 0;
@@ -1053,7 +1104,7 @@
                                                 const escapedLineText = escapeJS(l.text);
 
                                                 return `
-                                                    <div onclick="nextDialogueStep('${c.id}', ${lIdx})" class="p-3 rounded-xl cursor-pointer transition ${l.speaker === '1' ? 'bg-navy-800/80 border-l-4 border-gold-500' : 'bg-navy-700/50 border-l-4 border-blue-400'}">
+                                                    <div onclick="nextDialogueStep('${c.id}', ${lIdx})" class="p-3 rounded-xl cursor-pointer transition ${l.speaker === '1' ? 'bg-navy-800/90 border-l-4 border-gold-400' : 'bg-navy-700/70 border-l-4 border-blue-400'}">
                                                         <div class="flex justify-between items-center mb-1">
                                                             <span class="font-bold text-gold-400">${speakerName}:</span>
                                                             <div class="flex items-center gap-2">
@@ -1063,10 +1114,10 @@
                                                                 <button onclick="event.stopPropagation(); speakText('${escapedLineText}', 0.6)" class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white text-[10px] transition flex items-center gap-1" title="স্লো মোশনে শুনুন">
                                                                     <i class="fa-solid fa-person-walking text-[9px]"></i> স্লো
                                                                 </button>
-                                                                <span class="text-[9px] text-slate-400 font-mono opacity-75 ml-1">ধাপ ${toBengaliNumerals(step + 1)}/৩</span>
+                                                                <span class="text-[9px] text-slate-300 font-mono opacity-85 ml-1">ধাপ ${toBengaliNumerals(step + 1)}/৩</span>
                                                             </div>
                                                         </div>
-                                                        <div class="dialogue-step-text text-slate-200">
+                                                        <div class="dialogue-step-text text-slate-100">
                                                             ${getDialogueStepHTML(l, step)}
                                                         </div>
                                                     </div>
@@ -1080,6 +1131,7 @@
                     </div>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         function toggleConversationExpand(id) {
@@ -1089,9 +1141,9 @@
 
         function getDialogueStepHTML(lineObj, step) {
             if (step === 0) {
-                return `<div class="font-semibold text-white">"${lineObj.text}"</div><div class="text-[9px] text-gold-400/70 mt-1">উচ্চারণ ও অর্থ দেখতে ক্লিক করুন ➔</div>`;
+                return `<div class="font-semibold text-white">"${lineObj.text}"</div><div class="text-[9px] text-gold-300 mt-1">উচ্চারণ ও অর্থ দেখতে ক্লিক করুন ➔</div>`;
             } else if (step === 1) {
-                return `<div class="text-gold-300 font-medium">উচ্চারণ: ${lineObj.pron || 'দেয়া হয়নি'}</div><div class="text-[9px] text-gold-400/70 mt-1">অর্থ দেখতে আবার ক্লিক করুন ➔</div>`;
+                return `<div class="text-gold-200 font-medium">উচ্চারণ: ${lineObj.pron || 'দেয়া হয়নি'}</div><div class="text-[9px] text-gold-300 mt-1">অর্থ দেখতে আবার ক্লিক করুন ➔</div>`;
             } else {
                 return `<div class="text-emerald-300 font-semibold">অর্থ: ${lineObj.meaning || 'দেয়া হয়নি'}</div>`;
             }
@@ -1109,13 +1161,13 @@
             const row = document.createElement('div');
             row.className = 'dialogue-input-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center';
             row.innerHTML = `
-                <select class="speaker-select sm:col-span-2 p-2.5 rounded-xl bg-navy-900 text-xs text-gold-400 border border-gold-500/20">
+                <select class="speaker-select sm:col-span-2 p-2.5 rounded-xl bg-navy-900 text-xs text-gold-400 border border-gold-500/30">
                     <option value="1" ${speakerVal==='1'?'selected':''}>বক্তা ১</option>
                     <option value="2" ${speakerVal==='2'?'selected':''}>বক্তা ২</option>
                 </select>
-                <input type="text" value="${textVal}" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                <input type="text" value="${pronVal}" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                <input type="text" value="${meaningVal}" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
+                <input type="text" value="${textVal}" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
+                <input type="text" value="${pronVal}" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
+                <input type="text" value="${meaningVal}" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
                 <button onclick="this.parentElement.remove()" class="sm:col-span-1 text-red-400 text-center"><i class="fa-solid fa-xmark"></i></button>
             `;
             container.appendChild(row);
@@ -1172,13 +1224,13 @@
             document.getElementById('conv-person2-name').value = '';
             document.getElementById('dialogues-container').innerHTML = `
                 <div class="dialogue-input-row grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
-                    <select class="speaker-select sm:col-span-2 p-2.5 rounded-xl bg-navy-900 text-xs text-gold-400 border border-gold-500/20">
+                    <select class="speaker-select sm:col-span-2 p-2.5 rounded-xl bg-navy-900 text-xs text-gold-400 border border-gold-500/30">
                         <option value="1">বক্তা ১</option>
                         <option value="2">বক্তা ২</option>
                     </select>
-                    <input type="text" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                    <input type="text" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
-                    <input type="text" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/60 text-xs text-white border border-gold-500/20">
+                    <input type="text" placeholder="ইংরেজি বাক্য..." class="dialogue-text sm:col-span-4 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
+                    <input type="text" placeholder="উচ্চারণ..." class="dialogue-pron sm:col-span-3 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
+                    <input type="text" placeholder="অর্থ..." class="dialogue-meaning sm:col-span-2 p-2.5 rounded-xl bg-navy-900/70 text-xs text-white border border-gold-500/30">
                     <button onclick="this.parentElement.remove()" class="sm:col-span-1 text-red-400 text-center"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             `;
@@ -1210,21 +1262,21 @@
                     <button onclick="switchTab('study')" class="text-xs text-gold-400 hover:underline flex items-center gap-1">
                         <i class="fa-solid fa-arrow-left"></i> ইংরেজি হাব এ ফিরে যান
                     </button>
-                    <span class="text-xs font-bold text-slate-300">কুইজ (${toBengaliNumerals(currentQuizIndex + 1)}/${toBengaliNumerals(activeVocabs.length)})</span>
+                    <span class="text-xs font-bold text-slate-200">কুইজ (${toBengaliNumerals(currentQuizIndex + 1)}/${toBengaliNumerals(activeVocabs.length)})</span>
                 </div>
 
                 <div class="space-y-4">
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
-                        <span class="text-[10px] text-gold-500 uppercase font-bold">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
-                        <div class="bg-navy-900/60 p-4 rounded-xl text-center">
-                            <span class="text-xs text-slate-400">বাংলা অর্থ</span>
+                        <span class="text-[10px] text-gold-400 uppercase font-bold">প্রথম পদ্ধতি: বাংলা দেখে ইংরেজি শেখা</span>
+                        <div class="bg-navy-900/80 p-4 rounded-xl text-center border border-gold-500/20">
+                            <span class="text-xs text-slate-300">বাংলা অর্থ</span>
                             <h3 class="text-xl font-bold text-white mt-1">${currentItem.meaning}</h3>
                         </div>
 
-                        <div id="quiz-answer-display" class="hidden bg-gold-500/10 border border-gold-500/30 p-3 rounded-xl text-center">
-                            <span class="text-[10px] text-gold-400 uppercase tracking-widest block">সঠিক ইংরেজি শব্দ</span>
+                        <div id="quiz-answer-display" class="hidden bg-gold-500/20 border border-gold-500/40 p-3 rounded-xl text-center">
+                            <span class="text-[10px] text-gold-300 uppercase tracking-widest block">সঠিক ইংরেজি শব্দ</span>
                             <div class="flex items-center justify-center gap-2 mt-1">
-                                <span class="text-lg font-bold text-gold-300">${currentItem.word}</span>
+                                <span class="text-lg font-bold text-gold-200">${currentItem.word}</span>
                                 <button onclick="speakText('${escapedQuizWord}', 1.0)" class="w-6 h-6 rounded-full bg-gold-500/20 text-gold-400 hover:bg-gold-500 hover:text-navy-900 transition flex items-center justify-center text-[10px]">
                                     <i class="fa-solid fa-volume-high"></i>
                                 </button>
@@ -1232,23 +1284,24 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <button onclick="toggleQuizAnswer()" class="flex-1 py-2.5 rounded-xl bg-navy-700/60 text-slate-300 text-xs">উত্তর দেখুন / লুকান</button>
-                            <button onclick="nextQuizQuestion(${activeVocabs.length})" class="px-4 py-2.5 rounded-xl bg-gold-500/20 text-gold-400 border border-gold-500/30 text-xs">পরবর্তী ➔</button>
+                            <button onclick="toggleQuizAnswer()" class="flex-1 py-2.5 rounded-xl bg-navy-700 text-slate-200 text-xs border border-gold-500/20">উত্তর দেখুন / লুকান</button>
+                            <button onclick="nextQuizQuestion(${activeVocabs.length})" class="px-4 py-2.5 rounded-xl bg-gold-500/20 text-gold-300 border border-gold-500/30 text-xs">পরবর্তী ➔</button>
                         </div>
                     </div>
 
                     <div class="glass-card p-5 rounded-2xl border-gold-500/30 space-y-3">
-                        <span class="text-[10px] text-gold-500 uppercase font-bold">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
-                        <div class="bg-navy-900/60 p-4 rounded-xl text-center">
-                            <span class="text-xs text-slate-400">বাংলা অর্থ</span>
+                        <span class="text-[10px] text-gold-400 uppercase font-bold">দ্বিতীয় পদ্ধতি: নিজে ইংরেজি লেখা</span>
+                        <div class="bg-navy-900/80 p-4 rounded-xl text-center border border-gold-500/20">
+                            <span class="text-xs text-slate-300">বাংলা অর্থ</span>
                             <h3 class="text-xl font-bold text-white mt-1">${currentItem.meaning}</h3>
                         </div>
-                        <input id="quiz-user-input" type="text" placeholder="আপনার উত্তর এখানে লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/80 border border-gold-500/20 text-xs text-white focus:outline-none">
+                        <input id="quiz-user-input" type="text" placeholder="আপনার উত্তর এখানে লিখুন..." class="w-full p-3 rounded-xl bg-navy-900/90 border border-gold-500/30 text-xs text-white focus:outline-none">
                         <div id="quiz-verify-result" class="hidden p-3 rounded-xl text-xs font-semibold text-center"></div>
                         <button onclick="verifyQuizAnswer('${escapedQuizWord}')" class="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xs uppercase shadow-md">উত্তর যাচাই করুন</button>
                     </div>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         function toggleQuizAnswer() { document.getElementById('quiz-answer-display')?.classList.toggle('hidden'); }
@@ -1277,13 +1330,14 @@
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-list-check"></i> কাজের তালিকা ও রুটিন</h2></div>
                 <div class="glass-card p-4 rounded-2xl flex gap-2">
-                    <input id="todo-input" type="text" placeholder="নতুন কাজ..." class="flex-1 p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none">
-                    <button onclick="addTodo()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">যোগ</button>
+                    <input id="todo-input" type="text" placeholder="নতুন কাজ..." class="flex-1 p-3 rounded-xl bg-navy-900/70 border border-gold-500/30 text-xs text-white focus:outline-none">
+                    <button onclick="addTodo()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs shadow-md">যোগ</button>
                 </div>
                 <div class="glass-card p-5 rounded-2xl space-y-2">
-                    ${todos.map(t => `<div class="p-3 rounded-xl bg-navy-700/40 flex justify-between items-center text-xs"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" onchange="toggleTodo('${t.id}')" ${t.completed?'checked':''} class="accent-amber-500"><span class="${t.completed?'line-through text-slate-400':''}">${t.title}</span></label><button onclick="deleteTodo('${t.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`).join('')}
+                    ${todos.map(t => `<div class="p-3 rounded-xl bg-navy-700/60 border border-gold-500/20 flex justify-between items-center text-xs"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" onchange="toggleTodo('${t.id}')" ${t.completed?'checked':''} class="accent-amber-500"><span class="${t.completed?'line-through text-slate-400':''}">${t.title}</span></label><button onclick="deleteTodo('${t.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>`).join('')}
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
         async function addTodo() {
             const title = document.getElementById('todo-input').value.trim();
@@ -1299,13 +1353,14 @@
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-chart-line"></i> অভ্যাস ট্র্যাকার</h2></div>
                 <div class="glass-card p-4 rounded-2xl flex gap-2">
-                    <input id="habit-title" type="text" placeholder="অভ্যাস..." class="flex-1 p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none">
-                    <button onclick="addHabit()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">তৈরি</button>
+                    <input id="habit-title" type="text" placeholder="অভ্যাস..." class="flex-1 p-3 rounded-xl bg-navy-900/70 border border-gold-500/30 text-xs text-white focus:outline-none">
+                    <button onclick="addHabit()" class="px-5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs shadow-md">তৈরি</button>
                 </div>
                 <div class="glass-card p-5 rounded-2xl space-y-2">
-                    ${habits.map(h => `<div class="p-3 rounded-xl bg-navy-700/40 flex justify-between items-center text-xs"><span>${h.title} (স্ট্রীক: ${toBengaliNumerals(h.streak||0)} দিন)</span><div class="flex gap-2"><button onclick="incrementStreak('${h.id}')" class="px-2.5 py-1 bg-gold-500/20 text-gold-400 rounded-lg">সম্পন্ন</button><button onclick="deleteHabit('${h.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`).join('')}
+                    ${habits.map(h => `<div class="p-3 rounded-xl bg-navy-700/60 border border-gold-500/20 flex justify-between items-center text-xs"><span class="text-white">${h.title} (স্ট্রীক: ${toBengaliNumerals(h.streak||0)} দিন)</span><div class="flex gap-2"><button onclick="incrementStreak('${h.id}')" class="px-2.5 py-1 bg-gold-500/20 text-gold-300 border border-gold-500/30 rounded-lg">সম্পন্ন</button><button onclick="deleteHabit('${h.id}')" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`).join('')}
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
         async function addHabit() {
             const title = document.getElementById('habit-title').value.trim();
@@ -1322,11 +1377,12 @@
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-heart-pulse"></i> ফিটনেস ট্র্যাকার</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-4 text-xs">
-                    <div class="flex justify-between font-bold text-slate-200"><span>পানি গ্রহণ</span><span class="text-blue-400">${toBengaliNumerals(health.water)} মি.লি.</span></div>
-                    <div class="w-full bg-navy-900 h-3 rounded-full overflow-hidden border border-blue-500/20"><div class="bg-blue-500 h-full" style="width: ${Math.min(100, (health.water/2000)*100)}%"></div></div>
-                    <div class="flex gap-2"><button onclick="addWater(250)" class="flex-1 py-2 bg-blue-500/20 text-blue-300 rounded-xl">+২৫০ মি.লি.</button><button onclick="addWater(500)" class="flex-1 py-2 bg-blue-500/20 text-blue-300 rounded-xl">+৫০০ মি.লি.</button><button onclick="resetWater()" class="px-3 bg-navy-700 text-slate-300 rounded-xl">রিসেট</button></div>
+                    <div class="flex justify-between font-bold text-slate-200"><span>পানি গ্রহণ</span><span class="text-blue-300">${toBengaliNumerals(health.water)} মি.লি.</span></div>
+                    <div class="w-full bg-navy-900 h-3 rounded-full overflow-hidden border border-blue-500/30"><div class="bg-blue-500 h-full" style="width: ${Math.min(100, (health.water/2000)*100)}%"></div></div>
+                    <div class="flex gap-2"><button onclick="addWater(250)" class="flex-1 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl">+২৫০ মি.লি.</button><button onclick="addWater(500)" class="flex-1 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl">+৫০০ মি.লি.</button><button onclick="resetWater()" class="px-3 bg-navy-700 text-slate-300 border border-gold-500/20 rounded-xl">রিসেট</button></div>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
         async function addWater(amount) {
             const today = getTodayDateStr();
@@ -1348,14 +1404,15 @@
             document.getElementById('app-content').innerHTML = `
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-book-bookmark"></i> ব্যক্তিগত ডায়েরি</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-3">
-                    <input id="diary-title" type="text" placeholder="শিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none">
-                    <textarea id="diary-content" placeholder="অনুভূতি বা চিন্তাভাবনা..." class="w-full p-3 rounded-xl bg-navy-900/60 border border-gold-500/20 text-xs focus:outline-none" rows="3"></textarea>
-                    <button onclick="saveDiary()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs">সংরক্ষণ</button>
+                    <input id="diary-title" type="text" placeholder="শিরোনাম..." class="w-full p-3 rounded-xl bg-navy-900/70 border border-gold-500/30 text-xs text-white focus:outline-none">
+                    <textarea id="diary-content" placeholder="অনুভূতি বা চিন্তাভাবনা..." class="w-full p-3 rounded-xl bg-navy-900/70 border border-gold-500/30 text-xs text-white focus:outline-none" rows="3"></textarea>
+                    <button onclick="saveDiary()" class="w-full py-2.5 rounded-xl bg-gold-500 text-navy-900 font-bold text-xs shadow-md">সংরক্ষণ</button>
                 </div>
                 <div class="space-y-3">
-                    ${entries.map(e => `<div class="glass-card p-4 rounded-xl text-xs space-y-1"><h4 class="font-bold text-gold-400">${e.title}</h4><p class="text-slate-300">${e.content}</p><div class="text-right"><button onclick="deleteDiary('${e.id}')" class="text-red-400 text-[10px]">মুছে ফেলুন</button></div></div>`).join('')}
+                    ${entries.map(e => `<div class="glass-card p-4 rounded-xl text-xs space-y-1"><h4 class="font-bold text-gold-400">${e.title}</h4><p class="text-slate-200">${e.content}</p><div class="text-right"><button onclick="deleteDiary('${e.id}')" class="text-red-400 text-[10px]">মুছে ফেলুন</button></div></div>`).join('')}
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
         async function saveDiary() {
             const title = document.getElementById('diary-title').value.trim();
@@ -1374,24 +1431,24 @@
                 <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold gold-gradient-text"><i class="fa-solid fa-sliders"></i> প্রোফাইল সেটিংস</h2></div>
                 <div class="glass-card p-5 rounded-2xl space-y-4 text-xs">
                     <div>
-                        <label class="text-slate-400 font-medium mb-1 block">আপনার নাম</label>
-                        <input id="set-name" type="text" value="${profile.name}" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-white focus:outline-none focus:border-gold-500/50">
+                        <label class="text-slate-300 font-medium mb-1 block">আপনার নাম</label>
+                        <input id="set-name" type="text" value="${profile.name}" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/30 text-white focus:outline-none focus:border-gold-500/60">
                     </div>
                     <div>
-                        <label class="text-slate-400 font-medium mb-1 block">নীতিবাক্য (Motto)</label>
-                        <input id="set-motto" type="text" value="${profile.motto}" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/20 text-white focus:outline-none focus:border-gold-500/50">
+                        <label class="text-slate-300 font-medium mb-1 block">নীতিবাক্য (Motto)</label>
+                        <input id="set-motto" type="text" value="${profile.motto}" class="w-full p-3 rounded-xl bg-navy-900 border border-gold-500/30 text-white focus:outline-none focus:border-gold-500/60">
                     </div>
                     
-                    <!-- HEADER BACKGROUND IMAGE UPLOAD SECTION -->
-                    <div class="border-t border-gold-500/20 pt-4 mt-2">
+                    <!-- HEADER & CARD BACKGROUND IMAGE UPLOAD SECTION -->
+                    <div class="border-t border-gold-500/30 pt-4 mt-2">
                         <label class="text-gold-400 font-bold mb-1 flex items-center gap-2 text-sm">
-                            <i class="fa-solid fa-image"></i> হেডার ব্যাকগ্রাউন্ড ছবি
+                            <i class="fa-solid fa-image"></i> প্রোফাইল ও ব্যাকগ্রাউন্ড ছবি
                         </label>
-                        <p class="text-[10px] text-slate-400 mb-3">গ্যালারি থেকে আপনার পছন্দের ছবি সিলেক্ট করুন। অ্যাপের ওপরের হেডার অংশে স্পষ্ট ও আকর্ষণীয়ভাবে প্রদর্শন করা হবে।</p>
+                        <p class="text-[10px] text-slate-300 mb-3">গ্যালারি থেকে ছবি আপলোড করলে হেডার এবং সব ফ্ল্যাশ কার্ডের ব্যাকগ্রাউন্ডে আপনার ছবিটি সুন্দরভাবে ভেসে উঠবে।</p>
                         
                         <div class="flex flex-col gap-3">
                             <input type="file" id="header-bg-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
-                            <button onclick="document.getElementById('header-bg-input').click()" class="py-3 px-4 bg-navy-700/80 hover:bg-navy-700 text-gold-400 border border-gold-500/30 font-semibold rounded-xl flex items-center justify-center gap-2 transition">
+                            <button onclick="document.getElementById('header-bg-input').click()" class="py-3 px-4 bg-navy-700/80 hover:bg-navy-700 text-gold-400 border border-gold-500/30 font-semibold rounded-xl flex items-center justify-center gap-2 transition shadow-sm">
                                 <i class="fa-solid fa-upload text-sm"></i> গ্যালারি থেকে ছবি আপলোড করুন
                             </button>
                             
@@ -1409,6 +1466,7 @@
                     </button>
                 </div>
             `;
+            setTimeout(applyCustomBackgrounds, 50);
         }
 
         let tempUploadedImageData = null;
@@ -1441,8 +1499,8 @@
             const profile = (await dbGet('settings', 'profile')) || { name: 'সাইফুল ইসলাম', motto: 'নিরবচ্ছিন্ন আত্মউন্নয়ন' };
             profile.bgImage = '';
             await dbPut('settings', { key: 'profile', ...profile });
-            await applyHeaderBackground();
-            showToast('হেডার ছবি মুছে ফেলা হয়েছে');
+            await applyCustomBackgrounds();
+            showToast('ব্যাকগ্রাউন্ড ছবি মুছে ফেলা হয়েছে');
             renderSettingsView();
         }
 
@@ -1454,15 +1512,15 @@
             const bgImage = tempUploadedImageData !== null ? tempUploadedImageData : (existingProfile.bgImage || '');
 
             await dbPut('settings', { key: 'profile', name, motto, bgImage });
-            await applyHeaderBackground();
-            showToast('প্রোফাইল ও হেডার সেটিং সংরক্ষিত হয়েছে!');
+            await applyCustomBackgrounds();
+            showToast('প্রোফাইল ও কার্ড ব্যাকগ্রাউন্ড সংরক্ষিত হয়েছে!');
         }
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', async () => {
             loadThemePreference();
             await initDB();
-            await applyHeaderBackground();
+            await applyCustomBackgrounds();
             switchTab('dashboard');
         });
     </script>
